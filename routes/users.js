@@ -16,6 +16,7 @@ router.post('/set', function(req, res, next) {
   console.log("Test* set,name=", name, ",amount=", amount, ",create=", create);
 
   user.deployed().then(function(instance) {
+    console.log("instance=", instance);
     return instance.set(name, amount, create);
   }).then(function(result){
     //console.log(result);

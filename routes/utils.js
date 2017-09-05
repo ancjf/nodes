@@ -31,14 +31,22 @@ for (var f in files){
 
     var json = require(file);
     //console.log("name=", name, ",file=", file, ",json=", json);
-    utils.jsons[name] = contract(json);
+    utils.jsons[name] = json;
 }
-console.log("utils.jsons=", utils.jsons);
+//console.log("utils.jsons=", utils.jsons);
+utils.json = function(name){
+    console.log("name=", name);
+    return utils.jsons[name];
+}
+
+utils.abi = function(name){
+    return utils.json(name).abi;
+}
 
 utils.contract = function(name){
     console.log("name=", name);
 
-    var cont = utils.jsons[name];
+    var cont = contract(utils.json(name));
     cont.setProvider(provider);
     cont.defaults({
         from : defaultAccount,
@@ -47,6 +55,16 @@ utils.contract = function(name){
     });
 
     return cont;
+}
+
+utils.names = function(){
+    var ret = new Array();
+    var i = 0;
+    for (var f in utils.jsons){
+        ret[i++] = f;
+    }
+
+    return ret;
 }
 
 module.exports = utils;

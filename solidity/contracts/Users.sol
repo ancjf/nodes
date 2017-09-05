@@ -13,11 +13,11 @@ contract Users {
         return userMap[_user].create;
     }
 
-    event addEvent(bool createed, uint amount);
-    function add(string _user, uint _amount, bool create) external{
+    event addEvent(bool createed, uint amount, bool create);
+    function add(string _user, uint _amount, bool _create) external{
         if(!exist(_user)){
-            if(!create){
-                addEvent(false, 0);
+            if(!_create){
+                addEvent(false, 0, _create);
                 return;
             }
 
@@ -25,7 +25,7 @@ contract Users {
         }
 
         userMap[_user].amount += _amount;
-        addEvent(true, userMap[_user].amount);
+        addEvent(true, userMap[_user].amount, _create);
     }
 
     event decEvent(bool succed, uint amount);
@@ -43,11 +43,11 @@ contract Users {
         decEvent(true, userMap[_user].amount);
     }
 
-    event setEvent(bool succed, uint amount);
-    function set(string _user, uint _amount, bool create) external{
+    event setEvent(bool succed, uint amount, bool create);
+    function set(string _user, uint _amount, bool _create) external{
         if(!exist(_user)){
-            if(!create){
-                setEvent(false, 0);
+            if(!_create){
+                setEvent(false, 0, _create);
                 return;
             }
 
@@ -55,7 +55,7 @@ contract Users {
         }
 
         userMap[_user].amount = _amount;
-        setEvent(true, userMap[_user].amount);
+        setEvent(true, userMap[_user].amount, _create);
     }
 
     function get(string _user) external constant returns (bool, uint){
