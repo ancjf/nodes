@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 var utils = require('./utils.js');
-var user = utils.contract("Users.json");
+var user = utils.contract("Users");
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {

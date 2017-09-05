@@ -5,7 +5,7 @@ var express = require('express');
 var router = express.Router();
 
 var utils = require('./utils.js');
-var test = utils.contract("TestInt.json");
+var test = utils.contract("TestInt");
 
 router.get('/', function(req, res, next) {
     res.send('test_integer');
