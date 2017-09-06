@@ -37,6 +37,7 @@ contract Users {
 
         if(userMap[_user].amount < _amount){
             decEvent(false, 1);
+            return;
         }
 
         userMap[_user].amount -= _amount;
