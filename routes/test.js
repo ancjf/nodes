@@ -5,8 +5,6 @@ var express = require('express');
 var router = express.Router();
 var utils = require('./utils.js');
 
-console.log("tesg being");
-
 function randomString(len) {
     var $chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz0123456789';    /****默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
     var maxPos = $chars.length;
@@ -74,7 +72,7 @@ function testFunArgDefault(type) {
         var len = parseInt(type.substr(4)) * 2;
         if(isNaN(len))
             len = 4;
-        console.log("len=", len);
+        //console.log("len=", len);
         if(len >= 4)
             len = 4;
         return randomNumber(len);
@@ -82,10 +80,10 @@ function testFunArgDefault(type) {
 
     reg = /int*/;
     if(reg.test(type)){
-        var len = parseInt(type.substr(3)) * 2;
+        var len = (parseInt(type.substr(3))/8) * 2;
         if(isNaN(len))
             len = 4;
-        console.log("len=", len);
+        //console.log("len=", len);
         if(len >= 4)
             len = 4;
         return randomInteger(len);
@@ -93,19 +91,20 @@ function testFunArgDefault(type) {
 
     reg = /byte*/;
     if(reg.test(type)){
-        var len = parseInt(type.substr(4)) * 2;
+        var len = (parseInt(type.substr(4))/8) * 2;
         //console.log("len=", len);
         return randomString(len);
     }
 
     return '""';
 }
-
+/*
 console.log(testFunArgDefault("uint"));
 console.log(testFunArgDefault("int"));
 console.log(testFunArgDefault("address"));
 console.log(testFunArgDefault("string"));
 console.log(testFunArgDefault("byte32"));
+*/
 
 function testFunArg(inputs) {
     var argstr = "";
@@ -115,7 +114,7 @@ function testFunArg(inputs) {
     for(var i in inputs){
         var type = inputs[i].type;
         var str = testFunArgDefault(type);
-        console.log("type=", type, ",str=", str);
+        //console.log("type=", type, ",str=", str);
 
         if(first){
             argstr = str;
@@ -130,7 +129,7 @@ function testFunArg(inputs) {
 
 function testContractFun(con, fun, callback) {
     con.deployed().then(function(instance) {
-        console.log("fun=", fun, ",fun.name=", fun.name);
+        //console.log("fun=", fun, ",fun.name=", fun.name);
 
         var execstr = "";
         if(fun.constant){
@@ -139,13 +138,13 @@ function testContractFun(con, fun, callback) {
             execstr = "instance." + fun.name + testFunArg(fun.inputs);
         }
 
-        console.log("execstr=", execstr);
+        //console.log("execstr=", execstr);
         return eval(execstr);
     }).then(function(result){
-        callback(false, result);
+        callback(false, fun.name, result);
     }).catch(function(err){
-        console.log("Error:", err.message);
-        callback(true, err.message);
+        console.log("testContractFun_Error:", typeof err.message, err.message);
+        callback(true, fun.name, err.message);
     });
 }
 
@@ -157,11 +156,16 @@ function testContract(con, count, callback) {
 
     for(var i = 0; i < count; i++){
         var number = GetRandomNum(0, abi.length);
-        console.log("number=", number, ",abi.length=", abi.length);
-        testContractFun(con, abi[number], function (err, result) {
+        //console.log("number=", number, ",abi.length=", abi.length);
+        //console.log("testContract_begin:number=", number, ",abi.length=", abi.length, ",count=", count, ",i=", i);
+
+        testContractFun(con, abi[number], function (err, funname, result) {
+            //console.log("testContract:number=", number, ",abi.length=", abi.length, ",count=", count, ",i=", i, ",funname=", funname);
+
             var val = {};
             val.err = err;
             val.result = result;
+            val.funname = funname;
 
             ret.push(val);
 
@@ -170,6 +174,65 @@ function testContract(con, count, callback) {
             }
         });
     }
+}
+
+function test(count, perCount, ret, callback) {
+
+    var names = utils.names();
+    if(0 == names.length){
+        ret.err = "No have contract";
+        //callback(ret);
+        return;
+    }
+
+    var number = GetRandomNum(0, names.length);
+    var name = names[number];
+    var con = utils.contract(name);
+    //console.log("test:name=", name);
+
+    testContract(con, perCount, function (result) {
+        //console.log("err=", err, ".succeed=", succeed, ",count=", count);
+        if(typeof ret.contract[name] === "undefined"){
+            ret.contract[name] = {count:0,err:0,succeed:0,function:{}};
+        }
+
+        var err = 0;
+        var succeed = 0;
+
+        for(var i in result) {
+            if(typeof ret.contract[name].function[result[i].funname] === "undefined"){
+                ret.contract[name].function[result[i].funname] = {count:0,err:0,succeed:0};
+            }
+
+            ret.contract[name].function[result[i].funname].count++;
+            if (result[i].err) {
+                err++;
+                ret.contract[name].function[result[i].funname].err++;
+            }else {
+                succeed++;
+                ret.contract[name].function[result[i].funname].succeed++;
+                //ret[name].function[result.funname] =
+            }
+        }
+
+        ret.contract[name].count += result.length;
+        ret.contract[name].err += err;
+        ret.contract[name].succeed += succeed;
+
+        ret.count += result.length;
+        ret.err += err;
+        ret.succeed += succeed;
+
+        //console.log("ret=", ret);
+        if(count > 1){
+            test(count-1, perCount, ret, callback);
+        }else {
+            //console.log("callback:ret=", ret);
+            callback(ret);
+        }
+
+        //callback(ret);
+    });
 }
 
 router.get('/', function(req, res, next) {
@@ -183,15 +246,44 @@ router.post('/contract', function(req, res, next) {
     var con = utils.contract(name);
 
     testContract(con, count, function (result) {
-        res.send(result);
+        var ret = {};
+
+        ret.contract = name;
+        ret.count = result.length;
+        ret.err = 0;
+        ret.succeed = 0;
+        ret.function = {};
+
+
+        for(var i in result) {
+            if (typeof ret.function[result[i].funname] === "undefined") {
+                ret.function[result[i].funname] = {count: 0, err: 0, succeed: 0};
+            }
+
+            if (result[i].err) {
+                ret.err++;
+                ret.function[result[i].funname].err++;
+            }else {
+                ret.succeed++;
+                ret.function[result[i].funname].succeed++;
+            }
+        }
+
+        res.send(ret);
     });
 });
 
 router.post('/test', function(req, res, next) {
-    var con = utils.contract("TestInt");
     var count = req.body.count;
+    var perCount = req.body.perCount;
+    var ret = {"count": 0,
+        "err": 0,
+        "succeed": 0,
+        "contract": {}};
 
-    testContract(con, count, function (result) {
+    //console.log("count=", count, ",perCount=", perCount);
+    test(count, perCount, ret, function (result) {
+        //console.log("router.post.test:result=", JSON.stringify(result));
         res.send(result);
     });
 });

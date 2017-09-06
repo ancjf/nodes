@@ -35,7 +35,7 @@ for (var f in files){
 }
 //console.log("utils.jsons=", utils.jsons);
 utils.json = function(name){
-    console.log("name=", name);
+    //console.log("name=", name);
     return utils.jsons[name];
 }
 
@@ -44,7 +44,7 @@ utils.abi = function(name){
 }
 
 utils.contract = function(name){
-    console.log("name=", name);
+    //console.log("name=", name);
 
     var cont = contract(utils.json(name));
     cont.setProvider(provider);
