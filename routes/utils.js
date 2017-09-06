@@ -59,9 +59,19 @@ utils.contract = function(name){
 
 utils.names = function(){
     var ret = new Array();
-    var i = 0;
     for (var f in utils.jsons){
-        ret[i++] = f;
+        ret.push(f);
+    }
+
+    return ret;
+}
+
+utils.funs = function(con){
+    var ret = [];
+
+    for (var f in con.abi){
+        if(con.abi[f].type == "function")
+            ret.push(con.abi[f]);
     }
 
     return ret;

@@ -128,7 +128,7 @@ function transaction(con, funname, arg, res) {
 
         throw new Error('No function match:' + JSON.stringify(arg));
     }).then(function(result){
-        console.log(result);
+        //console.log(result);
         res.send(result);
     }).catch(function(err){
         console.log("Error:", err.message);
@@ -141,13 +141,13 @@ router.get('/transaction', function(req, res, next) {
     var con = query[".contract"];
     var fun = query[".function"];
 
-    console.log("con=", con, ",fun=", fun, ",query=", query);
+    //console.log("con=", con, ",fun=", fun, ",query=", query);
     transaction(utils.contract(con), fun, query, res);
 });
 
 router.post('/contract', function(req, res, next) {
     var name = req.body.name;
-    console.log("name=", name, ",req.body=", req.body);
+    //console.log("name=", name, ",req.body=", req.body);
     res.send(name);
 });
 
