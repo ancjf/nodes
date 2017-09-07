@@ -145,6 +145,12 @@ router.get('/transaction', function(req, res, next) {
     transaction(utils.contract(con), fun, query, res);
 });
 
+function contract(args, res) {
+    var name = args.name;
+    //console.log("name=", name, ",req.body=", req.body);
+    res.send(name);
+}
+
 router.post('/contract', function(req, res, next) {
     var name = req.body.name;
     //console.log("name=", name, ",req.body=", req.body);

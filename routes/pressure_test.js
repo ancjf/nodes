@@ -236,7 +236,7 @@ function pressure_test(count, perCount, ret, callback) {
 }
 
 function link(name) {
-    return '<form action="pressure_test/contract" method="get"> <input type="hidden" name="name" value="' + name + '" /> <input name="count" type="number"   value="1" min="1"> <input type="submit" id="submitName" value="' + name + '" /> </form>';
+    return '<form action="pressure_test/contract" method="get"> <input type="hidden" name="name" value="' + name + '" /> <input name="count" type="number"   value="1" min="1"> <input type="submit" id="submitName" value="test: ' + name + '" /> </form>';
 }
 
 function link_table(names) {
@@ -249,6 +249,7 @@ function link_table(names) {
         ret += link(name);
     }
 
+    ret += '<form action="pressure_test/test" method="get"> <table border="0" cellspacing="5" cellpadding="5" style="border:1px #666666 solid;"> <tr> <td> <label> count: </label> </td> <td>  <input type="number" name="count" value="1" min="1" />  </td> </tr> <tr> <td> <label> perCount: </label> </td> <td> <input name="perCount" type="number"   value="1" min="1"> </td> </tr> <tr> <td> <input type="submit" id="submitName" value="tast all" /> </td> </tr> </table> </form>';
     //console.log(ret);
     return ret;
 }
