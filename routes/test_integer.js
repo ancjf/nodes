@@ -55,8 +55,8 @@ router.post('/set', function(req, res, next) {
    // return;
 
     test.deployed().then(function(instance) {
-        console.log("instance=", instance);
-        return instance.set(val);
+        //console.log("instance=", instance);
+        return instance.set(val, utils.transaction_option());
     }).then(function(result){
         //console.log(result);
         res.send(result);

@@ -13,6 +13,7 @@ var contract = require("truffle-contract");
 
 var provider = new Web3.providers.HttpProvider(httpProvider);
 
+
 var defaultAccount = web3.eth.defaultAccount;
 if(defaultAccount === undefined){
     defaultAccount = web3.eth.accounts[0];
@@ -25,6 +26,9 @@ console.log(files);
 
 var utils = {};
 utils.jsons = {};
+utils.accounts = web3.eth.accounts;
+console.log("utils.accounts=", utils.accounts);
+
 for (var f in files){
     var file = '../solidity/build/contracts/' + files[f];
     var name = files[f].split(".")[0];
@@ -75,6 +79,21 @@ utils.funs = function(con){
     }
 
     return ret;
+}
+
+utils.get_random_num = function get_random_num(Min, Max) // [Min, Max)
+{
+    var Range = Max - Min;
+    var Rand = Math.floor(Math.random() * Range);
+    return Min + Rand;
+}
+
+utils.transaction_option = function(){
+    var rand = utils.get_random_num(0, this.accounts.length);
+    var acc =  "0xc3d75336a4560074ca9bbf00acd003e9a294e10b";// this.accounts[rand];
+
+    //console.log("acc=", acc);
+    return {from: acc};
 }
 
 module.exports = utils;

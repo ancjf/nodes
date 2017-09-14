@@ -47,20 +47,13 @@ function random_integer(len){
     return '0x'+  firstChr + random_x_string(len-1) + '';
 }
 
-function get_random_num(Min, Max) // [Min, Max)
-{
-    var Range = Max - Min;
-    var Rand = Math.floor(Math.random() * Range);
-    return Min + Rand;
-}
-
 function test_fun_arg_default(type) {
     if(type === "bool"){
         return Math.floor(Math.random()*2) == 0 ? "false" : "true";
     }
 
     if(type === "string" || type === "bytes"){
-        return random_string(get_random_num(1,256));
+        return random_string(utils.get_random_num(1,256));
     }
 
     if(type === "address"){
@@ -124,13 +117,14 @@ function test_fun_arg(inputs) {
         }
     }
 
-    return "(" + argstr + ")";
+    if(argstr.length > 0)
+        return "(" + argstr + ", utils.transaction_option())";
+
+    return "(utils.transaction_option())";
 }
 
 function test_contract_fun(con, fun, callback) {
     con.deployed().then(function(instance) {
-        //console.log("fun=", fun, ",fun.name=", fun.name);
-
         var execstr = "";
         if(fun.constant){
             execstr = "instance." + fun.name + ".call" + test_fun_arg(fun.inputs);
@@ -141,7 +135,18 @@ function test_contract_fun(con, fun, callback) {
         //console.log("execstr=", execstr);
         return eval(execstr);
     }).then(function(result){
-        callback(false, fun.name, result);
+
+        var failed = false;
+        if(!fun.constant){
+            if(result.logs.length > 0){
+                failed = false;
+                //console.log("result.logs.length > 0 : result:", result);
+            }else{
+                failed = true;
+                //console.log("result:", result);
+            }
+        }
+        callback(failed, fun.name, result);
     }).catch(function(err){
         console.log("test_contract_fun_Error:", typeof err.message, err.message);
         callback(true, fun.name, err.message);
@@ -155,7 +160,7 @@ function pressure_test_contract(con, count, callback) {
     var ret = [];
 
     for(var i = 0; i < count; i++){
-        var number = get_random_num(0, abi.length);
+        var number = utils.get_random_num(0, abi.length);
         //console.log("number=", number, ",abi.length=", abi.length);
         //console.log("test_contract_begin:number=", number, ",abi.length=", abi.length, ",count=", count, ",i=", i);
 
@@ -185,7 +190,7 @@ function pressure_test(count, perCount, ret, callback) {
         return;
     }
 
-    var number = get_random_num(0, names.length);
+    var number = utils.get_random_num(0, names.length);
     var name = names[number];
     var con = utils.contract(name);
     //console.log("test:name=", name);
@@ -293,7 +298,7 @@ function contract(args, res) {
 
         var end = new Date().getTime();
         ret.costTime = end - begin;
-        console.log("ret.costTime=", ret.costTime);
+        console.log("ret=", ret);
         res.send(ret);
     });
 }
@@ -322,6 +327,7 @@ function test(args, res) {
         var end = new Date().getTime();
         ret.costTime = end - begin;
         console.log("ret.costTime=", ret.costTime);
+        console.log("ret=", ret);
         res.send(result);
     });
 }
