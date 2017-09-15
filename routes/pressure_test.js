@@ -135,21 +135,10 @@ function test_contract_fun(con, fun, callback) {
         //console.log("execstr=", execstr);
         return eval(execstr);
     }).then(function(result){
-
-        var failed = false;
-        if(!fun.constant){
-            if(result.logs.length > 0){
-                failed = false;
-                //console.log("result.logs.length > 0 : result:", result);
-            }else{
-                failed = true;
-                //console.log("result:", result);
-            }
-        }
-        callback(failed, fun.name, result);
+        callback(false, fun, result);
     }).catch(function(err){
         console.log("test_contract_fun_Error:", typeof err.message, err.message);
-        callback(true, fun.name, err.message);
+        callback(true, fun, err.message);
     });
 }
 
@@ -164,13 +153,13 @@ function pressure_test_contract(con, count, callback) {
         //console.log("number=", number, ",abi.length=", abi.length);
         //console.log("test_contract_begin:number=", number, ",abi.length=", abi.length, ",count=", count, ",i=", i);
 
-        test_contract_fun(con, abi[number], function (err, funname, result) {
+        test_contract_fun(con, abi[number], function (err, fun, result) {
             //console.log("test_contract:number=", number, ",abi.length=", abi.length, ",count=", count, ",i=", i, ",funname=", funname);
 
             var val = {};
             val.err = err;
             val.result = result;
-            val.funname = funname;
+            val.fun = fun;
 
             ret.push(val);
 
@@ -198,24 +187,40 @@ function pressure_test(count, perCount, ret, callback) {
     pressure_test_contract(con, perCount, function (result) {
         //console.log("err=", err, ".succeed=", succeed, ",count=", count);
         if(typeof ret.contract[name] === "undefined"){
-            ret.contract[name] = {count:0,err:0,succeed:0,function:{}};
+            ret.contract[name] = {count:0,err:0,nolog:0,succeed:0,function:{}};
         }
 
         var err = 0;
+        var nolog = 0;
         var succeed = 0;
 
         for(var i in result) {
-            if(typeof ret.contract[name].function[result[i].funname] === "undefined"){
-                ret.contract[name].function[result[i].funname] = {count:0,err:0,succeed:0};
+            var funname = result[i].fun.name;
+
+            if(typeof ret.contract[name].function[funname] === "undefined"){
+                if(result[i].fun.constant)
+                    ret.contract[name].function[funname] = {count: 0, err: 0, succeed: 0};
+                else
+                    ret.contract[name].function[funname] = {count: 0, err: 0, nolog:0, succeed: 0};
             }
 
-            ret.contract[name].function[result[i].funname].count++;
+            ret.contract[name].function[funname].count++;
             if (result[i].err) {
                 err++;
-                ret.contract[name].function[result[i].funname].err++;
+                ret.contract[name].function[funname].err++;
             }else {
                 succeed++;
-                ret.contract[name].function[result[i].funname].succeed++;
+                if(result[i].fun.constant){
+                    ret.contract[name].function[funname].succeed++;
+                }else{
+                    if(result[i].result.logs.length > 0){
+                        ret.contract[name].function[funname].succeed++;
+                    }else{
+                        nolog++;
+                        ret.contract[name].function[funname].nolog++;
+                    }
+                }
+
                 //ret[name].function[result.funname] =
             }
         }
@@ -226,6 +231,7 @@ function pressure_test(count, perCount, ret, callback) {
 
         ret.count += result.length;
         ret.err += err;
+        ret.nolog += nolog;
         ret.succeed += succeed;
 
         console.log("count=", count, ",perCount=", perCount, ",name=", name);
@@ -276,23 +282,35 @@ function contract(args, res) {
 
         ret.count = result.length;
         ret.err = 0;
+        ret.nolog = 0;
         ret.succeed = 0;
         ret.costTime = 0,
-            ret.contract = name;
+        ret.contract = name;
         ret.function = {};
 
-
         for(var i in result) {
-            if (typeof ret.function[result[i].funname] === "undefined") {
-                ret.function[result[i].funname] = {count: 0, err: 0, succeed: 0};
+            var funname = result[i].fun.name;
+            if (typeof ret.function[funname] === "undefined") {
+                if(result[i].fun.constant)
+                    ret.function[funname] = {count: 0, err: 0, succeed: 0};
+                else
+                    ret.function[funname] = {count: 0, err: 0, nolog:0, succeed: 0};
             }
 
             if (result[i].err) {
                 ret.err++;
-                ret.function[result[i].funname].err++;
+                ret.function[funname].err++;
             }else {
                 ret.succeed++;
-                ret.function[result[i].funname].succeed++;
+                if(result[i].fun.constant){
+                    ret.function[funname].succeed++;
+                }else{
+                    if(result[i].result.logs.length > 0){
+                        ret.function[funname].succeed++;
+                    }else{
+                        ret.function[funname].nolog++;
+                    }
+                }
             }
         }
 
@@ -316,6 +334,7 @@ function test(args, res) {
     var perCount = args.perCount;
     var ret = {"count": 0,
         "err": 0,
+        "nolog": 0,
         "succeed": 0,
         "costTime" : 0,
         "contract": {}};

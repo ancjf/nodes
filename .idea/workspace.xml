@@ -4,7 +4,6 @@
     <list default="true" id="e0660395-239b-4a57-b28c-734721006c4b" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/routes/pressure_test.js" afterPath="$PROJECT_DIR$/routes/pressure_test.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/routes/test_integer.js" afterPath="$PROJECT_DIR$/routes/test_integer.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/routes/utils.js" afterPath="$PROJECT_DIR$/routes/utils.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/solidity/migrations/2_deploy_contracts.js" afterPath="$PROJECT_DIR$/solidity/migrations/2_deploy_contracts.js" />
     </list>
@@ -28,10 +27,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="contract_test.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="contract_test.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/routes/contract_test.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-453">
+            <state relative-caret-position="-132">
               <caret line="58" column="13" selection-start-line="58" selection-start-column="13" selection-end-line="58" selection-end-column="13" />
               <folding>
                 <marker date="1504754317316" expanded="true" signature="1227:1252" placeholder="..." />
@@ -40,13 +39,13 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="pressure_test.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="pressure_test.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/routes/pressure_test.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="95">
-              <caret line="134" column="10" selection-start-line="134" selection-start-column="10" selection-end-line="134" selection-end-column="10" />
+            <state relative-caret-position="217">
+              <caret line="199" column="76" selection-start-line="199" selection-start-column="76" selection-end-line="199" selection-end-column="76" />
               <folding>
-                <marker date="1505381822055" expanded="true" signature="7355:7380" placeholder="..." />
+                <marker date="1505465291403" expanded="true" signature="7606:7631" placeholder="..." />
               </folding>
             </state>
           </provider>
@@ -65,8 +64,8 @@
       <file leaf-file-name="2_deploy_contracts.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/solidity/migrations/2_deploy_contracts.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="323">
-              <caret line="17" column="33" selection-start-line="17" selection-start-column="33" selection-end-line="17" selection-end-column="33" />
+            <state relative-caret-position="266">
+              <caret line="14" column="0" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -75,7 +74,7 @@
       <file leaf-file-name="TestInt.sol" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/solidity/contracts/TestInt.sol">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="874">
+            <state relative-caret-position="511">
               <caret line="46" column="0" selection-start-line="46" selection-start-column="0" selection-end-line="46" selection-end-column="0" />
               <folding />
             </state>
@@ -85,8 +84,8 @@
       <file leaf-file-name="utils.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/routes/utils.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="321">
-              <caret line="92" column="62" selection-start-line="92" selection-start-column="62" selection-end-line="92" selection-end-column="62" />
+            <state relative-caret-position="457">
+              <caret line="94" column="0" selection-start-line="94" selection-start-column="0" selection-end-line="94" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -95,8 +94,8 @@
       <file leaf-file-name="test_integer.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/routes/test_integer.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="421">
-              <caret line="58" column="59" selection-start-line="58" selection-start-column="31" selection-end-line="58" selection-end-column="59" />
+            <state relative-caret-position="283">
+              <caret line="58" column="47" selection-start-line="58" selection-start-column="47" selection-end-line="58" selection-end-column="47" />
               <folding />
             </state>
           </provider>
@@ -158,9 +157,9 @@
         <option value="$PROJECT_DIR$/routes/contract_test.js" />
         <option value="$PROJECT_DIR$/solidity/build/contracts/TestInt.json" />
         <option value="$PROJECT_DIR$/routes/test_integer.js" />
-        <option value="$PROJECT_DIR$/solidity/migrations/2_deploy_contracts.js" />
-        <option value="$PROJECT_DIR$/routes/utils.js" />
         <option value="$PROJECT_DIR$/routes/pressure_test.js" />
+        <option value="$PROJECT_DIR$/routes/utils.js" />
+        <option value="$PROJECT_DIR$/solidity/migrations/2_deploy_contracts.js" />
       </list>
     </option>
   </component>
@@ -200,6 +199,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="PackagesPane" />
       <pane id="Scope" />
       <pane id="Scratches" />
       <pane id="ProjectPane">
@@ -336,7 +336,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -801,12 +800,13 @@
       <workItem from="1505190476859" duration="10902000" />
       <workItem from="1505265982600" duration="6302000" />
       <workItem from="1505292303551" duration="1469000" />
-      <workItem from="1505352053593" duration="15176000" />
+      <workItem from="1505352053593" duration="15759000" />
+      <workItem from="1505442320337" duration="10181000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="158655000" />
+    <option name="totallyTimeSpent" value="169419000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -819,7 +819,7 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.26638478" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.37105548" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2437432" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -854,7 +854,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/routes/pressure_test.js</url>
-          <line>258</line>
+          <line>264</line>
         </line-breakpoint>
       </breakpoints>
       <option name="time" value="1" />
@@ -1112,14 +1112,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/solidity/contracts/TestInt.sol">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="874">
-          <caret line="46" column="0" selection-start-line="46" selection-start-column="0" selection-end-line="46" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/routes/index.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="475">
@@ -1160,46 +1152,54 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/solidity/contracts/TestInt.sol">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="511">
+          <caret line="46" column="0" selection-start-line="46" selection-start-column="0" selection-end-line="46" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/routes/test_integer.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="421">
-          <caret line="58" column="59" selection-start-line="58" selection-start-column="31" selection-end-line="58" selection-end-column="59" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/routes/contract_test.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-453">
-          <caret line="58" column="13" selection-start-line="58" selection-start-column="13" selection-end-line="58" selection-end-column="13" />
-          <folding>
-            <marker date="1504754317316" expanded="true" signature="1227:1252" placeholder="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/solidity/migrations/2_deploy_contracts.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="323">
-          <caret line="17" column="33" selection-start-line="17" selection-start-column="33" selection-end-line="17" selection-end-column="33" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/routes/utils.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="321">
-          <caret line="92" column="62" selection-start-line="92" selection-start-column="62" selection-end-line="92" selection-end-column="62" />
+        <state relative-caret-position="283">
+          <caret line="58" column="47" selection-start-line="58" selection-start-column="47" selection-end-line="58" selection-end-column="47" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/routes/pressure_test.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="95">
-          <caret line="134" column="10" selection-start-line="134" selection-start-column="10" selection-end-line="134" selection-end-column="10" />
+        <state relative-caret-position="217">
+          <caret line="199" column="76" selection-start-line="199" selection-start-column="76" selection-end-line="199" selection-end-column="76" />
           <folding>
-            <marker date="1505381822055" expanded="true" signature="7355:7380" placeholder="..." />
+            <marker date="1505465291403" expanded="true" signature="7606:7631" placeholder="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/routes/utils.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="457">
+          <caret line="94" column="0" selection-start-line="94" selection-start-column="0" selection-end-line="94" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/solidity/migrations/2_deploy_contracts.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="266">
+          <caret line="14" column="0" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/routes/contract_test.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-132">
+          <caret line="58" column="13" selection-start-line="58" selection-start-column="13" selection-end-line="58" selection-end-column="13" />
+          <folding>
+            <marker date="1504754317316" expanded="true" signature="1227:1252" placeholder="..." />
           </folding>
         </state>
       </provider>
