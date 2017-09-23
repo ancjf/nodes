@@ -228,6 +228,7 @@ function pressure_test(count, perCount, ret, callback) {
 
         ret.contract[name].count += result.length;
         ret.contract[name].err += err;
+        ret.contract[name].nolog += nolog;
         ret.contract[name].succeed += succeed;
 
         ret.count += result.length;
