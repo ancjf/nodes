@@ -26,7 +26,7 @@ contract TestInt {
     event incEvent(int256 value, uint count);
     function inc(uint count) returns(int) {
         uint i = 0;
-        for(; i < count; i++){
+        for(; i < (count & 0xffff); i++){
             m_val++;
         }
 
@@ -37,7 +37,7 @@ contract TestInt {
     event decEvent(int256 value, uint count);
     function dec(uint count) returns(int) {
         uint i = 0;
-        for(; i < count; i++){
+        for(; i < (count & 0xffff); i++){
             m_val--;
         }
 

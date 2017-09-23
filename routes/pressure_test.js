@@ -62,12 +62,12 @@ function test_fun_arg_default(type) {
 
     var reg = /uint*/;
     if(reg.test(type)){
-        var len = parseInt(type.substr(4)) * 2;
+        var len = parseInt(type.substr(4)/8) * 2;
         if(isNaN(len))
             len = 4;
-        //console.log("len=", len);
-        if(len >= 4)
-            len = 4;
+        //console.log("uint:len=", len);
+        //if(len >= 4)
+            //len = 4;
         return random_number(len);
     }
 
@@ -76,9 +76,10 @@ function test_fun_arg_default(type) {
         var len = (parseInt(type.substr(3))/8) * 2;
         if(isNaN(len))
             len = 4;
-        //console.log("len=", len);
-        if(len >= 4)
-            len = 4;
+        //console.log("int:len=", len);
+        //if(len >= 4)
+            //len = 4;
+            //len = 4;
         return random_integer(len);
     }
 
