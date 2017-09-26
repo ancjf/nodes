@@ -7,9 +7,9 @@ var Users = artifacts.require("./Users.sol");
 var option = {gasPrice:0};
 
 module.exports = function(deployer) {
- // deployer.deploy(ConvertLib, option);
- // deployer.link(ConvertLib, MetaCoin, option);
- // deployer.deploy(MetaCoin, option);
+  deployer.deploy(ConvertLib, option);
+  deployer.link(ConvertLib, MetaCoin, option);
+  deployer.deploy(MetaCoin, option);
 
   //console.log("deployer=", deployer);
   //console.log("TestInt=", TestInt);

@@ -22,7 +22,7 @@ console.log(defaultAccount);
 
 var fs = require('fs');
 var files = fs.readdirSync('./solidity/build/contracts/');
-console.log(files);
+//console.log(files);
 
 var utils = {};
 utils.jsons = {};
@@ -32,10 +32,17 @@ console.log("utils.accounts=", utils.accounts);
 for (var f in files){
     var file = '../solidity/build/contracts/' + files[f];
     var name = files[f].split(".")[0];
+    var workid = web3.version.network;
 
     var json = require(file);
-    //console.log("name=", name, ",file=", file, ",json=", json);
-    utils.jsons[name] = json;
+    var network = json.networks[web3.version.network];
+    //console.log("typeof json.networks", typeof json.networks,  "network=", network);
+    if(network !== undefined){
+        console.log("name=", name);
+        //if(json.networks)
+
+        utils.jsons[name] = json;
+    }
 }
 //console.log("utils.jsons=", utils.jsons);
 utils.json = function(name){
