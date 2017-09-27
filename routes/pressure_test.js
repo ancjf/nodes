@@ -4,144 +4,9 @@
 var express = require('express');
 var router = express.Router();
 var utils = require('./utils.js');
-
-function random_string(len) {
-    var $chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz0123456789';    /****默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
-    var maxPos = $chars.length;
-    var pwd = '';
-    for (i = 0; i < len; i++) {
-        pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
-    }
-    return '"'+ pwd + '"';
-}
-
-function random_x_string(len) {
-    var $chars = '0123456789abcdef';    /****默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1****/
-    var maxPos = $chars.length;
-    var pwd = '';
-    for (i = 0; i < len; i++) {
-        pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
-    }
-    return pwd;
-}
-
-function random_address() {
-    return '0x'+ random_x_string(40) + '';
-}
-
-function random_number(len){
-    return '0x'+ random_x_string(len) + '';
-}
-
-function random_integer(len){
-    if(0 == len)
-        return '0x0';
-
-    var $chars = '01234567';
-    var firstChr = $chars.charAt(Math.floor(Math.random() * $chars.length));
-
-    if(Math.floor(Math.random()*2) == 0){
-        return '-0x'+  firstChr + random_x_string(len-1) + '';
-    }
-
-    return '0x'+  firstChr + random_x_string(len-1) + '';
-}
-
-function test_fun_arg_default(type) {
-    if(type === "bool"){
-        return Math.floor(Math.random()*2) == 0 ? "false" : "true";
-    }
-
-    if(type === "string" || type === "bytes"){
-        return random_string(utils.get_random_num(1,256));
-    }
-
-    if(type === "address"){
-        return random_address();
-    }
-
-    var reg = /uint*/;
-    if(reg.test(type)){
-        var len = parseInt(type.substr(4)/8) * 2;
-        if(isNaN(len))
-            len = 4;
-        //console.log("uint:len=", len);
-        //if(len >= 4)
-            //len = 4;
-        return random_number(len);
-    }
-
-    reg = /int*/;
-    if(reg.test(type)){
-        var len = (parseInt(type.substr(3))/8) * 2;
-        if(isNaN(len))
-            len = 4;
-        //console.log("int:len=", len);
-        //if(len >= 4)
-            //len = 4;
-            //len = 4;
-        return random_integer(len);
-    }
-
-    reg = /byte*/;
-    if(reg.test(type)){
-        var len = (parseInt(type.substr(4))/8) * 2;
-        //console.log("len=", len);
-        return random_string(len);
-    }
-
-    return '""';
-}
-/*
-console.log(test_fun_arg_default("uint"));
-console.log(test_fun_arg_default("int"));
-console.log(test_fun_arg_default("address"));
-console.log(test_fun_arg_default("string"));
-console.log(test_fun_arg_default("byte32"));
-*/
-
-function test_fun_arg(inputs) {
-    var argstr = "";
-    var first = true;
-
-    //console.log("fun=", fun, ",argname=", argname);
-    for(var i in inputs){
-        var type = inputs[i].type;
-        var str = test_fun_arg_default(type);
-        //console.log("type=", type, ",str=", str);
-
-        if(first){
-            argstr = str;
-            first = false;
-        }else{
-            argstr = argstr + "," + str;
-        }
-    }
-
-    if(argstr.length > 0)
-        return "(" + argstr + ", utils.transaction_option())";
-
-    return "(utils.transaction_option())";
-}
-
-function test_contract_fun(con, fun, callback) {
-    con.deployed().then(function(instance) {
-        var execstr = "";
-        if(fun.constant){
-            execstr = "instance." + fun.name + ".call" + test_fun_arg(fun.inputs);
-        }else{
-            execstr = "instance." + fun.name + test_fun_arg(fun.inputs);
-        }
-
-        //console.log("execstr=", execstr);
-        return eval(execstr);
-    }).then(function(result){
-        callback(false, fun, result);
-    }).catch(function(err){
-        console.log("test_contract_fun_Error:", typeof err.message, err.message);
-        callback(true, fun, err.message);
-    });
-}
+var args = require('./args.js');
+var trans = require('./trans.js');
+var assert = require('assert');
 
 function pressure_test_contract(con, count, callback) {
     var abi = utils.funs(con);
@@ -154,7 +19,7 @@ function pressure_test_contract(con, count, callback) {
         //console.log("number=", number, ",abi.length=", abi.length);
         //console.log("test_contract_begin:number=", number, ",abi.length=", abi.length, ",count=", count, ",i=", i);
 
-        test_contract_fun(con, abi[number], function (err, fun, result) {
+        trans.trans(con, abi[number], JSON.stringify("{}"), function (err, fun, result) {
             //console.log("test_contract:number=", number, ",abi.length=", abi.length, ",count=", count, ",i=", i, ",funname=", funname);
 
             var val = {};
@@ -164,6 +29,7 @@ function pressure_test_contract(con, count, callback) {
 
             ret.push(val);
 
+            assert.ok(ret.length <= count, "ret.length > count")
             if(ret.length >= count){
                 callback(ret);
             }
@@ -345,10 +211,10 @@ function test(args, res) {
     //console.log("count=", count, ",perCount=", perCount);
     pressure_test(count, perCount, ret, function (result) {
         //console.log("router.post.test:result=", JSON.stringify(result));
-        var end = new Date().getTime();
-        ret.costTime = end - begin;
-        console.log("ret.costTime=", ret.costTime);
-        console.log("ret=", ret);
+        //var end = new Date().getTime();
+        //ret.costTime = end - begin;
+        //console.log("ret.costTime=", ret.costTime);
+        console.log("result=", JSON.stringify(result));
         res.send(result);
     });
 }

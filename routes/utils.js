@@ -38,10 +38,14 @@ for (var f in files){
     var network = json.networks[web3.version.network];
     //console.log("typeof json.networks", typeof json.networks,  "network=", network);
     if(network !== undefined){
-        console.log("name=", name);
-        //if(json.networks)
+        var address = network["address"];
 
-        utils.jsons[name] = json;
+        if(address !== undefined) {
+            console.log("name=", name);
+            //if(json.networks)
+
+            utils.jsons[name] = json;
+        }
     }
 }
 //console.log("utils.jsons=", utils.jsons);
@@ -77,15 +81,64 @@ utils.names = function(){
     return ret;
 }
 
+function fun_match(fun, funname) {
+    if(fun.type != "function"){
+        return false;
+    }
+
+    var arr = funname.split(".");
+
+    if(arr.length != fun.inputs.length + 1){
+        console.log("length ::funname=", funname, ",arr=", arr, ",fun=", fun);
+        return false;
+    }
+
+    if(arr[0] !=  fun.name){
+        console.log("name ::funname=", funname, ",arr=", arr, ",fun=", fun);
+        return false;
+    }
+
+    for(var i = 0; i < fun.inputs.length; i++) {
+        //for (var i in fun.inputs) {
+        if(arr[i+1] != fun.inputs[i].type){
+            console.log("name ::funname=", funname, ",i+1=", i+1, ",arr[i+1]=",arr[i+1], ",fun.inputs[i].type=", fun.inputs[i].type, ",arr=", arr, ",fun=", fun);
+            return false;
+        }
+
+    }
+
+    return true;
+}
+
+utils.fun = function(con, name){
+    //console.log("con.abi=", con.abi);
+    for (var f in con.abi){
+        if(fun_match(con.abi[f], name))
+            return con.abi[f];
+    }
+
+    return {};
+}
+
 utils.funs = function(con){
     var ret = [];
 
+    //console.log("con.abi=", con.abi);
     for (var f in con.abi){
         if(con.abi[f].type == "function")
             ret.push(con.abi[f]);
     }
 
     return ret;
+}
+
+utils.fun_name = function (fun) {
+    var str = fun.name;
+    for (var i in fun.inputs) {
+        str = str + '.' + fun.inputs[i].type;
+    }
+
+    return str;
 }
 
 utils.get_random_num = function get_random_num(Min, Max) // [Min, Max)
