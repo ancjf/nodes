@@ -1,10 +1,10 @@
 /**
  * Created by cjf on 2017/8/30.
  */
-
+var logs = require('./logs.js');
 var truffle = require('../solidity/truffle.js');
 var httpProvider = "http://" + truffle.networks.development.host + ":" +  truffle.networks.development.port;
-console.log(httpProvider);
+logs.log(httpProvider);
 
 var Web3 = require('web3');
 var web3 = new Web3(new Web3.providers.HttpProvider(httpProvider));
@@ -18,16 +18,16 @@ var defaultAccount = web3.eth.defaultAccount;
 if(defaultAccount === undefined){
     defaultAccount = web3.eth.accounts[0];
 }
-console.log(defaultAccount);
+logs.log(defaultAccount);
 
 var fs = require('fs');
 var files = fs.readdirSync('./solidity/build/contracts/');
-//console.log(files);
+//logs.log(files);
 
 var utils = {};
 utils.jsons = {};
 utils.accounts = web3.eth.accounts;
-console.log("utils.accounts=", utils.accounts);
+logs.log("utils.accounts=", utils.accounts);
 
 for (var f in files){
     var file = '../solidity/build/contracts/' + files[f];
@@ -36,21 +36,21 @@ for (var f in files){
 
     var json = require(file);
     var network = json.networks[web3.version.network];
-    //console.log("typeof json.networks", typeof json.networks,  "network=", network);
+    //logs.log("typeof json.networks", typeof json.networks,  "network=", network);
     if(network !== undefined){
         var address = network["address"];
 
         if(address !== undefined) {
-            console.log("name=", name);
+            logs.log("name=", name);
             //if(json.networks)
 
             utils.jsons[name] = json;
         }
     }
 }
-//console.log("utils.jsons=", utils.jsons);
+//logs.log("utils.jsons=", utils.jsons);
 utils.json = function(name){
-    //console.log("name=", name);
+    //logs.log("name=", name);
     return utils.jsons[name];
 }
 
@@ -59,7 +59,7 @@ utils.abi = function(name){
 }
 
 utils.contract = function(name){
-    //console.log("name=", name);
+    //logs.log("name=", name);
 
     var cont = contract(utils.json(name));
     cont.setProvider(provider);
@@ -89,19 +89,19 @@ function fun_match(fun, funname) {
     var arr = funname.split(".");
 
     if(arr.length != fun.inputs.length + 1){
-        console.log("length ::funname=", funname, ",arr=", arr, ",fun=", fun);
+        logs.log("length ::funname=", funname, ",arr=", arr, ",fun=", fun);
         return false;
     }
 
     if(arr[0] !=  fun.name){
-        console.log("name ::funname=", funname, ",arr=", arr, ",fun=", fun);
+        logs.log("name ::funname=", funname, ",arr=", arr, ",fun=", fun);
         return false;
     }
 
     for(var i = 0; i < fun.inputs.length; i++) {
         //for (var i in fun.inputs) {
         if(arr[i+1] != fun.inputs[i].type){
-            console.log("name ::funname=", funname, ",i+1=", i+1, ",arr[i+1]=",arr[i+1], ",fun.inputs[i].type=", fun.inputs[i].type, ",arr=", arr, ",fun=", fun);
+            logs.log("name ::funname=", funname, ",i+1=", i+1, ",arr[i+1]=",arr[i+1], ",fun.inputs[i].type=", fun.inputs[i].type, ",arr=", arr, ",fun=", fun);
             return false;
         }
 
@@ -111,7 +111,7 @@ function fun_match(fun, funname) {
 }
 
 utils.fun = function(con, name){
-    //console.log("con.abi=", con.abi);
+    //logs.log("con.abi=", con.abi);
     for (var f in con.abi){
         if(fun_match(con.abi[f], name))
             return con.abi[f];
@@ -123,7 +123,7 @@ utils.fun = function(con, name){
 utils.funs = function(con){
     var ret = [];
 
-    //console.log("con.abi=", con.abi);
+    //logs.log("con.abi=", con.abi);
     for (var f in con.abi){
         if(con.abi[f].type == "function")
             ret.push(con.abi[f]);
@@ -153,7 +153,7 @@ utils.transaction_option = function(){
     var acc =  this.accounts[rand];
     //var acc =  "0x1d5b6469569035d526b6c58ab9c1aede9a3ca9e6";
 
-    //console.log("acc=", acc);
+    //logs.log("acc=", acc);
     return {from: acc};
 }
 

@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var utils = require('./utils.js');
 var trans = require('./trans.js');
+var logs = require('./logs.js');
 
 function link(name) {
   return '<form action="contract_test/contract" method="get"> <input name="name" type="text"   id="name" value=' + name + ' readonly> <input type="submit" id="submitName" value=' + "开始测试" + ' /> </form>';
@@ -80,10 +81,10 @@ function transaction(args, res) {
     var con = utils.contract(conname);
     var fun = utils.fun(con, funname);
 
-    //console.log("conname=", conname, ",funname=", funname, ",args=", args);
-    trans.trans(con, fun, args, function (err, fun, result) {
+    //logs.log("conname=", conname, ",funname=", funname, ",args=", args);
+    trans.trans(con, fun, args, function (err, conname, fun, result) {
         var ret = {"err":err,"result":result};
-        console.log("err=", err, ",result=", result);
+        logs.log("err=", err, ",result=", result);
         res.send(ret);
     });
 }
@@ -100,7 +101,7 @@ function contract(args, res) {
     var name = args.name;
     var abi = utils.abi(name);
 
-    //console.log("name=", name, ",req.body=", req.body);
+    //logs.log("name=", name, ",req.body=", req.body);
     res.send(contract_link(name, abi));
 }
 
