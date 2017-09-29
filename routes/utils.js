@@ -89,19 +89,19 @@ function fun_match(fun, funname) {
     var arr = funname.split(".");
 
     if(arr.length != fun.inputs.length + 1){
-        logs.log("length ::funname=", funname, ",arr=", arr, ",fun=", fun);
+        //logs.log("length ::funname=", funname, ",arr=", arr, ",fun=", fun);
         return false;
     }
 
     if(arr[0] !=  fun.name){
-        logs.log("name ::funname=", funname, ",arr=", arr, ",fun=", fun);
+        //logs.log("name ::funname=", funname, ",arr=", arr, ",fun=", fun);
         return false;
     }
 
     for(var i = 0; i < fun.inputs.length; i++) {
         //for (var i in fun.inputs) {
         if(arr[i+1] != fun.inputs[i].type){
-            logs.log("name ::funname=", funname, ",i+1=", i+1, ",arr[i+1]=",arr[i+1], ",fun.inputs[i].type=", fun.inputs[i].type, ",arr=", arr, ",fun=", fun);
+            //logs.log("name ::funname=", funname, ",i+1=", i+1, ",arr[i+1]=",arr[i+1], ",fun.inputs[i].type=", fun.inputs[i].type, ",arr=", arr, ",fun=", fun);
             return false;
         }
 

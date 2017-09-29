@@ -82,9 +82,9 @@ function transaction(args, res) {
     var fun = utils.fun(con, funname);
 
     //logs.log("conname=", conname, ",funname=", funname, ",args=", args);
-    trans.trans(con, fun, args, function (err, conname, fun, result) {
-        var ret = {"err":err,"result":result};
-        logs.log("err=", err, ",result=", result);
+    trans.trans(con, fun, args, function (result) {
+        var ret = {"err":result.err,"result":result.result};
+        logs.log("ret=", ret);
         res.send(ret);
     });
 }

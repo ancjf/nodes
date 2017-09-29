@@ -47,7 +47,7 @@ function fun_arg(inputs, arg) {
     return "(utils.transaction_option())";
 }
 
-trans.stat = function (stat, err, conname, fun, result) {
+trans.stat = function (stat, arg) {
     if (stat.count == undefined) {
         stat = {"count": 0,
             "err": 0,
@@ -57,14 +57,15 @@ trans.stat = function (stat, err, conname, fun, result) {
             "contract": {}};
     }
 
-    var funname = fun.name;
+    var funname = arg.fun.name;
+    var conname = arg.con.contract_name;
     if(typeof stat.contract[conname] === "undefined"){
         stat.contract[conname] = {count:0,err:0,nolog:0,succeed:0,function:{}};
     }
 
     if(typeof stat.contract[conname].function[funname] === "undefined"){
         //logs.log("conname=", conname, ",funname=", funname)
-        if(fun.constant)
+        if(arg.fun.constant)
             stat.contract[conname].function[funname] = {count: 0, err: 0, succeed: 0};
         else
             stat.contract[conname].function[funname] = {count: 0, err: 0, nolog:0, succeed: 0};
@@ -74,14 +75,14 @@ trans.stat = function (stat, err, conname, fun, result) {
     stat.contract[conname].count++;
     stat.contract[conname].function[funname].count++;
 
-    if(err){
+    if(arg.err){
         stat.err++;
         stat.contract[conname].err++;
         stat.contract[conname].function[funname].err++;
         return stat;
     }
 
-    if(!fun.constant && result.logs.length == 0){
+    if(!arg.fun.constant && arg.result.logs.length == 0){
         stat.nolog++;
         stat.contract[conname].nolog++;
         stat.contract[conname].function[funname].nolog++;
@@ -178,12 +179,22 @@ trans.trans = function (con, fun, arg, callback) {
         return eval(execstr);
     }).then(function(result){
         //logs.log("result=", result);
-        callback(false, con.contract_name, fun, result);
+        arg = {"con": con,
+            "fun": fun,
+            "err": false,
+            "result": result};
+
+        callback(arg);
     }).catch(function(err){
         logs.log("test_contract_fun_Error:", typeof err.message, err.message);
         logs.log("test_contract_fun_Error:", err.stack);
+
+        arg = {"con": con,
+            "fun": fun,
+            "err": true,
+            "result": err.message};
         //process.exit();
-        callback(true, con.contract_name, fun, err.message);
+        callback(arg);
 
     });
 }

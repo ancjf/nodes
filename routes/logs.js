@@ -43,4 +43,7 @@ function stackInfo() {
     return data;
 }
 
+logs.inspect = function (arg) {
+    return JSON.stringify(arg);
+}
 module.exports = logs;
