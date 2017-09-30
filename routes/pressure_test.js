@@ -7,6 +7,7 @@ var utils = require('./utils.js');
 var args = require('./args.js');
 var trans = require('./trans.js');
 var logs = require('./logs.js');
+var webs = require('./webs.js');
 var assert = require('assert');
 
 function pressure_test_transaction(stat, con, con_fun, count, perCount, callback) {
@@ -19,7 +20,7 @@ function pressure_test_transaction(stat, con, con_fun, count, perCount, callback
             back_count++
             assert.ok(back_count <= perCount, "ret.length > count");
             if(back_count >= perCount){
-                logs.log("pressure_test_transaction:count=", count, ",conname=", result.con.contract_name, ",fun.name=", result.fun.name);
+                logs.log("pressure_test_transaction:count=", count, ",conname=", result.con.contract_name, ",fun.name=", result.fun.name, ",back_count=", back_count);
 
                 if(count > 1){
                     pressure_test_transaction(stat, con, con_fun, count-1, perCount, callback);
@@ -160,10 +161,9 @@ function test(args, res) {
 }
 
 function link_table_input(text, conname, funname){
-    var text = '<tr>  <input type="hidden" name=".contract" value="' + conname + '" /> <input type="hidden" name=".function" value="' + funname + '" /> <td> <label>  '+ text + '</label> </td> </tr>';
-    var input = '<tr> <td> count:</td>  <td> <input name="count" type="number" value="5" min="1" ></td></tr> <tr> <td> perCount:</td>  <td> <input name="perCount" type="number" value="5" min="1"></td></tr>';
+    var inputs = {"count": "count", "perCount": "perCount"};
 
-    return  '<form action="/pressure_test/test" method="get">  <table border="0" cellspacing="5" cellpadding="5" style="border:1px #666666 solid;">' + text + input + '<tr> <td> <input type="submit" id="submitName" value=' + "开始测试" + ' />  </td> </tr> </table> </form>';
+    return webs.from(text, "/pressure_test/test", inputs, conname, funname, "number", "5");
 }
 
 function contract(args, res) {
@@ -192,16 +192,14 @@ function contract(args, res) {
 
 function root(args, res) {
     var names = utils.names();
-
-    var ret = "";
+    var args = {};
 
     for (var f in names){
         var name = names[f];
-        //logs.log("name=", name);
-
-        ret += '<form action="pressure_test/contract" method="get"> <input type="hidden" name="name" value="' + name + '" /> <input type="submit" id="submitName" value="test: ' + name + '" /> </form>';
+        args[name] = "/pressure_test/contract";
     }
 
+    var ret = webs.button_list(args);
     ret += link_table_input("", "", "");
 
     res.send(ret);

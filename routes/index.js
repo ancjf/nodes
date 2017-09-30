@@ -1,25 +1,12 @@
 var express = require('express');
 var router = express.Router();
 var utils = require('./utils.js');
-
-function link(name, text) {
-  return '<a href="/' + name + '">' + text  + '</a> <br>';
-}
-
-function link_table(names) {
-  var ret = "";
-
-  for (var f in names){
-      ret += link(f, names[f]);
-  }
-
-  return ret;
-}
+var webs = require('./webs.js');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  var names = {"contract_test":"test contract", "pressure_test":"pressure test"};
-  res.send(link_table(names));
+  var names = {"contract test":"/contract_test", "pressure test":"/pressure_test"};
+  res.send(webs.button_list(names));
 });
 
 module.exports = router;

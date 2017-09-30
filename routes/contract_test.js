@@ -3,67 +3,37 @@ var router = express.Router();
 var utils = require('./utils.js');
 var trans = require('./trans.js');
 var logs = require('./logs.js');
+var webs = require('./webs.js');
 
-function link(name) {
-  return '<form action="contract_test/contract" method="get"> <input name="name" type="text"   id="name" value=' + name + ' readonly> <input type="submit" id="submitName" value=' + "开始测试" + ' /> </form>';
-}
+function abi2inputs(abi){
+    var ret = {};
+    for (var i in abi.inputs){
+        var name = abi.inputs[i].name;
+        var type = abi.inputs[i].type;
+        var text = name + "." + type;
 
-function transaction_input(inputs){
-    //console.log("inputs=", inputs, ",end");
-    var ret = "";
-    for (var i in inputs){
-        var name = inputs[i].name;
-        var type = inputs[i].type;
-        var text = '<td>' + name + "." + type + ":</td>";
-        //console.log("i=", i, ",text=", text);
-        ret +=  '<tr> '+ text + '<td> <input name="' + name + '" type="text"></td></tr>';
+        ret[text] = name;
     }
 
     return ret;
 }
 
-function transaction_link(name, abi){
-    var input = transaction_input(abi.inputs);
-    var type =  abi.constant ? ".call" : ".transaction";
-    var text = '<tr>  <input type="hidden" name=".contract" value="' + name + '" /> <input type="hidden" name=".function" value="' + utils.fun_name(abi) + '" /> <td> <label>  '+ name + "." + abi.name + type + '</label> </td> </tr>';
+function transaction_link(conname, abi){
+    var text = conname + "." + abi.name;
 
-    return  '<form action="transaction" method="get">  <table border="0" cellspacing="5" cellpadding="5" style="border:1px #666666 solid;">' + text + input + '<tr> <td> <input type="submit" id="submitName" value=' + "开始测试" + ' />  </td> </tr> </table> </form>';
-}
-
-function contract_link(name, abi){
-    var link = '';
-
-    for (var i in abi){
-        var fun = abi[i];
-        if(fun.type != "function"){
-            //console.log("type fun=", fun);
-            continue;
-        }
-        link += transaction_link(name, fun);
-    }
-
-    //link += '</table>';
-    //console.log("link=", link)
-    return link;
-}
-
-function link_table(names) {
-  var ret = "";
-
-  for (var f in names){
-      var name = names[f];
-      //console.log("name=", name);
-
-      ret += link(name);
-  }
-
-  //console.log(ret);
-  return ret;
+    return webs.from(text, "/contract_test/transaction", abi2inputs(abi), conname, utils.fun_name(abi));
 }
 
 function root(args, res) {
     var names = utils.names();
-    res.send(link_table(names));
+    var args = {};
+
+    for (var f in names){
+        var name = names[f];
+        args[name] = "/contract_test/contract";
+    }
+
+    res.send(webs.button_list(args));
 }
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -101,8 +71,19 @@ function contract(args, res) {
     var name = args.name;
     var abi = utils.abi(name);
 
+    var link = '';
+
+    for (var i in abi){
+        var fun = abi[i];
+        if(fun.type != "function"){
+            //console.log("type fun=", fun);
+            continue;
+        }
+        link += transaction_link(name, fun);
+    }
+
     //logs.log("name=", name, ",req.body=", req.body);
-    res.send(contract_link(name, abi));
+    res.send(link);
 }
 
 router.get('/contract', function(req, res, next) {
