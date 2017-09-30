@@ -18,7 +18,7 @@ function pressure_test_transaction(stat, con, con_fun, count, perCount, callback
             stat = trans.stat(stat, result);
 
             back_count++
-            assert.ok(back_count <= perCount, "ret.length > count");
+            assert.ok(back_count <= perCount, "back_count > perCount");
             if(back_count >= perCount){
                 logs.log("pressure_test_transaction:count=", count, ",conname=", result.con.contract_name, ",fun.name=", result.fun.name, ",back_count=", back_count);
 
@@ -63,8 +63,8 @@ function pressure_test_contract(stat, con, count, perCount, callback) {
 function pressure_test(stat, count, perCount, callback) {
     var names = utils.names();
     if(0 == names.length){
-        ret.err = "No have contract";
-        //callback(ret);
+        logs.log("No have contract");
+        callback(stat);
         return;
     }
 
@@ -72,6 +72,12 @@ function pressure_test(stat, count, perCount, callback) {
     var name = names[number];
     var con = utils.contract(name);
     //logs.log("test:name=", name);
+
+    if(con.contract_name == undefined){
+        logs.log("name=", name);
+        res.send(stat);
+        return;
+    }
 
     pressure_test_contract(stat, con, 1, perCount, function (result) {
         //logs.log("stat=", stat, "result=", result);
@@ -99,6 +105,7 @@ function test_transaction(args, res) {
 
     if(fun.name == undefined){
         logs.log("count=", count, ",perCount=", perCount, ",conname=", conname, ",funname=", funname, ",fun=", fun);
+        res.send(stat);
         return;
     }
 

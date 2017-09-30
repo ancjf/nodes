@@ -51,11 +51,20 @@ function transaction(args, res) {
     var con = utils.contract(conname);
     var fun = utils.fun(con, funname);
 
+    if(con.contract_name == undefined){
+        logs.log("conname=", conname);
+        res.send("{}");
+        return;
+    }
+
+    if(fun.name == undefined){
+        logs.log("conname=", conname, ",funname=", funname);
+        res.send("{}");
+        return;
+    }
     //logs.log("conname=", conname, ",funname=", funname, ",args=", args);
     trans.trans(con, fun, args, function (result) {
-        var ret = {"err":result.err,"result":result.result};
-        logs.log("ret=", ret);
-        res.send(ret);
+        res.send(result.result);
     });
 }
 
