@@ -53,6 +53,7 @@ trans.stat = function (stat, arg) {
             "err": 0,
             "nolog": 0,
             "succeed": 0,
+            "gasUsed" : 0,
             "costTime" : 0,
             "contract": {}};
     }
@@ -60,7 +61,7 @@ trans.stat = function (stat, arg) {
     var funname = arg.fun.name;
     var conname = arg.con.contract_name;
     if(typeof stat.contract[conname] === "undefined"){
-        stat.contract[conname] = {count:0,err:0,nolog:0,succeed:0,function:{}};
+        stat.contract[conname] = {count:0, err:0, nolog:0, succeed:0, gasUsed : 0, function:{}};
     }
 
     if(typeof stat.contract[conname].function[funname] === "undefined"){
@@ -68,7 +69,7 @@ trans.stat = function (stat, arg) {
         if(arg.fun.constant)
             stat.contract[conname].function[funname] = {count: 0, err: 0, succeed: 0};
         else
-            stat.contract[conname].function[funname] = {count: 0, err: 0, nolog:0, succeed: 0};
+            stat.contract[conname].function[funname] = {count: 0, err: 0, nolog:0, succeed: 0, gasUsed : 0};
     }
 
     stat.count++;
@@ -92,6 +93,18 @@ trans.stat = function (stat, arg) {
     stat.succeed++;
     stat.contract[conname].succeed++;
     stat.contract[conname].function[funname].succeed++;
+
+    if(!arg.fun.constant){
+        var gasUsed = arg.result.receipt.gasUsed;
+        if(gasUsed == undefined)
+            gasUsed = 0;
+
+        stat.gasUsed += gasUsed;
+        stat.contract[conname].gasUsed += gasUsed;
+        stat.contract[conname].function[funname].gasUsed += gasUsed;
+        return stat;
+    }
+
     return stat;
 }
 
