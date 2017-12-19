@@ -14,9 +14,9 @@ module.exports = function(deployer) {
 
   //console.log("deployer=", deployer);
   //console.log("TestInt=", TestInt);
-  deployer.deploy(TestInt, option);
+  //deployer.deploy(TestInt, option);
   //console.log("TestInt deployed");
-  deployer.deploy(Users, option);
+  //deployer.deploy(Users, option);
   //console.log("Users deployed");
-  deployer.deploy(Node, option);
+  //deployer.deploy(Node, option);
 };
