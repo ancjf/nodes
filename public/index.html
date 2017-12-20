@@ -89,6 +89,76 @@ function save_url_array(url)
 	storage.setItem(strKey, strValue);
 }
 
+function request(url_fun, url_arg, url_type){
+	var url_host = $("#text_host").val();
+	var url_port = $("#text_port").val();
+	var url_number = $("#block_number").val();
+	if(url_host == undefined || url_host.length == 0)
+		url_host = window.location.host;
+	if(url_port == undefined || url_port.length == 0)
+		url_port = '8545';
+	
+	console.log('url_host=', url_host, ",url_port=", url_port, ",url_number=", url_number);
+	
+	$.ajax({    
+		url: '/web3/',    
+		type: 'get',    
+		dataType: 'json',   
+		contentType: 'application/json',    
+		data: {host:url_host,port:url_port,fun:url_fun,arg:url_arg,type:url_type},    
+		success: function(objResult) {
+			console.log("objResult=", objResult);
+			$("#result").text(JSON.stringify(objResult, null, 4));
+			
+			if(objResult != null && objResult != {})
+				save_url_array(url_host + ':' + url_port);
+		}
+	});
+
+	console.log(',$("#blockNumber").val())=', $("#blockNumber").val(), ",window.location.host=", window.location.host, ",window.location.port=", window.location.port);
+};
+
+function on_submit(obj)
+{
+	console.log('$(obj)=', $(obj));
+
+	console.log('obj.children=', obj.children);
+
+	var arr = $(obj).children("input");
+	var arg = '';
+	var fun = $(obj)[0].name;
+	var type = $(obj)[0].className;
+	
+	for(var i=0;i<arr.length;i++){
+		if(arr[i].type == 'submit')
+			continue;
+		
+		var value = arr[i].value;
+		console.log('value=', value, 'arg=', arg, ',arr=', arr);
+		if(value == null || 0 == value.length)
+			value = '""';
+			
+		if(arg.length){
+			arg = arg + '' + value;
+		}else{
+			arg = value;
+		}
+
+	}
+
+	console.log('fun=', fun, 'arg=', arg, 'type=', type);
+	
+
+	console.log('$(obj).children("input")=', $(obj).children("input"));
+	
+	console.log('this=', this);
+
+	request(fun, arg, type);
+	//addForm.username.focus();
+	return false;
+	return true;
+}
+   
 function getBlockByNumber(){
 	/*
 	var url = '/web3/getBlockByNumber()';
@@ -178,7 +248,19 @@ function getBlockByNumber(){
 
 
 <div class="w">
-	<div class="a"><div align="left"><p>getBlockByNumber: <input type="text" id="block_number" value="0" style="width:360;overflow-x:visible;overflow-y:visible;"/><button onclick="getBlockByNumber()" type="button">Submit</button></p></div></div>
+	<div class="a"><div align="left">
+
+	<form action="/web3/" class="fun.sync" method="get" name="eth.getBlock"  onsubmit="return on_submit(this);">
+		getBlockByNumber: <input type="text" name="fname" value="0" />
+		<input type="submit" name="submit" value="Submit"/>
+    </form>
+    
+    <form action="/web3/" class="" method="get" name="eth.blockNumber"  onsubmit="return on_submit(this);">
+		blockNumber: <input type="text" name="fname" />
+		<input type="submit" name="submit" value="Submit"/>
+    </form>
+ 
+    </div></div>
     <div class="b"><div align="left" id="result" style="word-wrap: break-word; white-space: pre-wrap; white-space: -moz-pre-wrap">
 </div></div>
 </div>
