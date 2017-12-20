@@ -2,8 +2,182 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e0660395-239b-4a57-b28c-734721006c4b" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/finalhandler/HISTORY.md" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/finalhandler/LICENSE" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/finalhandler/README.md" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/finalhandler/index.js" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/finalhandler/package.json" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/fresh/HISTORY.md" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/fresh/LICENSE" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/fresh/README.md" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/fresh/index.js" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/fresh/package.json" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/safe-buffer/.travis.yml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/safe-buffer/LICENSE" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/safe-buffer/README.md" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/safe-buffer/browser.js" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/safe-buffer/index.js" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/safe-buffer/package.json" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/safe-buffer/test.js" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/send/HISTORY.md" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/send/LICENSE" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/send/README.md" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/send/index.js" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/send/package.json" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/serve-static/HISTORY.md" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/serve-static/LICENSE" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/serve-static/README.md" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/serve-static/index.js" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/serve-static/package.json" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/bignumber.js/.npmignore" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/bignumber.js/.travis.yml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/bignumber.js/LICENCE" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/bignumber.js/README.md" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/bignumber.js/bignumber.js" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/bignumber.js/bignumber.js.map" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/bignumber.js/bignumber.min.js" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/bignumber.js/bower.json" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/bignumber.js/doc/API.html" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/bignumber.js/package.json" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/.npm/package/README" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/.npm/package/npm-shrinkwrap.json" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/src/index_old.js" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/test.html" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/test.js.test" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/test1.js.test" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/bignumber.js/.npmignore" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/bignumber.js/.travis.yml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/bignumber.js/LICENCE" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/bignumber.js/README.md" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/bignumber.js/bignumber.js" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/bignumber.js/bignumber.js.map" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/bignumber.js/bignumber.min.js" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/bignumber.js/bower.json" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/bignumber.js/doc/API.html" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/bignumber.js/package.json" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/.npm/package/README" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/.npm/package/npm-shrinkwrap.json" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/src/index_old.js" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/test.html" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/test.js.test" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/test1.js.test" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/bignumber.js/package.json" afterPath="$PROJECT_DIR$/node_modules/bignumber.js/package.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/debug/CHANGELOG.md" afterPath="$PROJECT_DIR$/node_modules/debug/CHANGELOG.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/debug/component.json" afterPath="$PROJECT_DIR$/node_modules/debug/component.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/debug/package.json" afterPath="$PROJECT_DIR$/node_modules/debug/package.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/debug/src/node.js" afterPath="$PROJECT_DIR$/node_modules/debug/src/node.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/express/History.md" afterPath="$PROJECT_DIR$/node_modules/express/History.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/express/package.json" afterPath="$PROJECT_DIR$/node_modules/express/package.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/is-hex-prefixed/.editorconfig" afterPath="$PROJECT_DIR$/node_modules/is-hex-prefixed/.editorconfig" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/is-hex-prefixed/.gitattributes" afterPath="$PROJECT_DIR$/node_modules/is-hex-prefixed/.gitattributes" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/is-hex-prefixed/.npmignore" afterPath="$PROJECT_DIR$/node_modules/is-hex-prefixed/.npmignore" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/is-hex-prefixed/.travis.yml" afterPath="$PROJECT_DIR$/node_modules/is-hex-prefixed/.travis.yml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/is-hex-prefixed/CHANGELOG.md" afterPath="$PROJECT_DIR$/node_modules/is-hex-prefixed/CHANGELOG.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/is-hex-prefixed/LICENSE" afterPath="$PROJECT_DIR$/node_modules/is-hex-prefixed/LICENSE" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/is-hex-prefixed/README.md" afterPath="$PROJECT_DIR$/node_modules/is-hex-prefixed/README.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/is-hex-prefixed/package.json" afterPath="$PROJECT_DIR$/node_modules/is-hex-prefixed/package.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/number-to-bn/.editorconfig" afterPath="$PROJECT_DIR$/node_modules/number-to-bn/.editorconfig" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/number-to-bn/.gitattributes" afterPath="$PROJECT_DIR$/node_modules/number-to-bn/.gitattributes" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/number-to-bn/.npmignore" afterPath="$PROJECT_DIR$/node_modules/number-to-bn/.npmignore" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/number-to-bn/.travis.yml" afterPath="$PROJECT_DIR$/node_modules/number-to-bn/.travis.yml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/number-to-bn/.zuul.yml" afterPath="$PROJECT_DIR$/node_modules/number-to-bn/.zuul.yml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/number-to-bn/CHANGELOG.md" afterPath="$PROJECT_DIR$/node_modules/number-to-bn/CHANGELOG.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/number-to-bn/LICENSE" afterPath="$PROJECT_DIR$/node_modules/number-to-bn/LICENSE" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/number-to-bn/README.md" afterPath="$PROJECT_DIR$/node_modules/number-to-bn/README.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/number-to-bn/dist/number-to-bn.js" afterPath="$PROJECT_DIR$/node_modules/number-to-bn/dist/number-to-bn.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/number-to-bn/package.json" afterPath="$PROJECT_DIR$/node_modules/number-to-bn/package.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/serve-favicon/HISTORY.md" afterPath="$PROJECT_DIR$/node_modules/serve-favicon/HISTORY.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/serve-favicon/package.json" afterPath="$PROJECT_DIR$/node_modules/serve-favicon/package.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/strip-hex-prefix/.editorconfig" afterPath="$PROJECT_DIR$/node_modules/strip-hex-prefix/.editorconfig" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/strip-hex-prefix/.gitattributes" afterPath="$PROJECT_DIR$/node_modules/strip-hex-prefix/.gitattributes" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/strip-hex-prefix/.npmignore" afterPath="$PROJECT_DIR$/node_modules/strip-hex-prefix/.npmignore" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/strip-hex-prefix/.travis.yml" afterPath="$PROJECT_DIR$/node_modules/strip-hex-prefix/.travis.yml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/strip-hex-prefix/CHANGELOG.md" afterPath="$PROJECT_DIR$/node_modules/strip-hex-prefix/CHANGELOG.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/strip-hex-prefix/LICENSE" afterPath="$PROJECT_DIR$/node_modules/strip-hex-prefix/LICENSE" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/strip-hex-prefix/README.md" afterPath="$PROJECT_DIR$/node_modules/strip-hex-prefix/README.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/strip-hex-prefix/package.json" afterPath="$PROJECT_DIR$/node_modules/strip-hex-prefix/package.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/.idea/dictionaries/frozeman.xml" afterPath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/.idea/dictionaries/frozeman.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/.idea/web3.iml" afterPath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/.idea/web3.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/.idea/workspace.xml" afterPath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/.versions" afterPath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/.versions" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/README.md" afterPath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/README.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/dist/web3-light.js" afterPath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/dist/web3-light.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/dist/web3-light.min.js" afterPath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/dist/web3-light.min.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/dist/web3.js" afterPath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/dist/web3.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/dist/web3.min.js" afterPath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/dist/web3.min.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/example/node-app.js" afterPath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/example/node-app.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/lib/solidity/coder.js" afterPath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/lib/solidity/coder.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/lib/utils/utils.js" afterPath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/lib/utils/utils.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/lib/version.json" afterPath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/lib/version.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/lib/web3/formatters.js" afterPath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/lib/web3/formatters.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/package.js" afterPath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/package.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/package.json" afterPath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/package.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/yarn.lock" afterPath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/node_modules/web3/yarn.lock" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/package.json" afterPath="$PROJECT_DIR$/node_modules/truffle-blockchain-utils/package.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract-schema/.npmignore" afterPath="$PROJECT_DIR$/node_modules/truffle-contract-schema/.npmignore" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract-schema/README.md" afterPath="$PROJECT_DIR$/node_modules/truffle-contract-schema/README.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract-schema/index.js" afterPath="$PROJECT_DIR$/node_modules/truffle-contract-schema/index.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract-schema/package.json" afterPath="$PROJECT_DIR$/node_modules/truffle-contract-schema/package.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract-schema/test/options.js" afterPath="$PROJECT_DIR$/node_modules/truffle-contract-schema/test/options.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/.npmignore" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/.npmignore" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/.travis.yml" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/.travis.yml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/README.md" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/README.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/contract.js" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/contract.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/dist/truffle-contract.js" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/dist/truffle-contract.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/dist/truffle-contract.min.js" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/dist/truffle-contract.min.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/index.js" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/index.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/.idea/dictionaries/frozeman.xml" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/.idea/dictionaries/frozeman.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/.idea/web3.iml" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/.idea/web3.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/.idea/workspace.xml" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/.versions" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/.versions" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/README.md" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/README.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/dist/web3-light.js" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/dist/web3-light.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/dist/web3-light.min.js" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/dist/web3-light.min.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/dist/web3.js" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/dist/web3.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/dist/web3.min.js" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/dist/web3.min.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/example/node-app.js" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/example/node-app.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/lib/solidity/coder.js" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/lib/solidity/coder.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/lib/utils/utils.js" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/lib/utils/utils.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/lib/version.json" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/lib/version.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/lib/web3/formatters.js" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/lib/web3/formatters.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/package.js" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/package.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/package.json" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/package.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/yarn.lock" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/node_modules/web3/yarn.lock" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/package.json" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/package.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/truffle-contract/test/upgrade.js" afterPath="$PROJECT_DIR$/node_modules/truffle-contract/test/upgrade.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/.idea/workspace.xml" afterPath="$PROJECT_DIR$/node_modules/web3/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/.jshintrc" afterPath="$PROJECT_DIR$/node_modules/web3/.jshintrc" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/.versions" afterPath="$PROJECT_DIR$/node_modules/web3/.versions" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/README.md" afterPath="$PROJECT_DIR$/node_modules/web3/README.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/dist/web3-light.js" afterPath="$PROJECT_DIR$/node_modules/web3/dist/web3-light.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/dist/web3-light.min.js" afterPath="$PROJECT_DIR$/node_modules/web3/dist/web3-light.min.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/dist/web3.js" afterPath="$PROJECT_DIR$/node_modules/web3/dist/web3.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/dist/web3.js.map" afterPath="$PROJECT_DIR$/node_modules/web3/dist/web3.js.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/dist/web3.min.js" afterPath="$PROJECT_DIR$/node_modules/web3/dist/web3.min.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/lib/utils/utils.js" afterPath="$PROJECT_DIR$/node_modules/web3/lib/utils/utils.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/lib/version.json" afterPath="$PROJECT_DIR$/node_modules/web3/lib/version.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/lib/web3.js" afterPath="$PROJECT_DIR$/node_modules/web3/lib/web3.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/lib/web3/allevents.js" afterPath="$PROJECT_DIR$/node_modules/web3/lib/web3/allevents.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/lib/web3/errors.js" afterPath="$PROJECT_DIR$/node_modules/web3/lib/web3/errors.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/lib/web3/event.js" afterPath="$PROJECT_DIR$/node_modules/web3/lib/web3/event.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/lib/web3/filter.js" afterPath="$PROJECT_DIR$/node_modules/web3/lib/web3/filter.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/lib/web3/formatters.js" afterPath="$PROJECT_DIR$/node_modules/web3/lib/web3/formatters.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/lib/web3/function.js" afterPath="$PROJECT_DIR$/node_modules/web3/lib/web3/function.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/lib/web3/httpprovider.js" afterPath="$PROJECT_DIR$/node_modules/web3/lib/web3/httpprovider.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/lib/web3/method.js" afterPath="$PROJECT_DIR$/node_modules/web3/lib/web3/method.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/lib/web3/methods/eth.js" afterPath="$PROJECT_DIR$/node_modules/web3/lib/web3/methods/eth.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/lib/web3/methods/personal.js" afterPath="$PROJECT_DIR$/node_modules/web3/lib/web3/methods/personal.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/lib/web3/methods/shh.js" afterPath="$PROJECT_DIR$/node_modules/web3/lib/web3/methods/shh.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/lib/web3/methods/watches.js" afterPath="$PROJECT_DIR$/node_modules/web3/lib/web3/methods/watches.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/package.js" afterPath="$PROJECT_DIR$/node_modules/web3/package.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/package.json" afterPath="$PROJECT_DIR$/node_modules/web3/package.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/test.html" afterPath="$PROJECT_DIR$/node_modules/web3/test.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/web3/yarn.lock" afterPath="$PROJECT_DIR$/node_modules/web3/yarn.lock" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/node_modules/xhr2/package.json" afterPath="$PROJECT_DIR$/node_modules/xhr2/package.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/package-lock.json" afterPath="$PROJECT_DIR$/package-lock.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/package.json" afterPath="$PROJECT_DIR$/package.json" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/public/index.html" afterPath="$PROJECT_DIR$/public/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/routes/web3.js" afterPath="$PROJECT_DIR$/routes/web3.js" />
     </list>
     <ignored path="dapp.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -68,8 +242,8 @@
       <file leaf-file-name="web3.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/routes/web3.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-475">
-              <caret line="22" column="2" selection-start-line="22" selection-start-column="2" selection-end-line="22" selection-end-column="2" />
+            <state relative-caret-position="-129">
+              <caret line="54" column="18" selection-start-line="54" selection-start-column="18" selection-end-line="54" selection-end-column="18" />
               <folding>
                 <element signature="e#0#40#0" expanded="false" />
               </folding>
@@ -899,16 +1073,16 @@
       <workItem from="1513215768071" duration="5983000" />
       <workItem from="1513310779471" duration="1228000" />
       <workItem from="1513649351295" duration="15039000" />
-      <workItem from="1513731897335" duration="13762000" />
+      <workItem from="1513731897335" duration="15424000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="496129000" />
+    <option name="totallyTimeSpent" value="497791000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -917,16 +1091,16 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.26638478" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24047878" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.28182808" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15833333" sideWeight="0.75931233" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15833333" sideWeight="0.7590909" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15833333" sideWeight="0.24068768" order="4" side_tool="true" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15833333" sideWeight="0.24090908" order="4" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39934713" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -1210,6 +1384,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="297">
           <caret line="68" column="3" selection-start-line="68" selection-start-column="3" selection-end-line="68" selection-end-column="3" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1301,8 +1476,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/routes/web3.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-475">
-          <caret line="22" column="2" selection-start-line="22" selection-start-column="2" selection-end-line="22" selection-end-column="2" />
+        <state relative-caret-position="-129">
+          <caret line="54" column="18" selection-start-line="54" selection-start-column="18" selection-end-line="54" selection-end-column="18" />
           <folding>
             <element signature="e#0#40#0" expanded="false" />
           </folding>

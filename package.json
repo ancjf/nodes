@@ -8,10 +8,13 @@
   "dependencies": {
     "body-parser": "~1.17.1",
     "cookie-parser": "~1.4.3",
-    "debug": "~2.6.3",
-    "express": "~4.15.2",
+    "debug": "^2.6.9",
+    "express": "^4.15.5",
     "jade": "~1.11.0",
     "morgan": "~1.8.1",
-    "serve-favicon": "~2.4.2"
+    "serve-favicon": "^2.4.5",
+    "truffle-contract": "^3.0.1",
+    "v6": "0.0.0",
+    "web3": "^0.20.0"
   }
 }
