@@ -13,7 +13,22 @@ var assert = require('assert');
 var Web3 = require('web3');
 var web3 = new Web3(new Web3.providers.HttpProvider());
 //logs.log("web3 start web3=", web3);
+/*
+web3.extend({
+    methods: [{
+        name: 'getPeers',
+        call: 'admin_peers',
+    }]
+});
+*/
+function result_fun(result) {
+    if(typeof(result) == "number")
+        result = result.toString();
+    if(result == null)
+        result = "null";
 
+    return result;
+}
 router.get('/*', function(req, res, next) {
     var host = req.query.host;
     var port = req.query.port;
@@ -28,10 +43,10 @@ router.get('/*', function(req, res, next) {
     var callback = function (error, result) {
         if (!error) {
             logs.log(result);
-            res.send(result);
+            res.send(result_fun(result));
         }else {
             logs.log(error);
-            res.send(error);
+            res.send({});
         }
     }
 
@@ -44,25 +59,24 @@ router.get('/*', function(req, res, next) {
 
         if(type == 'fun.sync') {
             line = 'web3.' + fun + '(' + arg + ', callback)';
-            result = eval(line);
+            eval(line);
         }else if(type == 'fun'){
             line = 'web3.' + fun + '(' + arg + ')';
+            logs.log("line=", line);
             result = eval(line);
 
             logs.log("line=", line, "result=", result, ',typeof(result)=', typeof(result));
-            res.send(result);
+            res.send(result_fun(result));
         }else{
             line = 'result = web3.' + fun;
             logs.log("line=", line);
             eval(line);
-            if(typeof(result) == "number")
-                result = result.toString();
 
             logs.log("line=", line, "result=", result, ',typeof(result)=', typeof(result));
-            res.send(result);
+            res.send(result_fun(result));
         }
 
-
+        //logs.log("web3=", web3);
         //web3.eth.getBlock(number, callback)
     } catch (err) {
         res.send(err);
@@ -70,6 +84,5 @@ router.get('/*', function(req, res, next) {
     }
     //res.send(req.query);
 });
-
 
 module.exports = router;
