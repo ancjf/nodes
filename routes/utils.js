@@ -141,6 +141,20 @@ utils.fun_name = function (fun) {
     return str;
 }
 
+utils.con_fun_name = function (conname, funname, constant) {
+    var abi = utils.abi(conname);
+
+    for (var i in abi){
+        var fun = abi[i];
+        if(fun.type != "function" || fun.constant != constant){
+            //logs.log("type fun=", fun);
+            continue;
+        }
+
+        return utils.fun_name(abi[i]);
+    }
+}
+
 utils.get_random_num = function get_random_num(Min, Max) // [Min, Max)
 {
     var Range = Max - Min;

@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var utils = require('./utils.js');
 var webs = require('./webs.js');
+var logs = require('./logs.js');
 
 function root(res) {
   var names = {"contract test":"/contract_test", "pressure test":"/pressure_test"};
@@ -9,6 +10,8 @@ function root(res) {
 }
 /* GET home page. */
 router.get('/', function(req, res, next) {
+  logs.log("req.query=", req.query, ",req.path=", req.path);
+  //res.sendFile();
   root(res);
 });
 

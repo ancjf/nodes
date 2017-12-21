@@ -75,10 +75,11 @@ function pressure_test(stat, count, perCount, callback) {
 
     if(con.contract_name == undefined){
         logs.log("name=", name);
-        res.send(stat);
+        //res.send(stat.id);
         return;
     }
 
+    //res.send(stat.id);
     pressure_test_contract(stat, con, 1, perCount, function (result) {
         //logs.log("stat=", stat, "result=", result);
         //stat = trans.stat_add(stat, result);
@@ -101,22 +102,26 @@ function test_transaction(args, res) {
     var con = utils.contract(conname);
     var fun = utils.fun(con, funname);
     var begin = new Date().getTime();
-    var stat = {};
+    var stat = trans.stat_init(count*perCount);
 
     if(fun.name == undefined){
         logs.log("count=", count, ",perCount=", perCount, ",conname=", conname, ",funname=", funname, ",fun=", fun);
-        res.send(stat);
+        //res.send(stat);
+        res.send(stat.id);
         return;
     }
 
     logs.log("count=", count, ",perCount=", perCount, ",conname=", conname, ",funname=", funname);
+    res.send(stat.id);
+
     pressure_test_transaction(stat, con, fun, count, perCount, function (result) {
 
         var end = new Date().getTime();
         result.costTime = end - begin;
 
         logs.log("result=", logs.inspect(result));
-        res.send(result);
+        //res.send(result);
+        //res.send(stat.id);
     });
 }
 
@@ -128,24 +133,40 @@ function test_contract(args, res) {
 
     var con = utils.contract(conname);
     var begin = new Date().getTime();
-    var stat = {};
+    var stat = trans.stat_init(count*perCount);
 
     logs.log("count=", count, ",perCount=", perCount, ",conname=", conname, ",funname=", funname);
+    res.send(stat.id);
     pressure_test_contract(stat, con, count, perCount, function (result) {
 
         var end = new Date().getTime();
         result.costTime = end - begin;
         logs.log("result=", logs.inspect(result));
-        res.send(result);
+        //res.send(result);
     });
 }
 
 function test(args, res) {
     var count = args["count"];
     var perCount = args["perCount"];
-    var conname = args[".contract"];
     var funname = args[".function"];
 
+    logs.log("funname=", funname);
+    if(funname != undefined && funname.length > 0) {
+        var arr = funname.split(".");
+        if(arr.length > 1){
+            args[".contract"] = arr[0];
+            args[".function"] = utils.con_fun_name(arr[0], arr[1], arr[2] ==  'call' ? true : false);
+        }else{
+            args[".contract"] = funname;
+            args[".function"] = "";
+        }
+
+        funname = args[".function"];
+        logs.log("arr=", arr);
+    }
+
+    var conname = args[".contract"];
     if(conname != undefined && funname != undefined){
         if(conname.length > 0 && funname.length > 0){
             test_transaction(args, res);
@@ -157,13 +178,15 @@ function test(args, res) {
     }
 
     var begin = new Date().getTime();
-    var stat = {};
-    logs.log("count=", count, ",perCount=", perCount, ",conname=", conname, ",funname=", funname);
+    var stat = trans.stat_init(count*perCount);
+    logs.log("count=", count, ",perCount=", perCount, ",conname=", conname, ",funname=", funname, ",stat=", stat);
+    res.send(stat.id);
+
     pressure_test(stat, count, perCount, function (result) {
         var end = new Date().getTime();
         result.costTime = end - begin;
         logs.log("result=", logs.inspect(result));
-        res.send(result);
+        //res.send(result);
     });
 }
 
@@ -193,8 +216,50 @@ function contract(args, res) {
         link += link_table_input(text, name, funname);
     }
 
-    //logs.log("name=", name, ",req.body=", req.body);
+    logs.log("name=", name);
     res.send(link);
+}
+
+function log(args, res) {
+    var id = args.id;
+    var remove = args.remove;
+    logs.log("id=", id, ",remove=", remove);
+
+    var ret = trans.log(id, remove);
+
+    res.send(ret);
+}
+
+function query(args, res) {
+    var name = args.name;
+    logs.log("name=", name);
+    if(name == undefined){
+        res.send(utils.names());
+        logs.log("name=", name);
+        return;
+    }
+
+    var abi = utils.abi(name);
+    var arr = new Array();
+    var index = 0;
+    arr[index++] = name;
+
+    for (var i in abi){
+        var fun = abi[i];
+        if(fun.type != "function"){
+            //logs.log("type fun=", fun);
+            continue;
+        }
+
+        var type =  fun.constant ? ".call" : ".transaction";
+        var text = name + "." + fun.name + type;
+        var funname = utils.fun_name(fun);
+
+        arr[index++] = text;
+    }
+
+    logs.log("arr=", arr);
+    res.send(arr);
 }
 
 function root(args, res) {
@@ -234,6 +299,22 @@ router.post('/test', function(req, res, next) {
 
 router.get('/test', function(req, res, next) {
     test(req.query, res);
+});
+
+router.post('/query', function(req, res, next) {
+    query(req.body, res);
+});
+
+router.get('/query', function(req, res, next) {
+    query(req.query, res);
+});
+
+router.post('/log', function(req, res, next) {
+    log(req.body, res);
+});
+
+router.get('/log', function(req, res, next) {
+    log(req.query, res);
 });
 
 module.exports = router;

@@ -4,17 +4,6 @@
     <meta charset="utf-8"/>
 	<script type="text/javascript" src="javascripts/jquery-3.2.1.min.js"></script>
 <script>
-var xhr = null;                 
-try{    
-	xhr = new ActiveXObject("Msxml2.XMLHTTP");    
-}catch(e){    
-	try{    
-		xhr = new ActiveXObject("Microsoft.XMLHTTP");    
-	}catch(e){}    
-}
-  
-if (!xhr) 
-	xhr = new XMLHttpRequest();
 
 var url_array = new Array();
 
@@ -46,6 +35,14 @@ function set_select()
 		// array: 指向Array对象本身  
 		select.add(new Option(element,"")); 
 	});
+}
+
+function host() {
+	return $("#text_host").val();
+}
+
+function port() {
+	return $("#text_port").val();
 }
 
 function onDeviceReady() {
@@ -99,47 +96,6 @@ function save_url_array(url)
 	set_select();
 }
 
-function request(url_fun, url_arg, url_type){
-	var url_host = $("#text_host").val();
-	var url_port = $("#text_port").val();
-	var url_number = $("#block_number").val();
-	if(url_host == undefined || url_host.length == 0)
-		url_host = window.location.host;
-	if(url_port == undefined || url_port.length == 0)
-		url_port = '8545';
-	
-	console.log('url_host=', url_host, ",url_port=", url_port, ",url_number=", url_number);
-	
-	$.ajax({    
-		url: '/web3/',    
-		type: 'get',    
-		dataType: 'json',   
-		contentType: 'application/json',    
-		data: {host:url_host,port:url_port,fun:url_fun,arg:url_arg,type:url_type}, 
-		error: function(XMLHttpRequest, textStatus, errorThrown) {
-			console.log("XMLHttpRequest.status=", XMLHttpRequest.status, ",XMLHttpRequest.readyState=", XMLHttpRequest.readyState, ",textStatus=", textStatus, ",XMLHttpRequest=", XMLHttpRequest);
-			if(XMLHttpRequest.status == 200 && XMLHttpRequest.readyState == 4 && XMLHttpRequest.responseText != ''){
-				$("#result").text(XMLHttpRequest.responseText);
-				save_url_array(url_host + ':' + url_port);
-			}
-   		},   
-		success: function(objResult) {
-			console.log("objResult=", objResult);
-			var result = JSON.stringify(objResult, null, 4);
-			console.log("result.length=", result.length, "result=", result);
-			$("#result").text(result);
-			
-			if(objResult != null && objResult != undefined && result != ''  && result != '{}'){
-				save_url_array(url_host + ':' + url_port);
-			}else{
-				console.log("recv err");
-			}
-		}
-	});
-
-	//console.log(',$("#blockNumber").val())=', $("#blockNumber").val(), ",window.location.host=", window.location.host, ",window.location.port=", window.location.port);
-};
-
 function on_change(obj)
 {
 	var id = obj.options.selectedIndex;
@@ -150,35 +106,9 @@ function on_change(obj)
 	console.log("obj=", obj, "id=", id, "text=", text);
 }
 
-function on_submit(obj)
-{
-	var arr = $(obj).children("input");
-	var arg = '';
-	var fun = $(obj)[0].name;
-	var type = $(obj)[0].className;
-	
-	for(var i=0;i<arr.length;i++){
-		if(arr[i].type == 'submit')
-			continue;
-		
-		var value = arr[i].value;
-		//console.log('value=', value, 'arg=', arg, ',arr=', arr);
-		if(value == null || 0 == value.length)
-			value = '""';
-		else
-			value = '"' + value + '"';
-			
-		if(arg.length){
-			arg = arg + ',' + value;
-		}else{
-			arg = value;
-		}
-
-	}
-
-	console.log('fun=', fun, 'arg=', arg, 'type=', type);
-	request(fun, arg, type);
-	return false;
+function jump_url(obj){
+	console.log("obj.name=", obj.name);
+	document.getElementById("main_frame").src = obj.name;
 }
 
 </script>
@@ -208,85 +138,16 @@ function on_submit(obj)
 <p>
 	<input type="text" id="text_host" value="192.168.1.1"> </input>
 	<input type="number" id="text_port" min="1" max="65535" value="8545"> </input>
-    <select id="url_list" onchange="on_change(this)">
+    <select id="url_list" onChange="on_change(this)">
     </select>
     
-    <a href="/test">contract test</a>
+    <a href="/contract.html">contract</a>
+    <a href="/test">test contract</a>
+    <a href="/test_stress.html">test stress</a>
+    <button name="test_stress.html" onclick="jump_url(this)">test stress</button>
 </p>
 
-
-<div class="w">
-	<div class="a"><div align="left">
-
-	<form action="/web3/" class="fun.sync" method="get" name="eth.getBlock"  onsubmit="return on_submit(this);">
-		<input type="text" name="fname" size="66" value="0" /> <input type="submit" name="submit" value="getBlock"/> <hr class="division">
-    </form>
-    
-    <form action="/web3/" class="" method="get" name="eth.blockNumber"  onsubmit="return on_submit(this);">
-		<input type="submit" name="submit" value="blockNumber"/> <hr>
-    </form>
-    
-    <form action="/web3/" class="fun" method="get" name="eth.getTransaction"  onsubmit="return on_submit(this);">
-		<input type="text" name="fname" size="66"/> <input type="submit" name="submit" value="getTransaction"/> <hr>
-    </form>
-
-    <form action="/web3/" class="fun" method="get" name="eth.getTransactionFromBlock"  onsubmit="return on_submit(this);">
-		<input type="text" name="fname" size="66" value="0" /> <input type="text" name="fname" value="0" /> <input type="submit" name="submit" value="getTransactionFromBlock"/> <hr>
-    </form>
-
-    <form action="/web3/" class="fun" method="get" name="eth.getTransactionReceipt"  onsubmit="return on_submit(this);">
-		<input type="text" name="fname" size="66"/> <input type="submit" name="submit" value="getTransactionReceipt"/> <hr>
-    </form>
-        
-    <form action="/web3/" class="fun" method="get" name="eth.getBalance"  onsubmit="return on_submit(this);">
-		<input type="text" name="fname" size="44"/> <input type="submit" name="submit" value="getBalance"/> <hr>
-    </form>
-     
-    <form action="/web3/" class="" method="get" name="personal.listAccounts"  onsubmit="return on_submit(this);">
-		<input type="submit" name="submit" value="listAccounts"/>
-    </form>
-
-	<form action="/web3/" class="" method="get" name="eth.gasPrice"  onsubmit="return on_submit(this);">
-		<input type="submit" name="submit" value="gasPrice"/>
-    </form>
-
-	<form action="/web3/" class="fun" method="get" name="eth.getCode"  onsubmit="return on_submit(this);">
-		<input type="text" name="fname" size="66"/> <input type="submit" name="submit" value="getCode"/>
-    </form>
-     
-	<form action="/web3/" class="fun" method="get" name="eth.getStorageAt"  onsubmit="return on_submit(this);">
-		<input type="text" name="fname" size="66"/> <input type="text" name="fname" value="0"/> <input type="submit" name="submit" value="getStorageAt"/>
-    </form>
-
-    <form action="/web3/" class="" method="get" name="personal.listAccounts"  onsubmit="return on_submit(this);">
-		<input type="submit" name="submit" value="listAccounts"/>
-    </form>
-
-	<form action="/web3/" class="" method="get" name="admin.peers"  onsubmit="return on_submit(this);">
-		<input type="submit" name="submit" value="peers"/>
-    </form>
-
-	<form action="/web3/" class="fun" method="get" name="eth.getStorageAt"  onsubmit="return on_submit(this);">
-		<input type="text" name="fname" size="66"/> <input type="text" name="fname" value="0"/> <input type="submit" name="submit" value="getStorageAt"/>
-    </form>
-
-	<form action="/web3/" class="fun" method="get" name="personal.newAccount"  onsubmit="return on_submit(this);">
-		<input type="text" name="fname"/> <input type="submit" name="submit" value="newAccount"/>
-    </form>
-    
-	<form action="/web3/" class="" method="get" name="version.api"  onsubmit="return on_submit(this);">
-		<input type="submit" name="submit" value="version"/>
-    </form>
-<!--
-	<form action="/web3/" class="fun" method="get" name="getPeers"  onsubmit="return on_submit(this);">
-		<input type="submit" name="submit" value="getPeers"/>
-    </form>
--->                            
-    </div></div>
-    <div class="b"><div align="left" id="result" style="word-wrap: break-word; white-space: pre-wrap; white-space: -moz-pre-wrap">
-</div></div>
-</div>
-
+<iframe id="main_frame" width="98%" height="95%" src="/web3.html"></iframe>
 
 </div>
 

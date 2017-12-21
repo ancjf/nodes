@@ -1,22 +1,232 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
+
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>无标题文档</title>
+    <meta charset="utf-8"/>
+	<script type="text/javascript" src="javascripts/jquery-3.2.1.min.js"></script>
+<script>
+var xhr = null;                 
+try{    
+	xhr = new ActiveXObject("Msxml2.XMLHTTP");    
+}catch(e){    
+	try{    
+		xhr = new ActiveXObject("Microsoft.XMLHTTP");    
+	}catch(e){}    
+}
+  
+if (!xhr) 
+	xhr = new XMLHttpRequest();
+
+function onDeviceReady() {
+	console.log('list:window.parent=', window.parent);
+	return;
+	var strKey = "url_array"; 
+	var storage = window.localStorage; 
+	var value = storage.getItem(strKey);
+	
+	console.log('value=', value, '$("#text_host")=', $("#text_host"));
+	if(value==null)
+		return;
+		
+	var strs= value.split(",");
+	var select = document.getElementById("url_list"); 
+	for(var i=0;i<strs.length ;i++ ){
+		if(strs[i].length > 0){
+			if(i == 0){
+				set_url(strs[i]);
+				inserted = true;
+			}
+			url_array.push(strs[i]);
+			select.add(new Option(strs[i],""));
+		}
+	}
+}
+
+function request(url_fun, url_arg, url_type){
+	var url_host = window.parent.host();
+	var url_port = window.parent.port();
+	var url_number = $("#block_number").val();
+	if(url_host == undefined || url_host.length == 0)
+		url_host = window.location.host;
+	if(url_port == undefined || url_port.length == 0)
+		url_port = '8545';
+	
+	console.log('url_host=', url_host, ",url_port=", url_port, ",url_number=", url_number);
+	
+	$.ajax({    
+		url: '/web3/',    
+		type: 'get',    
+		dataType: 'json',   
+		contentType: 'application/json',    
+		data: {host:url_host,port:url_port,fun:url_fun,arg:url_arg,type:url_type}, 
+		error: function(XMLHttpRequest, textStatus, errorThrown) {
+			console.log("XMLHttpRequest.status=", XMLHttpRequest.status, ",XMLHttpRequest.readyState=", XMLHttpRequest.readyState, ",textStatus=", textStatus, ",XMLHttpRequest=", XMLHttpRequest);
+			if(XMLHttpRequest.status == 200 && XMLHttpRequest.readyState == 4 && XMLHttpRequest.responseText != ''){
+				$("#result_text").text(XMLHttpRequest.responseText);
+				window.parent.save_url_array(url_host + ':' + url_port);
+			}
+   		},   
+		success: function(objResult) {
+			console.log("objResult=", objResult);
+			var result = JSON.stringify(objResult, null, 4);
+			console.log("result.length=", result.length, "result=", result);
+			$("#result_text").text(result);
+			
+			if(objResult != null && objResult != undefined && result != ''  && result != '{}'){
+				window.parent.save_url_array(url_host + ':' + url_port);
+			}else{
+				console.log("recv err");
+			}
+		}
+	});
+
+	//console.log(',$("#blockNumber").val())=', $("#blockNumber").val(), ",window.location.host=", window.location.host, ",window.location.port=", window.location.port);
+};
+
+function on_submit(obj)
+{
+	var arr = $(obj).children("input");
+	var arg = '';
+	var fun = $(obj)[0].name;
+	var type = $(obj)[0].className;
+	
+	for(var i=0;i<arr.length;i++){
+		if(arr[i].type == 'submit')
+			continue;
+		
+		var value = arr[i].value;
+		//console.log('value=', value, 'arg=', arg, ',arr=', arr);
+		if(value == null || 0 == value.length)
+			value = '""';
+		else
+			value = '"' + value + '"';
+			
+		if(arg.length){
+			arg = arg + ',' + value;
+		}else{
+			arg = value;
+		}
+
+	}
+
+	console.log('fun=', fun, 'arg=', arg, 'type=', type);
+	request(fun, arg, type);
+	return false;
+}
+
+</script>
+
+<style type="text/css">
+	html
+	{
+	 height:100%;
+	 margin:0;
+	}
+	body
+	{
+		height:99%;
+		margin:0; 
+	}
+	
+	hr{ border-top:1px solid #987cb9;}
+	
+	.left{ width:38%; float:left;border:1px solid green;height:100%;}
+	.right{ width:60%; margin-left:38%;border:1px solid orange;height:100%;}
+	
+	#result_text {  
+    width: 100%; /*自动适应父布局宽度*/  
+	height: 100%;
+    overflow: auto;  
+    word-break: break-all;  
+    /*在ie中解决断行问题(防止自动变为在一行显示，主要解决ie兼容问题，ie8中当设宽度为100%时，文本域类容超过一行时，当我们双击文本内容就会自动变为一行显示，所以只能用ie的专有断行属性“word-break或word-wrap”控制其断行)*/  
+	} 
+</style>
+
 </head>
 
 <body>
-
 <div align="center">
 
+<div class="w">
+	<div class="left"><div align="left">
 
-<p>getBlockByNumber: <input type="number" id="blockNumber" value="0"/><button onclick="getBlockByNumber()" type="button">Submit</button></p>
+	<form action="/web3/" class="fun.sync" method="get" name="eth.getBlock"  onsubmit="return on_submit(this);">
+		<input type="text" name="fname" size="66" value="0" /> <input type="submit" name="submit" value="getBlock"/> <hr class="division">
+    </form>
+    
+    <form action="/web3/" class="" method="get" name="eth.blockNumber"  onsubmit="return on_submit(this);">
+		<input type="submit" name="submit" value="blockNumber"/> <hr>
+    </form>
+    
+    <form action="/web3/" class="fun" method="get" name="eth.getTransaction"  onsubmit="return on_submit(this);">
+		<input type="text" name="fname" size="66"/> <input type="submit" name="submit" value="getTransaction"/> <hr>
+    </form>
 
-<div align="left" id="result" style="word-wrap: break-word; white-space: pre-wrap; white-space: -moz-pre-wrap">
+    <form action="/web3/" class="fun" method="get" name="eth.getTransactionFromBlock"  onsubmit="return on_submit(this);">
+		<input type="text" name="fname" size="66" value="0" /> <input type="text" name="fname" value="0" /> <input type="submit" name="submit" value="getTransactionFromBlock"/> <hr>
+    </form>
+
+    <form action="/web3/" class="fun" method="get" name="eth.getTransactionReceipt"  onsubmit="return on_submit(this);">
+		<input type="text" name="fname" size="66"/> <input type="submit" name="submit" value="getTransactionReceipt"/> <hr>
+    </form>
+        
+    <form action="/web3/" class="fun" method="get" name="eth.getBalance"  onsubmit="return on_submit(this);">
+		<input type="text" name="fname" size="44"/> <input type="submit" name="submit" value="getBalance"/> <hr>
+    </form>
+     
+    <form action="/web3/" class="" method="get" name="personal.listAccounts"  onsubmit="return on_submit(this);">
+		<input type="submit" name="submit" value="listAccounts"/>
+    </form>
+
+	<form action="/web3/" class="" method="get" name="eth.gasPrice"  onsubmit="return on_submit(this);">
+		<input type="submit" name="submit" value="gasPrice"/>
+    </form>
+
+	<form action="/web3/" class="fun" method="get" name="eth.getCode"  onsubmit="return on_submit(this);">
+		<input type="text" name="fname" size="66"/> <input type="submit" name="submit" value="getCode"/>
+    </form>
+     
+	<form action="/web3/" class="fun" method="get" name="eth.getStorageAt"  onsubmit="return on_submit(this);">
+		<input type="text" name="fname" size="66"/> <input type="text" name="fname" value="0"/> <input type="submit" name="submit" value="getStorageAt"/>
+    </form>
+
+    <form action="/web3/" class="" method="get" name="personal.listAccounts"  onsubmit="return on_submit(this);">
+		<input type="submit" name="submit" value="listAccounts"/>
+    </form>
+
+	<form action="/web3/" class="" method="get" name="admin.peers"  onsubmit="return on_submit(this);">
+		<input type="submit" name="submit" value="peers"/>
+    </form>
+
+	<form action="/web3/" class="fun" method="get" name="eth.getStorageAt"  onsubmit="return on_submit(this);">
+		<input type="text" name="fname" size="66"/> <input type="text" name="fname" value="0"/> <input type="submit" name="submit" value="getStorageAt"/>
+    </form>
+
+	<form action="/web3/" class="fun" method="get" name="personal.newAccount"  onsubmit="return on_submit(this);">
+		<input type="text" name="fname"/> <input type="submit" name="submit" value="newAccount"/>
+    </form>
+    
+	<form action="/web3/" class="" method="get" name="version.api"  onsubmit="return on_submit(this);">
+		<input type="submit" name="submit" value="version"/>
+    </form>
+<!--
+	<form action="/web3/" class="fun" method="get" name="getPeers"  onsubmit="return on_submit(this);">
+		<input type="submit" name="submit" value="getPeers"/>
+    </form>
+-->                            
+    </div></div>
+    <div class="right"><textarea id="result_text"></textarea></div>
+    
 </div>
 
 
 </div>
 
+<script type="text/javascript">
+$(document).ready(function(){
+	onDeviceReady();
+});
+
+</script>
 </body>
+
 </html>

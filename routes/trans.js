@@ -5,7 +5,8 @@
 var utils = require('./utils.js');
 var args = require('./args.js');
 var logs = require('./logs.js');
-var trans = {};
+
+var trans = {"logs":{}};
 
 function fun_arg(inputs, arg) {
     var argstr = "";
@@ -47,17 +48,25 @@ function fun_arg(inputs, arg) {
     return "(utils.transaction_option())";
 }
 
-trans.stat = function (stat, arg) {
-    if (stat.count == undefined) {
-        stat = {"count": 0,
-            "err": 0,
-            "nolog": 0,
-            "succeed": 0,
-            "gasUsed" : 0,
-            "costTime" : 0,
-            "contract": {}};
-    }
+function randid(){
+    return new Date().getTime().toString();
+}
 
+trans.stat_init = function (req_count) {
+    return {"id": randid(),
+        "start": new Date().getTime(),
+        "req_count": req_count,
+        "count": 0,
+        "err": 0,
+        "nolog": 0,
+        "succeed": 0,
+        "gasUsed" : 0,
+        "costTime" : 0,
+        "contract": {}};
+}
+
+trans.stat = function (stat, arg) {
+    stat.costTime = new Date().getTime() - stat.start;
     var funname = arg.fun.name;
     var conname = arg.con.contract_name;
     if(typeof stat.contract[conname] === "undefined"){
@@ -80,6 +89,8 @@ trans.stat = function (stat, arg) {
         stat.err++;
         stat.contract[conname].err++;
         stat.contract[conname].function[funname].err++;
+        trans.logs[stat.id] = stat;
+        //logs.log("stat=", logs.inspect(stat));
         return stat;
     }
 
@@ -87,6 +98,8 @@ trans.stat = function (stat, arg) {
         stat.nolog++;
         stat.contract[conname].nolog++;
         stat.contract[conname].function[funname].nolog++;
+        trans.logs[stat.id] = stat;
+        //logs.log("stat=", logs.inspect(stat));
         return stat;
     }
 
@@ -102,10 +115,25 @@ trans.stat = function (stat, arg) {
         stat.gasUsed += gasUsed;
         stat.contract[conname].gasUsed += gasUsed;
         stat.contract[conname].function[funname].gasUsed += gasUsed;
+        trans.logs[stat.id] = stat;
+        //logs.log("stat=", logs.inspect(stat));
         return stat;
     }
 
+    trans.logs[stat.id] = stat;
+    //logs.log("stat=", logs.inspect(stat));
     return stat;
+}
+
+trans.log = function (id, remove) {
+    var ret = trans.logs[id];
+
+    if(remove == true || remove == 'true'){
+        logs.log("id=", id);
+        delete trans.logs[id];
+    }
+
+    return ret;
 }
 
 trans.trans = function (con, fun, arg, callback) {
