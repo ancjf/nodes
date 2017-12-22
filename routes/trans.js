@@ -43,9 +43,10 @@ function fun_arg(inputs, arg) {
     }
 
     if(argstr.length > 0)
-        return "(" + argstr + ", utils.transaction_option())";
+        //return "(" + argstr + ", utils.transaction_option())";
+        return "(" + argstr + ")";
 
-    return "(utils.transaction_option())";
+    return "()";
 }
 
 function randid(){
@@ -129,7 +130,7 @@ trans.log = function (id, remove) {
     var ret = trans.logs[id];
 
     if(remove == true || remove == 'true'){
-        logs.log("id=", id);
+        //logs.log("id=", id);
         delete trans.logs[id];
     }
 

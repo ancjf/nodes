@@ -3,13 +3,15 @@
  */
 var logs = require('./logs.js');
 var truffle = require('../solidity/truffle.js');
-var httpProvider = "http://" + truffle.networks.development.host + ":" +  truffle.networks.development.port;
-logs.log(httpProvider);
-
-var Web3 = require('web3');
-var web3 = new Web3(new Web3.providers.HttpProvider(httpProvider));
 
 var contract = require("truffle-contract");
+var Web3 = require('web3');
+/*
+var httpProvider = "http://" + truffle.networks.development.host + ":" +  truffle.networks.development.port;
+logs.log(httpProvider);
+var web3 = new Web3(new Web3.providers.HttpProvider(httpProvider));
+
+
 
 var provider = new Web3.providers.HttpProvider(httpProvider);
 
@@ -19,23 +21,34 @@ if(defaultAccount === undefined){
     defaultAccount = web3.eth.accounts[0];
 }
 logs.log(defaultAccount);
-
+*/
 var fs = require('fs');
 var files = fs.readdirSync('./solidity/build/contracts/');
 //logs.log(files);
 
 var utils = {};
 utils.jsons = {};
+utils.connames = {};
+
+/*
 utils.accounts = web3.eth.accounts;
 logs.log("utils.accounts=", utils.accounts);
+*/
 
 for (var f in files){
     var file = '../solidity/build/contracts/' + files[f];
-    var name = files[f].split(".")[0];
+    var name = files[f];
+    if(name.lastIndexOf(".") >= 0)
+        name = name.substring(0, name.lastIndexOf("."));
+    /*
     var workid = web3.version.network;
-
+     */
     var json = require(file);
+    utils.jsons[name] = json;
+    logs.log("name=", name);
+    /*
     var network = json.networks[web3.version.network];
+
     //logs.log("typeof json.networks", typeof json.networks,  "network=", network);
     if(network !== undefined){
         var address = network["address"];
@@ -47,6 +60,7 @@ for (var f in files){
             utils.jsons[name] = json;
         }
     }
+    */
 }
 //logs.log("utils.jsons=", utils.jsons);
 utils.json = function(name){
@@ -58,8 +72,16 @@ utils.abi = function(name){
     return utils.json(name).abi;
 }
 
-utils.contract = function(name){
-    //logs.log("name=", name);
+utils.contract = function(name, rpc){
+    logs.log("name=", name, "rpc=", rpc);
+    var provider = new Web3.providers.HttpProvider(rpc);
+    var web3 = new Web3(new Web3.providers.HttpProvider(rpc));
+    var defaultAccount = web3.eth.defaultAccount;
+    if(defaultAccount === undefined){
+        defaultAccount = web3.eth.accounts[0];
+        logs.log("rpc=", rpc, ",defaultAccount=", defaultAccount);
+    }
+
 
     var cont = contract(utils.json(name));
     cont.setProvider(provider);
@@ -72,12 +94,27 @@ utils.contract = function(name){
     return cont;
 }
 
-utils.names = function(){
+utils.names = function(rpc){
+    if(utils.connames[rpc] != undefined)
+        return utils.connames[rpc];
+
+    var web3 = new Web3(new Web3.providers.HttpProvider(rpc));
     var ret = new Array();
+
     for (var f in utils.jsons){
-        ret.push(f);
+        var network = utils.jsons[f].networks[web3.version.network];
+
+        //logs.log("typeof json.networks", typeof json.networks,  "network=", network);
+        if(network !== undefined){
+            var address = network["address"];
+            if(address !== undefined) {
+                logs.log("f=", f);
+                ret.push(f);
+            }
+        }
     }
 
+    utils.connames[rpc] = ret;
     return ret;
 }
 
@@ -120,9 +157,9 @@ utils.fun = function(con, name){
     return {};
 }
 
-utils.funs = function(con){
+utils.funs = function(con, rpc){
     if(typeof(con) == "string")
-        con = utils.contract(con);
+        con = utils.contract(con, rpc);
 
     var ret = [];
 

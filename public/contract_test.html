@@ -4,17 +4,6 @@
     <meta charset="utf-8"/>
 	<script type="text/javascript" src="javascripts/jquery-3.2.1.min.js"></script>
 <script>
-var xhr = null;                 
-try{    
-	xhr = new ActiveXObject("Msxml2.XMLHTTP");    
-}catch(e){    
-	try{    
-		xhr = new ActiveXObject("Microsoft.XMLHTTP");    
-	}catch(e){}    
-}
-  
-if (!xhr) 
-	xhr = new XMLHttpRequest();
 
 function QueryString(item){
 	var svalue = location.search.match(new RegExp("[\?\&]" + item + "=([^\&]*)(\&?)","i"));
@@ -24,15 +13,6 @@ function QueryString(item){
 var g_abis;
 
 function set_table(abi, index){
-	/*
-	    <form action="/contract_test/transaction" method="get">  
-    <table border="0" cellspacing="5" cellpadding="5" style="border:1px #666666 solid;">
-    <tr> <td>count.uint256:</td>  <td> <input name="count" type="text" value="" min="1"></td></tr>
-    <tr> <td> <input type="submit" id="submitName" value="TestInt.inc">  </td> </tr> 
-    </table> 
-    </form>
-	*/
-	
 	var ret = '<form action="/contract_test/transaction" method="get" id = "' + index.toString() + '" onsubmit="return on_submit(this);"> <table border="0" cellspacing="5" cellpadding="5" style="border:1px #666666 solid;">'
 	
 	for(var i=0; i<abi.inputs.length; i++){
@@ -73,56 +53,19 @@ function set_contracts(abis){
 function onDeviceReady() {
 	console.log('list:window.parent=', window.parent);
 	
-	$.ajax({    
-		url: '/contract_test/contract',    
-		type: 'get',    
-		dataType: 'json',   
-		contentType: 'application/json',    
-		data: {"name":QueryString("name")}, 
-		error: function(XMLHttpRequest, textStatus, errorThrown) {
-			console.log("XMLHttpRequest.status=", XMLHttpRequest.status, ",XMLHttpRequest.readyState=", XMLHttpRequest.readyState, ",textStatus=", textStatus, ",XMLHttpRequest=", XMLHttpRequest);
-   		},   
-		success: function(objResult) {
-			//console.log("objResult=", objResult);
-			set_contracts(objResult);
-		}
-	});	
+	window.parent.ajax('/contract_test/contract', 
+		{"name":QueryString("name")},
+		function(XMLHttpRequest, textStatus){
+            set_contracts(JSON.parse(XMLHttpRequest.responseText));   
+        }
+	);
 }
 
-var time_id;
-
 function precoss_result(objResult){
-	if(objResult.count >= objResult.req_count){
-		console.log("*******************objResult.count=", objResult.count, "objResult.req_count=", objResult.req_count, ",time_id=", time_id);
-		clearInterval(time_id);
-	}
-	
 	var result = JSON.stringify(objResult, null, 4);
 	//console.log("result.length=", result.length, "result=", result);
 	if(result.length)
 		$("#result_text").text(result);
-}
-
-function time_get_log(id){
-	console.log('id=', id);
-	
-	$.ajax({    
-		url: '/pressure_test/log',    
-		type: 'get',    
-		dataType: 'json',   
-		contentType: 'application/json',    
-		data: {"id":id,"remove":"true"}, 
-		error: function(XMLHttpRequest, textStatus, errorThrown) {
-			console.log("XMLHttpRequest.status=", XMLHttpRequest.status, ",XMLHttpRequest.readyState=", XMLHttpRequest.readyState, ",textStatus=", textStatus, ",XMLHttpRequest=", XMLHttpRequest);
-			if(XMLHttpRequest.status == 200 && XMLHttpRequest.readyState == 4 && XMLHttpRequest.responseText != ''){
-				$("#result_text").text(XMLHttpRequest.responseText);
-			}
-   		},   
-		success: function(objResult) {
-			//console.log("objResult=", objResult);
-			precoss_result(objResult);
-		}
-	});	
 }
 
 function form_data(obj){
@@ -143,32 +86,13 @@ function on_submit(obj)
 	var reqdata = form_data(obj);
 	console.log('reqdata=', reqdata);
 	
-	$.ajax({    
-		url: '/contract_test/transaction',    
-		type: 'get',    
-		dataType: 'json',   
-		contentType: 'application/json',    
-		data: reqdata, 
-		error: function(XMLHttpRequest, textStatus, errorThrown) {
-			console.log("XMLHttpRequest.status=", XMLHttpRequest.status, ",XMLHttpRequest.readyState=", XMLHttpRequest.readyState, ",textStatus=", textStatus, ",XMLHttpRequest=", XMLHttpRequest);
-			if(XMLHttpRequest.status == 200 && XMLHttpRequest.readyState == 4 && XMLHttpRequest.responseText != ''){
-				$("#result_text").text(XMLHttpRequest.responseText);
-			}
-   		},   
-		success: function(objResult) {
-			console.log("objResult=", objResult);
-			var result = JSON.stringify(objResult, null, 4);
-			console.log("result.length=", result.length, "result=", result);
-			$("#result_text").text(result);
-			
-			if(objResult != null && objResult != undefined && result != ''  && result != '{}'){
-				//time_id = setInterval("time_get_log(" + result + ")", 1000);
-				//setTimeout("time_get_log(" + result + ")", 1000);
-			}else{
-				console.log("recv err");
-			}
-		}
-	});
+	window.parent.ajax('/contract_test/transaction', 
+		reqdata,
+		function(XMLHttpRequest, textStatus){
+			var result = JSON.stringify(JSON.parse(XMLHttpRequest.responseText), null, 4);
+			$("#result_text").text(result); 
+        }
+	);
 	
 	return false;
 }
@@ -214,10 +138,7 @@ function on_submit(obj)
     </div></div>
     <div class="right"><textarea id="result_text"></textarea></div>
     
-
-    
 </div>
-
 
 </div>
 

@@ -4,17 +4,6 @@
     <meta charset="utf-8"/>
 	<script type="text/javascript" src="javascripts/jquery-3.2.1.min.js"></script>
 <script>
-var xhr = null;                 
-try{    
-	xhr = new ActiveXObject("Msxml2.XMLHTTP");    
-}catch(e){    
-	try{    
-		xhr = new ActiveXObject("Microsoft.XMLHTTP");    
-	}catch(e){}    
-}
-  
-if (!xhr) 
-	xhr = new XMLHttpRequest();
 
 function set_contracts(con){
 	console.log('con=', con);
@@ -30,101 +19,12 @@ function set_contracts(con){
 function onDeviceReady() {
 	console.log('list:window.parent=', window.parent);
 	
-	$.ajax({    
-		url: '/pressure_test/query',    
-		type: 'get',    
-		dataType: 'json',   
-		contentType: 'application/json',    
-		data: {}, 
-		error: function(XMLHttpRequest, textStatus, errorThrown) {
-			console.log("XMLHttpRequest.status=", XMLHttpRequest.status, ",XMLHttpRequest.readyState=", XMLHttpRequest.readyState, ",textStatus=", textStatus, ",XMLHttpRequest=", XMLHttpRequest);
-   		},   
-		success: function(objResult) {
-			//console.log("objResult=", objResult);
-			set_contracts(objResult);
-		}
-	});	
-}
-
-var time_id;
-
-function precoss_result(objResult){
-	if(objResult.count >= objResult.req_count){
-		console.log("*******************objResult.count=", objResult.count, "objResult.req_count=", objResult.req_count, ",time_id=", time_id);
-		clearInterval(time_id);
-	}
-	
-	var result = JSON.stringify(objResult, null, 4);
-	//console.log("result.length=", result.length, "result=", result);
-	if(result.length)
-		$("#result_text").text(result);
-}
-
-function time_get_log(id){
-	console.log('id=', id);
-	
-	$.ajax({    
-		url: '/pressure_test/log',    
-		type: 'get',    
-		dataType: 'json',   
-		contentType: 'application/json',    
-		data: {"id":id,"remove":"true"}, 
-		error: function(XMLHttpRequest, textStatus, errorThrown) {
-			console.log("XMLHttpRequest.status=", XMLHttpRequest.status, ",XMLHttpRequest.readyState=", XMLHttpRequest.readyState, ",textStatus=", textStatus, ",XMLHttpRequest=", XMLHttpRequest);
-			if(XMLHttpRequest.status == 200 && XMLHttpRequest.readyState == 4 && XMLHttpRequest.responseText != ''){
-				$("#result_text").text(XMLHttpRequest.responseText);
-			}
-   		},   
-		success: function(objResult) {
-			//console.log("objResult=", objResult);
-			precoss_result(objResult);
-		}
-	});	
-}
-
-function on_submit(obj)
-{
-	if(time_id != undefined){
-		console.log("time_id=", time_id);
-		clearInterval(time_id);
-		time_id = undefined;
-	}
-	
-	var count = $(obj).find("#count")[0].value;
-	var perCount = $(obj).find("#perCount")[0].value;
-	
-	console.log('count=', count, 'perCount=', perCount, ',$(obj).find("#count")=', $(obj).find("#count"));
-	
-	$.ajax({    
-		url: '/pressure_test/test',    
-		type: 'get',    
-		dataType: 'json',   
-		contentType: 'application/json',    
-		data: {"count":count,"perCount":perCount}, 
-		error: function(XMLHttpRequest, textStatus, errorThrown) {
-			console.log("XMLHttpRequest.status=", XMLHttpRequest.status, ",XMLHttpRequest.readyState=", XMLHttpRequest.readyState, ",textStatus=", textStatus, ",XMLHttpRequest=", XMLHttpRequest);
-			if(XMLHttpRequest.status == 200 && XMLHttpRequest.readyState == 4 && XMLHttpRequest.responseText != ''){
-				$("#result_text").text(XMLHttpRequest.responseText);
-				time_id = setInterval("time_get_log(" + XMLHttpRequest.responseText + ")", 1000);
-				//setTimeout("time_get_log(" + result + ")", 1000);
-			}
-   		},   
-		success: function(objResult) {
-			console.log("objResult=", objResult);
-			var result = JSON.stringify(objResult, null, 4);
-			console.log("result.length=", result.length, "result=", result);
-			$("#result_text").text(result);
-			
-			if(objResult != null && objResult != undefined && result != ''  && result != '{}'){
-				time_id = setInterval("time_get_log(" + result + ")", 1000);
-				//setTimeout("time_get_log(" + result + ")", 1000);
-			}else{
-				console.log("recv err");
-			}
-		}
-	});
-	
-	return false;
+	window.parent.ajax('/contract_test/', 
+		{},
+		function(XMLHttpRequest, textStatus){
+            set_contracts(JSON.parse(XMLHttpRequest.responseText));   
+        }
+	);	
 }
 
 </script>

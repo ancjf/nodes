@@ -4,17 +4,6 @@
     <meta charset="utf-8"/>
 	<script type="text/javascript" src="javascripts/jquery-3.2.1.min.js"></script>
 <script>
-var xhr = null;                 
-try{    
-	xhr = new ActiveXObject("Msxml2.XMLHTTP");    
-}catch(e){    
-	try{    
-		xhr = new ActiveXObject("Microsoft.XMLHTTP");    
-	}catch(e){}    
-}
-  
-if (!xhr) 
-	xhr = new XMLHttpRequest();
 
 function set_contracts(con){
 	console.log('con=', con);
@@ -29,6 +18,16 @@ function set_contracts(con){
 
 function onDeviceReady() {
 	console.log('list:window.parent=', window.parent);
+	
+	window.parent.ajax('/pressure_test/query', 
+		{},
+		function(XMLHttpRequest, textStatus){
+			console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
+            set_contracts(JSON.parse(XMLHttpRequest.responseText));   
+        }
+	);
+	
+	return;
 	
 	$.ajax({    
 		url: '/pressure_test/query',    
@@ -63,23 +62,12 @@ function precoss_result(objResult){
 function time_get_log(id){
 	console.log('id=', id);
 	
-	$.ajax({    
-		url: '/pressure_test/log',    
-		type: 'get',    
-		dataType: 'json',   
-		contentType: 'application/json',    
-		data: {"id":id,"remove":"true"}, 
-		error: function(XMLHttpRequest, textStatus, errorThrown) {
-			console.log("XMLHttpRequest.status=", XMLHttpRequest.status, ",XMLHttpRequest.readyState=", XMLHttpRequest.readyState, ",textStatus=", textStatus, ",XMLHttpRequest=", XMLHttpRequest);
-			if(XMLHttpRequest.status == 200 && XMLHttpRequest.readyState == 4 && XMLHttpRequest.responseText != ''){
-				$("#result_text").text(XMLHttpRequest.responseText);
-			}
-   		},   
-		success: function(objResult) {
-			//console.log("objResult=", objResult);
-			precoss_result(objResult);
-		}
-	});	
+	window.parent.log(id,
+		function(result){
+			console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
+            precoss_result(result);
+        }
+	);
 }
 
 function on_submit(obj)
@@ -92,15 +80,27 @@ function on_submit(obj)
 	
 	var count = $(obj).find("#count")[0].value;
 	var perCount = $(obj).find("#perCount")[0].value;
+	var rpc = window.parent.rpc();
 	
 	console.log('count=', count, 'perCount=', perCount, ',$(obj).find("#count")=', $(obj).find("#count"));
+	
+	window.parent.ajax('/pressure_test/test', 
+		{"count":count,"perCount":perCount},
+		function(XMLHttpRequest, textStatus){
+			console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
+            $("#result_text").text(XMLHttpRequest.responseText);
+			time_id = setInterval("time_get_log(" + XMLHttpRequest.responseText + ")", 1000);
+        }
+	);
+	
+	return false;
 	
 	$.ajax({    
 		url: '/pressure_test/test',    
 		type: 'get',    
 		dataType: 'json',   
 		contentType: 'application/json',    
-		data: {"count":count,"perCount":perCount}, 
+		data: {".rpc":rpc,"count":count,"perCount":perCount}, 
 		error: function(XMLHttpRequest, textStatus, errorThrown) {
 			console.log("XMLHttpRequest.status=", XMLHttpRequest.status, ",XMLHttpRequest.readyState=", XMLHttpRequest.readyState, ",textStatus=", textStatus, ",XMLHttpRequest=", XMLHttpRequest);
 			if(XMLHttpRequest.status == 200 && XMLHttpRequest.readyState == 4 && XMLHttpRequest.responseText != ''){
@@ -161,7 +161,7 @@ function on_submit(obj)
 <div align="center">
 
 <div class="w">
-	<div class="left"><div align="left">
+	<div class="left"><div align="middle">
     
     <div align="middle", id="left_list"></div>
     

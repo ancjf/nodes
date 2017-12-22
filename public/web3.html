@@ -4,17 +4,6 @@
     <meta charset="utf-8"/>
 	<script type="text/javascript" src="javascripts/jquery-3.2.1.min.js"></script>
 <script>
-var xhr = null;                 
-try{    
-	xhr = new ActiveXObject("Msxml2.XMLHTTP");    
-}catch(e){    
-	try{    
-		xhr = new ActiveXObject("Microsoft.XMLHTTP");    
-	}catch(e){}    
-}
-  
-if (!xhr) 
-	xhr = new XMLHttpRequest();
 
 function onDeviceReady() {
 	console.log('list:window.parent=', window.parent);
@@ -41,47 +30,6 @@ function onDeviceReady() {
 	}
 }
 
-function request(url_fun, url_arg, url_type){
-	var url_host = window.parent.host();
-	var url_port = window.parent.port();
-	var url_number = $("#block_number").val();
-	if(url_host == undefined || url_host.length == 0)
-		url_host = window.location.host;
-	if(url_port == undefined || url_port.length == 0)
-		url_port = '8545';
-	
-	console.log('url_host=', url_host, ",url_port=", url_port, ",url_number=", url_number);
-	
-	$.ajax({    
-		url: '/web3/',    
-		type: 'get',    
-		dataType: 'json',   
-		contentType: 'application/json',    
-		data: {host:url_host,port:url_port,fun:url_fun,arg:url_arg,type:url_type}, 
-		error: function(XMLHttpRequest, textStatus, errorThrown) {
-			console.log("XMLHttpRequest.status=", XMLHttpRequest.status, ",XMLHttpRequest.readyState=", XMLHttpRequest.readyState, ",textStatus=", textStatus, ",XMLHttpRequest=", XMLHttpRequest);
-			if(XMLHttpRequest.status == 200 && XMLHttpRequest.readyState == 4 && XMLHttpRequest.responseText != ''){
-				$("#result_text").text(XMLHttpRequest.responseText);
-				window.parent.save_url_array(url_host + ':' + url_port);
-			}
-   		},   
-		success: function(objResult) {
-			console.log("objResult=", objResult);
-			var result = JSON.stringify(objResult, null, 4);
-			console.log("result.length=", result.length, "result=", result);
-			$("#result_text").text(result);
-			
-			if(objResult != null && objResult != undefined && result != ''  && result != '{}'){
-				window.parent.save_url_array(url_host + ':' + url_port);
-			}else{
-				console.log("recv err");
-			}
-		}
-	});
-
-	//console.log(',$("#blockNumber").val())=', $("#blockNumber").val(), ",window.location.host=", window.location.host, ",window.location.port=", window.location.port);
-};
-
 function on_submit(obj)
 {
 	var arr = $(obj).children("input");
@@ -105,11 +53,17 @@ function on_submit(obj)
 		}else{
 			arg = value;
 		}
-
 	}
 
 	console.log('fun=', fun, 'arg=', arg, 'type=', type);
-	request(fun, arg, type);
+	window.parent.ajax('/web3/', 
+		{"fun":fun,"arg":arg,"type":type},
+		function(XMLHttpRequest, textStatus){
+			var result = JSON.stringify(JSON.parse(XMLHttpRequest.responseText), null, 4);
+            $("#result_text").text(result);  
+        }
+	);
+
 	return false;
 }
 

@@ -25,18 +25,17 @@ function transaction_link(conname, abi){
 }
 
 function root(args, res) {
-    var names = utils.names();
-    var args = {};
+    logs.log("rpc=", rpc, ",names=", names);
+    var rpc = args[".rpc"];
+    logs.log("rpc=", rpc, ",names=", names);
+    var names = utils.names(rpc);
 
-    for (var f in names){
-        var name = names[f];
-        args[name] = "/contract_test/contract";
-    }
-
-    res.send(webs.button_list(args));
+    logs.log("rpc=", rpc, ",names=", names);
+    res.send(names);
 }
 /* GET home page. */
 router.get('/', function(req, res, next) {
+    logs.log("rpc=");
     root(req.query, res);
 });
 
@@ -46,14 +45,13 @@ router.post('/', function(req, res, next) {
 
 function transaction(args, res) {
     var conname = args[".contract"];
+    var rpc = args[".rpc"];
 
-    var con = utils.contract(conname);
+    logs.log("conname=", conname, "rpc=", rpc);
+    var con = utils.contract(conname, rpc);
     var fun = args[".function"];
     //var arr = funname.split('.');
-
-
     //var fun = utils.fun(con, arr[1]);
-
 
     logs.log("conname=", conname, ",fun=", fun);
     if(con.contract_name == undefined){
@@ -83,7 +81,8 @@ router.post('/transaction', function(req, res, next) {
 });
 
 function contract(args, res) {
-    var abi = utils.funs(args.name);
+    logs.log("args=", args);
+    var abi = utils.funs(args.name, args[".rpc"]);
 
     logs.log("abi=", abi);
     res.send(abi);

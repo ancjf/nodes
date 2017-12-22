@@ -45,6 +45,53 @@ function port() {
 	return $("#text_port").val();
 }
 
+function rpc(){
+	return "http://" + $("#text_host").val() + ":" + $("#text_port").val();
+}
+
+function ajax(url, data, callback){
+	var rpcurl = rpc();
+	if(data[".rpc"] == undefined)
+		data[".rpc"] = rpcurl;
+		
+	$.ajax({    
+		"url": url,    
+		"type": 'get',    
+		"dataType": 'json',   
+		"contentType": 'application/json',    
+		"data": data, 
+		complete:function(XMLHttpRequest, textStatus){  
+            if(textStatus == 'timeout'){  
+                var xmlhttp = window.XMLHttpRequest ? new window.XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHttp");  
+                xmlhttp.abort();   
+				console.log('timeout');
+				return;
+			}
+			
+			try{
+            	callback(XMLHttpRequest, textStatus);  
+				save_url_array(rpcurl);
+			}catch(err){
+				console.log('err=', err);
+			} 
+        }
+	});	
+}
+
+function log(id, callback){
+	ajax('/pressure_test/log', 
+		{"id":id,"remove":"true"},
+		function(XMLHttpRequest, textStatus){
+			//console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
+			try{
+            	callback(JSON.parse(XMLHttpRequest.responseText));
+			}catch(err){
+				console.log('err=', err);
+			}
+        }
+	);
+}
+
 function onDeviceReady() {
 	var strKey = "url_array"; 
 	var storage = window.localStorage; 
@@ -70,6 +117,11 @@ function onDeviceReady() {
 
 function save_url_array(url)
 {
+	if(url.indexOf('//')){
+		console.log('url=', url);
+		url = url.substring(url.indexOf('//')+2);
+	}
+		
 	var strKey = "url_array"; 
 	console.log('url=', url);
 	if(url_array[0] == url)
@@ -141,11 +193,10 @@ function jump_url(obj){
     <select id="url_list" onChange="on_change(this)">
     </select>
     
-    <a href="/contract.html">contract</a>
-    <a href="/contract_test">test contract</a>
-    <a href="/test_stress.html">test stress</a>
+    <button name="web3.html" onClick="jump_url(this)">web3</button>
     <button name="contract_list.html" onClick="jump_url(this)">contract_test</button>
     <button name="test_stress.html" onClick="jump_url(this)">test stress</button>
+    <a href="Mailto:ancjf@163.com">Contact me!</a>
 </p>
 
 <iframe id="main_frame" width="98%" height="95%" src="/web3.html"></iframe>

@@ -4,17 +4,6 @@
     <meta charset="utf-8"/>
 	<script type="text/javascript" src="javascripts/jquery-3.2.1.min.js"></script>
 <script>
-var xhr = null;                 
-try{    
-	xhr = new ActiveXObject("Msxml2.XMLHTTP");    
-}catch(e){    
-	try{    
-		xhr = new ActiveXObject("Microsoft.XMLHTTP");    
-	}catch(e){}    
-}
-  
-if (!xhr) 
-	xhr = new XMLHttpRequest();
 
 var g_abis;
 
@@ -37,30 +26,20 @@ function set_contracts(abis){
 		html += set_table(text, i);
 	}
 	
-	//console.log('html=', html);
+	console.log('html=', html);
 	$("#left_list").html(html);
 }
 
 function onDeviceReady() {
 	console.log('list:window.parent=', window.parent);
 	
-	$.ajax({    
-		url: '/pressure_test/query',    
-		type: 'get',    
-		dataType: 'json',   
-		contentType: 'application/json',    
-		data: {"name":QueryString("name")}, 
-		error: function(XMLHttpRequest, textStatus, errorThrown) {
-			console.log("XMLHttpRequest.status=", XMLHttpRequest.status, ",XMLHttpRequest.readyState=", XMLHttpRequest.readyState, ",textStatus=", textStatus, ",XMLHttpRequest=", XMLHttpRequest);
-			if(XMLHttpRequest.status == 200 && XMLHttpRequest.readyState == 4 && XMLHttpRequest.responseText != ''){
-				set_contracts(XMLHttpRequest.responseText);
-			}
-   		},   
-		success: function(objResult) {
-			//console.log("objResult=", objResult);
-			set_contracts(objResult);
-		}
-	});	
+	window.parent.ajax('/pressure_test/query', 
+		{"name":QueryString("name")},
+		function(XMLHttpRequest, textStatus){
+			console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
+            set_contracts(JSON.parse(XMLHttpRequest.responseText));   
+        }
+	);
 }
 
 var time_id;
@@ -80,23 +59,12 @@ function precoss_result(objResult){
 function time_get_log(id){
 	console.log('id=', id);
 	
-	$.ajax({    
-		url: '/pressure_test/log',    
-		type: 'get',    
-		dataType: 'json',   
-		contentType: 'application/json',    
-		data: {"id":id,"remove":"true"}, 
-		error: function(XMLHttpRequest, textStatus, errorThrown) {
-			console.log("XMLHttpRequest.status=", XMLHttpRequest.status, ",XMLHttpRequest.readyState=", XMLHttpRequest.readyState, ",textStatus=", textStatus, ",XMLHttpRequest=", XMLHttpRequest);
-			if(XMLHttpRequest.status == 200 && XMLHttpRequest.readyState == 4 && XMLHttpRequest.responseText != ''){
-				$("#result_text").text(XMLHttpRequest.responseText);
-			}
-   		},   
-		success: function(objResult) {
-			//console.log("objResult=", objResult);
-			precoss_result(objResult);
-		}
-	});	
+	window.parent.log(id,
+		function(result){
+			console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
+            precoss_result(result);
+        }
+	);
 }
 
 function on_submit(obj)
@@ -112,40 +80,21 @@ function on_submit(obj)
 	var perCount = $(obj).find("#perCount")[0].value;
 	var text = $(obj).find("#text")[0].value;
 	var contract = text.split(".")[0];
-	var reqdata = {"count":count,"perCount":perCount,".contract":contract};
+	var rpc = window.parent.rpc();
+	var reqdata = {".rpc":rpc,"count":count,"perCount":perCount,".contract":contract};
 	if(id >= 0)
 		reqdata[".function"] = g_abis[id];
 	
 	console.log('count=', count, 'perCount=', perCount, ',text=', text, ",contract=", contract);
 	
-	$.ajax({    
-		url: '/pressure_test/test',    
-		type: 'get',    
-		dataType: 'json',   
-		contentType: 'application/json',    
-		data: reqdata, 
-		error: function(XMLHttpRequest, textStatus, errorThrown) {
-			console.log("XMLHttpRequest.status=", XMLHttpRequest.status, ",XMLHttpRequest.readyState=", XMLHttpRequest.readyState, ",textStatus=", textStatus, ",XMLHttpRequest=", XMLHttpRequest);
-			if(XMLHttpRequest.status == 200 && XMLHttpRequest.readyState == 4 && XMLHttpRequest.responseText != ''){
-				$("#result_text").text(XMLHttpRequest.responseText);
-				time_id = setInterval("time_get_log(" + XMLHttpRequest.responseText + ")", 1000);
-				//setTimeout("time_get_log(" + result + ")", 1000);
-			}
-   		},   
-		success: function(objResult) {
-			console.log("objResult=", objResult);
-			var result = JSON.stringify(objResult, null, 4);
-			console.log("result.length=", result.length, "result=", result);
-			$("#result_text").text(result);
-			
-			if(objResult != null && objResult != undefined && result != ''  && result != '{}'){
-				time_id = setInterval("time_get_log(" + result + ")", 1000);
-				//setTimeout("time_get_log(" + result + ")", 1000);
-			}else{
-				console.log("recv err");
-			}
-		}
-	});
+	window.parent.ajax('/pressure_test/test', 
+		reqdata,
+		function(XMLHttpRequest, textStatus){
+			console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
+            $("#result_text").text(XMLHttpRequest.responseText);
+			time_id = setInterval("time_get_log(" + XMLHttpRequest.responseText + ")", 1000);
+        }
+	);
 	
 	return false;
 }

@@ -48,7 +48,7 @@ function pressure_test_contract(stat, con, count, perCount, callback) {
             back_count++
             assert.ok(back_count <= perCount, "back_count > perCount");
             if(back_count >= perCount){
-                logs.log("pressure_test_contract:count=", count, ",conname=", result.con.contract_name, ",fun.name=", result.fun.name);
+                //logs.log("pressure_test_contract:count=", count, ",conname=", result.con.contract_name, ",fun.name=", result.fun.name);
 
                 if(count > 1){
                     pressure_test_contract(stat, con, count-1, perCount, callback);
@@ -60,8 +60,8 @@ function pressure_test_contract(stat, con, count, perCount, callback) {
     }
 }
 
-function pressure_test(stat, count, perCount, callback) {
-    var names = utils.names();
+function pressure_test(rpc, stat, count, perCount, callback) {
+    var names = utils.names(rpc);
     if(0 == names.length){
         logs.log("No have contract");
         callback(stat);
@@ -70,7 +70,7 @@ function pressure_test(stat, count, perCount, callback) {
 
     var number = utils.get_random_num(0, names.length);
     var name = names[number];
-    var con = utils.contract(name);
+    var con = utils.contract(name, rpc);
     //logs.log("test:name=", name);
 
     if(con.contract_name == undefined){
@@ -84,9 +84,9 @@ function pressure_test(stat, count, perCount, callback) {
         //logs.log("stat=", stat, "result=", result);
         //stat = trans.stat_add(stat, result);
         stat = result;
-        logs.log("test:count=", count, ",perCount=", perCount, ",name=", name);
+        //logs.log("test:count=", count, ",perCount=", perCount, ",name=", name);
         if(count > 1){
-            pressure_test(stat, count-1, perCount, callback);
+            pressure_test(rpc, stat, count-1, perCount, callback);
         }else{
             callback(stat);
         }
@@ -97,9 +97,11 @@ function test_transaction(args, res) {
     var count = args["count"];
     var perCount = args["perCount"];
     var conname = args[".contract"];
+    var rpc = args[".rpc"];
     //var funname = args[".function"];
 
-    var con = utils.contract(conname);
+    logs.log("count=", count, ",perCount=", perCount, ",conname=", conname, ",args=", args);
+    var con = utils.contract(conname, rpc);
     //var fun = utils.fun(con, funname);
     var fun = args[".function"];
     var funname = fun.name;
@@ -132,8 +134,9 @@ function test_contract(args, res) {
     var perCount = args["perCount"];
     var conname = args[".contract"];
     var funname = args[".function"];
+    var rpc = args[".rpc"];
 
-    var con = utils.contract(conname);
+    var con = utils.contract(conname, rpc);
     var begin = new Date().getTime();
     var stat = trans.stat_init(count*perCount);
 
@@ -153,6 +156,7 @@ function test(args, res) {
     var perCount = args["perCount"];
     var conname = args[".contract"];
     var fun = args[".function"];
+    var rpc = args[".rpc"];
 
     logs.log("conname=", conname);
 
@@ -168,10 +172,10 @@ function test(args, res) {
 
     var begin = new Date().getTime();
     var stat = trans.stat_init(count*perCount);
-    logs.log("count=", count, ",perCount=", perCount, ",conname=", conname, ",stat=", stat);
+    logs.log("rpc=", rpc, ",count=", count, ",perCount=", perCount, ",conname=", conname, ",stat=", stat);
     res.send(stat.id);
 
-    pressure_test(stat, count, perCount, function (result) {
+    pressure_test(rpc, stat, count, perCount, function (result) {
         var end = new Date().getTime();
         result.costTime = end - begin;
         logs.log("result=", logs.inspect(result));
@@ -212,7 +216,7 @@ function contract(args, res) {
 function log(args, res) {
     var id = args.id;
     var remove = args.remove;
-    logs.log("id=", id, ",remove=", remove);
+    //logs.log("id=", id, ",remove=", remove);
 
     var ret = trans.log(id, remove);
 
@@ -221,21 +225,23 @@ function log(args, res) {
 
 function query(args, res) {
     var name = args.name;
-    logs.log("name=", name);
+    var rpc = args[".rpc"];
+    logs.log("rpc=", rpc, ",name=", name);
     if(name == undefined){
-        res.send(utils.names());
+        res.send(utils.names(rpc));
         logs.log("name=", name);
         return;
     }
 
-    var abi = utils.funs(name);
+    var abi = utils.funs(name, rpc);
 
     logs.log("name=", name, ",abi=", abi);
     res.send(abi);
 }
 
 function root(args, res) {
-    var names = utils.names();
+    var rpc = args[".rpc"];
+    var names = utils.names(rpc);
     var args = {};
 
     for (var f in names){

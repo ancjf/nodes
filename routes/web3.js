@@ -30,14 +30,13 @@ function result_fun(result) {
     return result;
 }
 router.get('/*', function(req, res, next) {
-    var host = req.query.host;
-    var port = req.query.port;
     var fun = req.query.fun;
     var arg = req.query.arg;
     var type = req.query.type;
-    var url = "http://" + host +  ':' + port;
+    //var url = "http://" + host +  ':' + port;
+    var url = req.query[".rpc"];
 
-    logs.log("host=", host, "port=", port, "url=", url, "fun=", fun, "arg=", arg, "type=", type);
+    logs.log("url=", url, "url=", url, "fun=", fun, "arg=", arg, "type=", type);
     logs.log("req.query=", req.query);
 
     var callback = function (error, result) {
