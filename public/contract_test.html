@@ -16,25 +16,54 @@ try{
 if (!xhr) 
 	xhr = new XMLHttpRequest();
 
-var g_abis;
-
 function QueryString(item){
 	var svalue = location.search.match(new RegExp("[\?\&]" + item + "=([^\&]*)(\&?)","i"));
 	return svalue ? svalue[1] : "";
 }
 
-function set_table(text, index) {
-    return  '<form action="/pressure_test/test" method="get" id = "' + index.toString() + '" onsubmit="return on_submit(this);">  <table border="0" cellspacing="5" cellpadding="5" style="border:1px #666666 solid;"><tr> <td>count:</td>  <td> <input id="count" type="number" value="5" min="1" ></td></tr><tr><td>perCount:</td>  <td> <input id="perCount" type="number" value="5" min="1" ></td></tr><tr> <td> <input type="submit" id="text" value="' + text + '" />  </td> </tr> </table> </form>';
+var g_abis;
+
+function set_table(abi, index){
+	/*
+	    <form action="/contract_test/transaction" method="get">  
+    <table border="0" cellspacing="5" cellpadding="5" style="border:1px #666666 solid;">
+    <tr> <td>count.uint256:</td>  <td> <input name="count" type="text" value="" min="1"></td></tr>
+    <tr> <td> <input type="submit" id="submitName" value="TestInt.inc">  </td> </tr> 
+    </table> 
+    </form>
+	*/
+	
+	var ret = '<form action="/contract_test/transaction" method="get" id = "' + index.toString() + '" onsubmit="return on_submit(this);"> <table border="0" cellspacing="5" cellpadding="5" style="border:1px #666666 solid;">'
+	
+	for(var i=0; i<abi.inputs.length; i++){
+		var name = abi.inputs[i].name;
+		var text = name + '.' + abi.inputs[i].type + ':';
+		
+		ret += '<tr> <td>' + text + '</td>  <td> <input class="input" name="' + name + '" type="text"></td></tr>';
+	}
+	
+	var type = abi.constant ? 'call' : 'transaction';
+	var funname = QueryString("name") + '.' + abi.name + '.' + type;
+	ret += '<tr> <td> <input type="submit" id="submitName" value="'  + funname + '">  </td></tr></table></form>';
+	//console.log('ret=', ret);
+	/*
+	var html = '';
+	for(var i=0;i<con.length;i++){
+		html += '<form action="/contract_test.html" method="get"><input type="submit" name="name" style="font-size:20px;width:200px;" value="' + con[i] + '"> </form>';
+	}
+	
+	$("#left_list").html(html);
+	*/
+	return ret;
 }
 
 function set_contracts(abis){
 	g_abis = abis;
-	
-	var html = set_table(QueryString("name"), -1);
+	console.log('abis=', abis);
+
+	var html = '';
 	for(var i=0; i<abis.length; i++){
-		var type = abis[i].constant ? 'call' : 'transaction';
-		var text = QueryString("name") + '.' + abis[i].name + '.' + type;
-		html += set_table(text, i);
+		html += set_table(abis[i], i);
 	}
 	
 	//console.log('html=', html);
@@ -45,16 +74,13 @@ function onDeviceReady() {
 	console.log('list:window.parent=', window.parent);
 	
 	$.ajax({    
-		url: '/pressure_test/query',    
+		url: '/contract_test/contract',    
 		type: 'get',    
 		dataType: 'json',   
 		contentType: 'application/json',    
 		data: {"name":QueryString("name")}, 
 		error: function(XMLHttpRequest, textStatus, errorThrown) {
 			console.log("XMLHttpRequest.status=", XMLHttpRequest.status, ",XMLHttpRequest.readyState=", XMLHttpRequest.readyState, ",textStatus=", textStatus, ",XMLHttpRequest=", XMLHttpRequest);
-			if(XMLHttpRequest.status == 200 && XMLHttpRequest.readyState == 4 && XMLHttpRequest.responseText != ''){
-				set_contracts(XMLHttpRequest.responseText);
-			}
    		},   
 		success: function(objResult) {
 			//console.log("objResult=", objResult);
@@ -99,27 +125,26 @@ function time_get_log(id){
 	});	
 }
 
-function on_submit(obj)
-{
-	if(time_id != undefined){
-		console.log("time_id=", time_id);
-		clearInterval(time_id);
-		time_id = undefined;
+function form_data(obj){
+	var id = parseInt($(obj)[0].id);
+	var ret = {".contract":QueryString("name"),".function":g_abis[id]};
+	
+	var arr = $(obj).find(".input");
+	for(var i=0; i<arr.length; i++){
+		ret[arr[i].name] = arr[i].value;
 	}
 	
-	var id = parseInt($(obj)[0].id);
-	var count = $(obj).find("#count")[0].value;
-	var perCount = $(obj).find("#perCount")[0].value;
-	var text = $(obj).find("#text")[0].value;
-	var contract = text.split(".")[0];
-	var reqdata = {"count":count,"perCount":perCount,".contract":contract};
-	if(id >= 0)
-		reqdata[".function"] = g_abis[id];
-	
-	console.log('count=', count, 'perCount=', perCount, ',text=', text, ",contract=", contract);
+	console.log("id=", id, ",ret=", ret);
+	return ret;
+}
+
+function on_submit(obj)
+{
+	var reqdata = form_data(obj);
+	console.log('reqdata=', reqdata);
 	
 	$.ajax({    
-		url: '/pressure_test/test',    
+		url: '/contract_test/transaction',    
 		type: 'get',    
 		dataType: 'json',   
 		contentType: 'application/json',    
@@ -128,8 +153,6 @@ function on_submit(obj)
 			console.log("XMLHttpRequest.status=", XMLHttpRequest.status, ",XMLHttpRequest.readyState=", XMLHttpRequest.readyState, ",textStatus=", textStatus, ",XMLHttpRequest=", XMLHttpRequest);
 			if(XMLHttpRequest.status == 200 && XMLHttpRequest.readyState == 4 && XMLHttpRequest.responseText != ''){
 				$("#result_text").text(XMLHttpRequest.responseText);
-				time_id = setInterval("time_get_log(" + XMLHttpRequest.responseText + ")", 1000);
-				//setTimeout("time_get_log(" + result + ")", 1000);
 			}
    		},   
 		success: function(objResult) {
@@ -139,7 +162,7 @@ function on_submit(obj)
 			$("#result_text").text(result);
 			
 			if(objResult != null && objResult != undefined && result != ''  && result != '{}'){
-				time_id = setInterval("time_get_log(" + result + ")", 1000);
+				//time_id = setInterval("time_get_log(" + result + ")", 1000);
 				//setTimeout("time_get_log(" + result + ")", 1000);
 			}else{
 				console.log("recv err");
@@ -186,11 +209,12 @@ function on_submit(obj)
 <div class="w">
 	<div class="left"><div align="left">
     
-    <div align="middle", style="overflow:auto;" id="left_list">
-    </div>
-                              
+    <div align="middle", id="left_list"></div>
+                               
     </div></div>
     <div class="right"><textarea id="result_text"></textarea></div>
+    
+
     
 </div>
 

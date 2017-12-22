@@ -46,11 +46,16 @@ router.post('/', function(req, res, next) {
 
 function transaction(args, res) {
     var conname = args[".contract"];
-    var funname = args[".function"];
 
     var con = utils.contract(conname);
-    var fun = utils.fun(con, funname);
+    var fun = args[".function"];
+    //var arr = funname.split('.');
 
+
+    //var fun = utils.fun(con, arr[1]);
+
+
+    logs.log("conname=", conname, ",fun=", fun);
     if(con.contract_name == undefined){
         logs.log("conname=", conname);
         res.send("{}");
@@ -58,11 +63,12 @@ function transaction(args, res) {
     }
 
     if(fun.name == undefined){
-        logs.log("conname=", conname, ",funname=", funname);
+        logs.log("conname=", conname);
         res.send("{}");
         return;
     }
-    //logs.log("conname=", conname, ",funname=", funname, ",args=", args);
+
+    logs.log("args=", args);
     trans.trans(con, fun, args, function (result) {
         res.send(result.result);
     });
@@ -77,9 +83,11 @@ router.post('/transaction', function(req, res, next) {
 });
 
 function contract(args, res) {
-    var name = args.name;
-    var abi = utils.abi(name);
+    var abi = utils.funs(args.name);
 
+    logs.log("abi=", abi);
+    res.send(abi);
+    /*
     var link = '';
 
     for (var i in abi){
@@ -92,7 +100,8 @@ function contract(args, res) {
     }
 
     //logs.log("name=", name, ",req.body=", req.body);
-    res.send(link);
+    res.send(link);.
+    */
 }
 
 router.get('/contract', function(req, res, next) {

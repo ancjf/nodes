@@ -139,14 +139,14 @@ trans.log = function (id, remove) {
 trans.trans = function (con, fun, arg, callback) {
     con.deployed().then(function(instance) {
         var execstr = "";
-        if(fun.constant){
-            execstr = "instance." + fun.name + ".call" + fun_arg(fun.inputs, arg);
-        }else{
+        if(fun.constant == 'false' || fun.constant == false){
             execstr = "instance." + fun.name + fun_arg(fun.inputs, arg);
+        }else{
+            execstr = "instance." + fun.name + ".call" + fun_arg(fun.inputs, arg);
         }
 
         //logs.log("con.contract_name=", con.contract_name);
-        //logs.log("con.contract_name=", con.contract_name, ",execstr=", execstr);
+        //logs.log("con.contract_name=", con.contract_name, ",execstr=", execstr, ",fun=", fun);
         return eval(execstr);
     }).then(function(result){
         //logs.log("result=", result);

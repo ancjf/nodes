@@ -97,10 +97,12 @@ function test_transaction(args, res) {
     var count = args["count"];
     var perCount = args["perCount"];
     var conname = args[".contract"];
-    var funname = args[".function"];
+    //var funname = args[".function"];
 
     var con = utils.contract(conname);
-    var fun = utils.fun(con, funname);
+    //var fun = utils.fun(con, funname);
+    var fun = args[".function"];
+    var funname = fun.name;
     var begin = new Date().getTime();
     var stat = trans.stat_init(count*perCount);
 
@@ -149,26 +151,13 @@ function test_contract(args, res) {
 function test(args, res) {
     var count = args["count"];
     var perCount = args["perCount"];
-    var funname = args[".function"];
-
-    logs.log("funname=", funname);
-    if(funname != undefined && funname.length > 0) {
-        var arr = funname.split(".");
-        if(arr.length > 1){
-            args[".contract"] = arr[0];
-            args[".function"] = utils.con_fun_name(arr[0], arr[1], arr[2] ==  'call' ? true : false);
-        }else{
-            args[".contract"] = funname;
-            args[".function"] = "";
-        }
-
-        funname = args[".function"];
-        logs.log("arr=", arr);
-    }
-
     var conname = args[".contract"];
-    if(conname != undefined && funname != undefined){
-        if(conname.length > 0 && funname.length > 0){
+    var fun = args[".function"];
+
+    logs.log("conname=", conname);
+
+    if(conname != undefined && conname.length > 0){
+        if(fun != undefined){
             test_transaction(args, res);
             return;
         }else if(conname.length > 0){
@@ -179,7 +168,7 @@ function test(args, res) {
 
     var begin = new Date().getTime();
     var stat = trans.stat_init(count*perCount);
-    logs.log("count=", count, ",perCount=", perCount, ",conname=", conname, ",funname=", funname, ",stat=", stat);
+    logs.log("count=", count, ",perCount=", perCount, ",conname=", conname, ",stat=", stat);
     res.send(stat.id);
 
     pressure_test(stat, count, perCount, function (result) {
@@ -239,27 +228,10 @@ function query(args, res) {
         return;
     }
 
-    var abi = utils.abi(name);
-    var arr = new Array();
-    var index = 0;
-    arr[index++] = name;
+    var abi = utils.funs(name);
 
-    for (var i in abi){
-        var fun = abi[i];
-        if(fun.type != "function"){
-            //logs.log("type fun=", fun);
-            continue;
-        }
-
-        var type =  fun.constant ? ".call" : ".transaction";
-        var text = name + "." + fun.name + type;
-        var funname = utils.fun_name(fun);
-
-        arr[index++] = text;
-    }
-
-    logs.log("arr=", arr);
-    res.send(arr);
+    logs.log("name=", name, ",abi=", abi);
+    res.send(abi);
 }
 
 function root(args, res) {

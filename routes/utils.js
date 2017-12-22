@@ -121,6 +121,9 @@ utils.fun = function(con, name){
 }
 
 utils.funs = function(con){
+    if(typeof(con) == "string")
+        con = utils.contract(con);
+
     var ret = [];
 
     //logs.log("con.abi=", con.abi);
