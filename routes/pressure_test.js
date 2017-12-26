@@ -20,7 +20,7 @@ function pressure_test_transaction(stat, con, con_fun, count, perCount, callback
             back_count++
             assert.ok(back_count <= perCount, "back_count > perCount");
             if(back_count >= perCount){
-                logs.log("pressure_test_transaction:count=", count, ",conname=", result.con.contract_name, ",fun.name=", result.fun.name, ",back_count=", back_count);
+                logs.logvar(count, result.con.contract_name, result.fun.name, back_count);
 
                 if(count > 1){
                     pressure_test_transaction(stat, con, con_fun, count-1, perCount, callback);
@@ -39,8 +39,8 @@ function pressure_test_contract(stat, con, count, perCount, callback) {
 
     for(var i = 0; i < perCount; i++){
         var number = utils.get_random_num(0, abi.length);
-        //logs.log("number=", number, ",abi.length=", abi.length);
-        //logs.log("test_contract_begin:number=", number, ",abi.length=", abi.length, ",count=", count, ",i=", i);
+        //logs.logvar(number, abi.length);
+        //logs.logvar(number, abi.length, count, i);
 
         trans.trans(con, abi[number], JSON.stringify("{}"), function (result) {
             stat = trans.stat(stat, result);
@@ -48,7 +48,7 @@ function pressure_test_contract(stat, con, count, perCount, callback) {
             back_count++
             assert.ok(back_count <= perCount, "back_count > perCount");
             if(back_count >= perCount){
-                //logs.log("pressure_test_contract:count=", count, ",conname=", result.con.contract_name, ",fun.name=", result.fun.name);
+                //logs.logvar(count, result.con.contract_name, result.fun.name);
 
                 if(count > 1){
                     pressure_test_contract(stat, con, count-1, perCount, callback);
@@ -71,20 +71,20 @@ function pressure_test(rpc, stat, count, perCount, callback) {
     var number = utils.get_random_num(0, names.length);
     var name = names[number];
     var con = utils.contract(name, rpc);
-    //logs.log("test:name=", name);
+    //logs.logvar(name, names);
 
     if(con.contract_name == undefined){
-        logs.log("name=", name);
+        logs.logvar(names, name);
         //res.send(stat.id);
         return;
     }
 
     //res.send(stat.id);
     pressure_test_contract(stat, con, 1, perCount, function (result) {
-        //logs.log("stat=", stat, "result=", result);
+        //logs.logvar(stat, result);
         //stat = trans.stat_add(stat, result);
         stat = result;
-        //logs.log("test:count=", count, ",perCount=", perCount, ",name=", name);
+        //logs.logvar(count, perCount, name);
         if(count > 1){
             pressure_test(rpc, stat, count-1, perCount, callback);
         }else{
@@ -100,7 +100,7 @@ function test_transaction(args, res) {
     var rpc = args[".rpc"];
     //var funname = args[".function"];
 
-    logs.log("count=", count, ",perCount=", perCount, ",conname=", conname, ",args=", args);
+    //logs.log("count=", count, ",perCount=", perCount, ",conname=", conname, ",args=", args);
     var con = utils.contract(conname, rpc);
     //var fun = utils.fun(con, funname);
     var fun = args[".function"];
@@ -109,13 +109,13 @@ function test_transaction(args, res) {
     var stat = trans.stat_init(count*perCount);
 
     if(fun.name == undefined){
-        logs.log("count=", count, ",perCount=", perCount, ",conname=", conname, ",funname=", funname, ",fun=", fun);
+        logs.logvar(count, perCount, conname, funname, fun);
         //res.send(stat);
         res.send(stat.id);
         return;
     }
 
-    logs.log("count=", count, ",perCount=", perCount, ",conname=", conname, ",funname=", funname);
+    logs.logvar(count, perCount, conname, funname);
     res.send(stat.id);
 
     pressure_test_transaction(stat, con, fun, count, perCount, function (result) {
@@ -140,7 +140,7 @@ function test_contract(args, res) {
     var begin = new Date().getTime();
     var stat = trans.stat_init(count*perCount);
 
-    logs.log("count=", count, ",perCount=", perCount, ",conname=", conname, ",funname=", funname);
+    logs.logvar(count, perCount, conname, funname);
     res.send(stat.id);
     pressure_test_contract(stat, con, count, perCount, function (result) {
 
@@ -158,7 +158,7 @@ function test(args, res) {
     var fun = args[".function"];
     var rpc = args[".rpc"];
 
-    logs.log("conname=", conname);
+    logs.logvar(conname);
 
     if(conname != undefined && conname.length > 0){
         if(fun != undefined){
@@ -172,7 +172,7 @@ function test(args, res) {
 
     var begin = new Date().getTime();
     var stat = trans.stat_init(count*perCount);
-    logs.log("rpc=", rpc, ",count=", count, ",perCount=", perCount, ",conname=", conname, ",stat=", stat);
+    //logs.log("rpc=", rpc, ",count=", count, ",perCount=", perCount, ",conname=", conname, ",stat=", stat);
     res.send(stat.id);
 
     pressure_test(rpc, stat, count, perCount, function (result) {
@@ -209,14 +209,14 @@ function contract(args, res) {
         link += link_table_input(text, name, funname);
     }
 
-    logs.log("name=", name);
+    logs.logvar(name);
     res.send(link);
 }
 
 function log(args, res) {
     var id = args.id;
     var remove = args.remove;
-    //logs.log("id=", id, ",remove=", remove);
+    //logs.logvar(id, remove);
 
     var ret = trans.log(id, remove);
 
@@ -226,7 +226,7 @@ function log(args, res) {
 function query(args, res) {
     var name = args.name;
     var rpc = args[".rpc"];
-    logs.log("rpc=", rpc, ",name=", name);
+    logs.logvar(rpc, name);
     if(name == undefined){
         res.send(utils.names(rpc));
         logs.log("name=", name);
@@ -235,7 +235,7 @@ function query(args, res) {
 
     var abi = utils.funs(name, rpc);
 
-    logs.log("name=", name, ",abi=", abi);
+    logs.logvar(name, abi);
     res.send(abi);
 }
 

@@ -29,22 +29,23 @@ function result_fun(result) {
 
     return result;
 }
-router.get('/*', function(req, res, next) {
-    var fun = req.query.fun;
-    var arg = req.query.arg;
-    var type = req.query.type;
-    //var url = "http://" + host +  ':' + port;
-    var url = req.query[".rpc"];
 
-    logs.log("url=", url, "url=", url, "fun=", fun, "arg=", arg, "type=", type);
-    logs.log("req.query=", req.query);
+function root(args, res) {
+    var fun = args.fun;
+    var arg = args.arg;
+    var type = args.type;
+    //var url = "http://" + host +  ':' + port;
+    var url = args[".rpc"];
+
+    //logs.log("url=", url, "url=", url, "fun=", fun, "arg=", arg, "type=", type);
+    //logs.log("args=", args);
 
     var callback = function (error, result) {
         if (!error) {
-            logs.log(result);
+            //logs.log(result);
             res.send(result_fun(result));
         }else {
-            logs.log(error);
+            //logs.log(error);
             res.send({});
         }
     }
@@ -61,17 +62,17 @@ router.get('/*', function(req, res, next) {
             eval(line);
         }else if(type == 'fun'){
             line = 'web3.' + fun + '(' + arg + ')';
-            logs.log("line=", line);
+            //logs.log("line=", line);
             result = eval(line);
 
-            logs.log("line=", line, "result=", result, ',typeof(result)=', typeof(result));
+            //logs.log("line=", line, "result=", result, ',typeof(result)=', typeof(result));
             res.send(result_fun(result));
         }else{
             line = 'result = web3.' + fun;
-            logs.log("line=", line);
+            //logs.log("line=", line);
             eval(line);
 
-            logs.log("line=", line, "result=", result, ',typeof(result)=', typeof(result));
+            //logs.log("line=", line, "result=", result, ',typeof(result)=', typeof(result));
             res.send(result_fun(result));
         }
 
@@ -79,9 +80,18 @@ router.get('/*', function(req, res, next) {
         //web3.eth.getBlock(number, callback)
     } catch (err) {
         res.send(err);
-        logs.log("err=", err);
+        //logs.log("err=", err);
     }
-    //res.send(req.query);
+    //res.send(args);
+};
+
+router.post('/', function(req, res, next) {
+    logs.log("req.body=", req.body);
+    root(req.body, res);
+});
+
+router.get('/*', function(req, res, next) {
+    root(req.query, res);
 });
 
 module.exports = router;

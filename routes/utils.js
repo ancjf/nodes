@@ -35,6 +35,7 @@ utils.accounts = web3.eth.accounts;
 logs.log("utils.accounts=", utils.accounts);
 */
 
+
 for (var f in files){
     var file = '../solidity/build/contracts/' + files[f];
     var name = files[f];
@@ -45,7 +46,8 @@ for (var f in files){
      */
     var json = require(file);
     utils.jsons[name] = json;
-    logs.log("name=", name);
+    //logs.log("name=", name);
+    logs.logvar(name);
     /*
     var network = json.networks[web3.version.network];
 
@@ -64,7 +66,7 @@ for (var f in files){
 }
 //logs.log("utils.jsons=", utils.jsons);
 utils.json = function(name){
-    //logs.log("name=", name);
+    //logs.logvar(name);
     return utils.jsons[name];
 }
 
@@ -73,15 +75,16 @@ utils.abi = function(name){
 }
 
 utils.contract = function(name, rpc){
-    logs.log("name=", name, "rpc=", rpc);
     var provider = new Web3.providers.HttpProvider(rpc);
     var web3 = new Web3(new Web3.providers.HttpProvider(rpc));
-    var defaultAccount = web3.eth.defaultAccount;
-    if(defaultAccount === undefined){
-        defaultAccount = web3.eth.accounts[0];
-        logs.log("rpc=", rpc, ",defaultAccount=", defaultAccount);
-    }
 
+    var defaultAccount = web3.eth.defaultAccount;
+    //logs.logvar(name, rpc, defaultAccount);
+    if(defaultAccount === undefined){
+        var rand = utils.get_random_num(0, web3.eth.accounts.length);
+        defaultAccount = web3.eth.accounts[rand];
+        logs.logvar(rpc, defaultAccount);
+    }
 
     var cont = contract(utils.json(name));
     cont.setProvider(provider);
@@ -101,6 +104,7 @@ utils.names = function(rpc){
     var web3 = new Web3(new Web3.providers.HttpProvider(rpc));
     var ret = new Array();
 
+    logs.logvar(rpc);
     for (var f in utils.jsons){
         var network = utils.jsons[f].networks[web3.version.network];
 
@@ -108,7 +112,7 @@ utils.names = function(rpc){
         if(network !== undefined){
             var address = network["address"];
             if(address !== undefined) {
-                logs.log("f=", f);
+                logs.logvar(f);
                 ret.push(f);
             }
         }
@@ -126,12 +130,12 @@ function fun_match(fun, funname) {
     var arr = funname.split(".");
 
     if(arr.length != fun.inputs.length + 1){
-        //logs.log("length ::funname=", funname, ",arr=", arr, ",fun=", fun);
+        //logs.logvar(funname, arr, fun);
         return false;
     }
 
     if(arr[0] !=  fun.name){
-        //logs.log("name ::funname=", funname, ",arr=", arr, ",fun=", fun);
+        //logs.logvar(funname, arr, fun);
         return false;
     }
 
@@ -207,7 +211,7 @@ utils.transaction_option = function(){
     var acc =  this.accounts[rand];
     //var acc =  "0x1d5b6469569035d526b6c58ab9c1aede9a3ca9e6";
 
-    //logs.log("acc=", acc);
+    //logs.logvar(acc);
     return {from: acc};
 }
 

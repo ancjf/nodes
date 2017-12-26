@@ -25,17 +25,17 @@ function transaction_link(conname, abi){
 }
 
 function root(args, res) {
-    logs.log("rpc=", rpc, ",names=", names);
+    logs.logvar(rpc, names);
     var rpc = args[".rpc"];
-    logs.log("rpc=", rpc, ",names=", names);
+    logs.logvar( rpc, names);
     var names = utils.names(rpc);
 
-    logs.log("rpc=", rpc, ",names=", names);
+    logs.logvar(rpc, names);
     res.send(names);
 }
 /* GET home page. */
 router.get('/', function(req, res, next) {
-    logs.log("rpc=");
+    //logs.log("rpc=");
     root(req.query, res);
 });
 
@@ -47,27 +47,29 @@ function transaction(args, res) {
     var conname = args[".contract"];
     var rpc = args[".rpc"];
 
-    logs.log("conname=", conname, "rpc=", rpc);
+    logs.logvar(conname, rpc);
+    logs.log(conname, rpc);
     var con = utils.contract(conname, rpc);
     var fun = args[".function"];
     //var arr = funname.split('.');
     //var fun = utils.fun(con, arr[1]);
 
-    logs.log("conname=", conname, ",fun=", fun);
+    logs.logvar(conname, fun);
     if(con.contract_name == undefined){
-        logs.log("conname=", conname);
+        logs.logvar(conname);
         res.send("{}");
         return;
     }
 
     if(fun.name == undefined){
-        logs.log("conname=", conname);
+        logs.logvar(conname);
         res.send("{}");
         return;
     }
 
-    logs.log("args=", args);
+    logs.logvar(conname);
     trans.trans(con, fun, args, function (result) {
+        logs.logvar(result.result);
         res.send(result.result);
     });
 }
@@ -81,10 +83,10 @@ router.post('/transaction', function(req, res, next) {
 });
 
 function contract(args, res) {
-    logs.log("args=", args);
+    logs.logvar(args);
     var abi = utils.funs(args.name, args[".rpc"]);
 
-    logs.log("abi=", abi);
+    //logs.logvar(abi);
     res.send(abi);
     /*
     var link = '';
