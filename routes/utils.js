@@ -35,6 +35,7 @@ utils.accounts = web3.eth.accounts;
 logs.log("utils.accounts=", utils.accounts);
 */
 
+logs.logvar('name', /*files, */typeof(files), typeof('name'));
 
 for (var f in files){
     var file = '../solidity/build/contracts/' + files[f];

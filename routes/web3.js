@@ -37,8 +37,8 @@ function root(args, res) {
     //var url = "http://" + host +  ':' + port;
     var url = args[".rpc"];
 
-    //logs.log("url=", url, "url=", url, "fun=", fun, "arg=", arg, "type=", type);
-    //logs.log("args=", args);
+    logs.logvar(url, fun, arg, type, typeof(type));
+    //logs.logvar(args);
 
     var callback = function (error, result) {
         if (!error) {
@@ -55,17 +55,17 @@ function root(args, res) {
         var result
         var web3 = new Web3(new Web3.providers.HttpProvider(url));
 
-        //logs.log("web3.eth.blockNumber=", web3.eth.blockNumber);
+        //logs.logvar(web3.eth.blockNumber);
 
         if(type == 'fun.sync') {
             line = 'web3.' + fun + '(' + arg + ', callback)';
             eval(line);
         }else if(type == 'fun'){
             line = 'web3.' + fun + '(' + arg + ')';
-            //logs.log("line=", line);
+            //logs.logvar(line);
             result = eval(line);
 
-            //logs.log("line=", line, "result=", result, ',typeof(result)=', typeof(result));
+            //logs.logvar("line=", line, "result=", result, ',typeof(result)=', typeof(result));
             res.send(result_fun(result));
         }else{
             line = 'result = web3.' + fun;
@@ -86,7 +86,6 @@ function root(args, res) {
 };
 
 router.post('/', function(req, res, next) {
-    logs.log("req.body=", req.body);
     root(req.body, res);
 });
 

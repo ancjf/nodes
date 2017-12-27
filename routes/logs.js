@@ -7,77 +7,74 @@ var fs = require("fs");
 var util = require('util');
 var logs = {args:{}};
 
-function getArgs(func) {
-    // 首先匹配函数括弧里的参数
-    var args = func.toString().match(/function\s.*?\(([^)]*)\)/)[1];
-
-    // 分解参数成数组
-    return args.split(",").map(function(arg) {
-        // 去空格和内联注释
-        return arg.replace(/\/\*.*\*\//, "").trim();
-    }).filter(function(arg) {
-        // 确保没有undefineds
-        return arg;
-    });
-}
-
 function skipLine(str, n){
-    var index = str.indexOf('\n');
-    if(-1 == index)
-        return -1;
+    var index = 0;
 
-    console.log("n=", n, "str=", str);
-    for(var i = 0; i < n; i++){
-        index = str.indexOf('\n', index+1);
-        console.log("index=", index);
+    //console.log("n=", n, "str=", str);
+    for(var i = 0; i+1 < n; i++){
+        if(i)
+            index = str.indexOf('\n', index+1);
+        else
+            index = str.indexOf('\n');
+        //console.log("i=", i, "index=", index);
         if(-1 == index)
             return -1;
     }
 
-    return index;
+    //console.log("end:index=", index);
+    return index > 0 ? index+1 : index;
 }
 
-function readLineArg(file, line, pos, argin, callback){
-    var nread = 0;
-    var data = '';
+function argsLine(str, n){
+    var anno = false;
+    var index = 0;
+    var ret = '';
+    //console.log("n=", n, "str=", str);
+    for(var i = n; i < str.length; i++) {
+        if (str[i] == '(') {
+            if (anno) {
+                continue;
+            }
 
-    var point = file + "\\" +  line + "\\" + pos;
-    if(logs.args[point] != undefined){
-        callback(args, argin);
-        return;
+            if(index > 0)
+                ret += str[i];
+            index++;
+        }else if(str[i] == ')'){
+            if(anno){
+                continue;
+            }
+
+            index--;
+            if(0 == index)
+                return ret;
+            ret += str[i];
+        }else if(str[i] == '/' &&  str[i+1] == '*'){
+            anno = true;
+            i++;
+        }else if(str[i] == '*' &&  str[i+1] == '/') {
+            anno = false;
+            i++;
+        }else{
+            if(index > 0 && !anno)
+                ret += str[i];
+        }
     }
 
-    line =    Number(line);
-    pos =    Number(pos);
-    //console.log("file=", file);
-    const rl = readline.createInterface({
-        input: fs.createReadStream(file)
-    });
+    //console.log("end:index=", index);
+    return ret;
+}
 
-    rl.on('line', function(text){
-            ++nread;
-            if(nread >= line)
-                data = data + text;
-            //console.log('Line from file: text=', text);
-    });
+function isString(str){
+    if(typeof (str) !== "string" || str.length < 2)
+        return false;
 
-    rl.on('close', function(text){
-        data = data.substring(data.indexOf('(', pos-1));
-        var args = data.match(/\(([^)]*)\)/)[1];
+    if(str[0] == '"' && str[str.length-1] == '"')
+        return true;
 
+    if(str[0] == "'" && str[str.length-1] == "'")
+        return true;
 
-        //console.log("读取完毕！data=", data);
-        //console.log("args=", args);
-
-        args = args.split(",");
-        for (var i in args) {
-            args[i] = args[i].replace(/\/\*.*\*\//, "").trim();
-        }
-
-        //console.log("args=", args);
-        logs.args[point] = args;
-        callback(args, argin);
-    });
+    return false;
 }
 
 logs.logvar = function (msg) {
@@ -87,34 +84,50 @@ logs.logvar = function (msg) {
     var pos = info['pos'];
     var line = info['line'];
     var nread = 0;
-    var data = '';
+    var point = file + "\\" +  line + "\\" + pos;
 
-    //var execstr = '"(" + method + ") <" + file + ":" + line + "> "';
-    var execstr = '"<" + file + ":" + line + "> "';
-
-    //console.log("arguments=", arguments);
-    readLineArg(info.path, Number(info.line), Number(info.pos), arguments, function readLineArg(args, argin){
-        //console.log("argin=", argin);
-        for(var i = 0;i < argin.length; i++) {
-            execstr = execstr + ',"' + args[i] + '=",' + util.format("argin[%d]", i);
-            if(i + 1 < argin.length)
-                execstr = execstr + ',","';
+    var args = logs.args[point];
+    if(args == undefined) {
+        var data = fs.readFileSync(info.path, "utf-8");
+        var index = skipLine(data, Number(line));
+        args = argsLine(data, index + Number(pos) - 1);
+        //console.log("args=", args);
+        args = args.split(",");
+        for (var i in args) {
+            args[i] = args[i].trim();
         }
 
-        execstr = "console.log(" + execstr + ")";
-        //console.log("execstr=", execstr);
-        eval(execstr);
-    });
+        logs.args[point] = args;
+    }
+
+    //console.log("args=", args);
+    var execstr = '"(" + method + ") <" + file + ":" + line + "> "';
+    //var execstr = '"<" + file + ":" + line + "> "';
+
+    for(var i = 0;i < arguments.length; i++) {
+        if(isString(args[i])){
+            execstr = execstr + "," + util.format("arguments[%d]", i);
+        }else{
+            execstr = execstr + ',"' + args[i] + '=",' + util.format("arguments[%d]", i);
+        }
+
+        if(i + 1 < arguments.length)
+            execstr = execstr + ',","';
+    }
+
+    execstr = "console.log(" + execstr + ")";
+    //console.log("execstr=", execstr);
+    eval(execstr);
 }
 
 logs.log = function (msg) {
     var info = stackInfo();
-    //var method = info['method'];
+    var method = info['method'];
     var file = info['file'];
     var line = info['line'];
 
-    //var execstr = '"(" + method + ") <" + file + ":" + line + "> "';
-    var execstr = '"<" + file + ":" + line + "> "';
+    var execstr = '"(" + method + ") <" + file + ":" + line + "> "';
+    //var execstr = '"<" + file + ":" + line + "> "';
 
     for(var i = 0;i < arguments.length; i++) {
         execstr = execstr + "," + util.format("arguments[%d]", i);
@@ -125,6 +138,7 @@ logs.log = function (msg) {
     eval(execstr);
     //console.log("(" + method + ") <" + file + ":" + line + "> ", arguments[0]);
 }
+
 // 这里是主要方法
 function stackInfo() {
     var path = require('path');
