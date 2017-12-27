@@ -23,7 +23,7 @@ if(defaultAccount === undefined){
 logs.log(defaultAccount);
 */
 var fs = require('fs');
-const json_path = '.\\jsons\\';
+const json_path = './jsons/';
 
 //logs.log(files);
 

@@ -37,6 +37,10 @@ function set_select()
 	});
 }
 
+function url_key(){
+	return "url_array" + window.location.host + ':' + window.location.port;
+}
+
 function host() {
 	return $("#text_host").val();
 }
@@ -93,7 +97,7 @@ function log(id, callback){
 }
 
 function onDeviceReady() {
-	var strKey = "url_array"; 
+	var strKey = url_key(); 
 	var storage = window.localStorage; 
 	var value = storage.getItem(strKey);
 	
@@ -115,6 +119,8 @@ function onDeviceReady() {
 	}
 }
 
+
+
 function save_url_array(url)
 {
 	if(url.indexOf('//')){
@@ -122,8 +128,8 @@ function save_url_array(url)
 		url = url.substring(url.indexOf('//')+2);
 	}
 		
-	var strKey = "url_array"; 
-	console.log('url=', url);
+	var strKey = url_key(); 
+	console.log('url=', url, ",window.location.host=", window.location.host, ",window.location.port=", window.location.port);
 	if(url_array[0] == url)
 		return;
 
