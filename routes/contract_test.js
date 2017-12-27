@@ -54,7 +54,7 @@ function transaction(args, res) {
     //var arr = funname.split('.');
     //var fun = utils.fun(con, arr[1]);
 
-    logs.logvar(conname, fun);
+    //logs.logvar(conname, fun);
     if(con.contract_name == undefined){
         logs.logvar(conname);
         res.send("{}");
@@ -67,9 +67,9 @@ function transaction(args, res) {
         return;
     }
 
-    logs.logvar(conname);
+    //logs.logvar(conname);
     trans.trans(con, fun, args, function (result) {
-        logs.logvar(result.result);
+        //logs.logvar(result.result);
         res.send(result.result);
     });
 }

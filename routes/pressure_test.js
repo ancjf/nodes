@@ -235,7 +235,7 @@ function query(args, res) {
 
     var abi = utils.funs(name, rpc);
 
-    logs.logvar(name, abi);
+    //logs.logvar(name, abi);
     res.send(abi);
 }
 

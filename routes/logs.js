@@ -155,7 +155,7 @@ function stackInfo() {
         data.pos = sp[4];
         data.file = path.basename(data.path);
     }
-
+    
     return data;
 }
 
