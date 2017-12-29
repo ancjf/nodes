@@ -26,7 +26,7 @@ function set_contracts(abis){
 		html += set_table(text, i);
 	}
 	
-	console.log('html=', html);
+	//console.log('html=', html);
 	$("#left_list").html(html);
 }
 
@@ -36,7 +36,7 @@ function onDeviceReady() {
 	window.parent.ajax('/pressure_test/query', 
 		{"name":QueryString("name")},
 		function(XMLHttpRequest, textStatus){
-			console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
+			//console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
             set_contracts(JSON.parse(XMLHttpRequest.responseText));   
         }
 	);
@@ -61,7 +61,7 @@ function time_get_log(id){
 	
 	window.parent.log(id,
 		function(result){
-			console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
+			//console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
             precoss_result(result);
         }
 	);

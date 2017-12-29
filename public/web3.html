@@ -19,7 +19,7 @@ function set_fun(name, fun){
         var reminder = typeof(fun.params[i]);
         var text = fun.params[i];
 
-        console.log('fun.params=', fun.params, ',typeof(fun.params[i]=', typeof(fun.params[i]));
+        //console.log('fun.params=', fun.params, ',typeof(fun.params[i]=', typeof(fun.params[i]));
         if(typeof(fun.params[i]) == "string")
             ret += '<tr><td> <input class="input" name="' + reminder + '" type="text"></td></tr>';
         else
