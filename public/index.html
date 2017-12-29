@@ -2,10 +2,31 @@
 
 <head>
     <meta charset="utf-8"/>
+    <meta http-equiv="Access-Control-Allow-Origin" content="192.168.153.128">
+    <meta http-equiv="Access-Control-Allow-Methods" content="POST,GET">
 	<script type="text/javascript" src="javascripts/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="javascripts/json_rpc.js"></script>
 <script>
 
 var url_array = new Array();
+
+function getRequest() {
+    var xmlHttpRequest = null;
+    if(window.XMLHttpRequest) {
+        xmlHttpRequest = new XMLHttpRequest();
+    } else {
+        if(window.ActiveXObject) {
+            try {//IE5、6
+                xmlHttpRequest = new ActiveXObject("Microsoft.XMLHTTP");
+            } catch(e) {
+                try {
+                    xmlHttpRequest = new ActiveXObject("Msxml2.XMLHTTP");
+                } catch(e) {}
+            }
+        }
+    }
+    return xmlHttpRequest;
+}
 
 function removeByValue(arr, val) {
   for(var i=0; i<arr.length; i++) {
@@ -38,7 +59,7 @@ function set_select()
 }
 
 function url_key(){
-	return "url_array" + window.location.host + ':' + window.location.port;
+	return "url_array." + window.location.href;
 }
 
 function host() {
@@ -53,7 +74,13 @@ function rpc(){
 	return "http://" + $("#text_host").val() + ":" + $("#text_port").val();
 }
 
+function json_rpc(name, params, fun) {
+    return rpc_call(rpc(), name, params, fun);
+}
+
 function ajax(url, data, callback){
+    console.log('data=', data);
+
 	var rpcurl = rpc();
 	if(data[".rpc"] == undefined)
 		data[".rpc"] = rpcurl;
@@ -66,7 +93,7 @@ function ajax(url, data, callback){
 		"data": data, 
 		complete:function(XMLHttpRequest, textStatus){  
             if(textStatus == 'timeout'){  
-                var xmlhttp = window.XMLHttpRequest ? new window.XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHttp");  
+                var xmlhttp = getRequest();
                 xmlhttp.abort();   
 				console.log('timeout');
 				return;
@@ -80,6 +107,43 @@ function ajax(url, data, callback){
 			} 
         }
 	});	
+}
+
+function rpccall(){
+    console.log('rpccall');
+    /*
+    rpc_call("http://192.168.153.128:8545", "eth_blockNumber", [], function (err, result) {
+        console.log('err=', err, 'result=', result);
+    });
+    return;*/
+    $.ajax({
+        "url":"http://192.168.153.128:8545",
+        "type": 'post',
+        "dataType": 'String',
+        //"contentType": 'application/x-www-form-urlencoded',
+        "contentType": 'application/json',
+        /*
+        xhrFields:{
+            withCredentials:true
+        },
+        */
+        crossDomain:true,
+        //processData: false,
+        "data": '{"jsonrpc":"2.0","id":"2","method":"eth_getBlockByNumber","params":["", false]}',
+
+        complete:function(XMLHttpRequest, textStatus){
+            if(textStatus == 'timeout'){
+                var xmlhttp = getRequest();
+                xmlhttp.abort();
+                console.log('timeout');
+                return;
+            }
+
+            console.log('textStatus=', textStatus);
+            console.log('XMLHttpRequest=', XMLHttpRequest);
+            console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
+        }
+    });
 }
 
 function log(id, callback){

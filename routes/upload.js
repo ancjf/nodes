@@ -55,4 +55,12 @@ router.get('/query', function(req, res, next) {
     res.send(files);
 });
 
+
+router.post('/query', function(req, res, next) {
+    var files = utils.files();
+
+    logs.logvar(files);
+    res.send(files);
+});
+
 module.exports = router;
