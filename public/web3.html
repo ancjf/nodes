@@ -42,8 +42,53 @@ function set_funs() {
     $("#funs").html(html);
 }
 
+function test_funs() {
+    const SimpleStoreABI = [{"constant":false,"inputs":[{"name":"_value","type":"uint256"}],"name":"set","outputs":[{"name":"","type":"bool"}],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"get","outputs":[{"name":"storeValue","type":"uint256"}],"payable":false,"type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"_newValue","type":"uint256"},{"indexed":false,"name":"_sender","type":"address"}],"name":"SetComplete","type":"event"}];
+
+    const abi = window.parent.ethabi;
+    console.log('abi=', abi);
+    const setInputBytecode = abi.encodeMethod(SimpleStoreABI[0], [24000]);
+    console.log('setInputBytecode=', setInputBytecode);
+// returns 0x60fe47b10000000000000000000000000000000000000000000000000000000000005dc0
+
+    const setOutputBytecode = abi.decodeMethod(SimpleStoreABI[0], "0x0000000000000000000000000000000000000000000000000000000000000001");
+    console.log('setOutputBytecode=', setOutputBytecode);
+    console.log('abi.random(SimpleStoreABI[0])=', abi.random(SimpleStoreABI[0]));
+
+// returns  Result { '0': true }
+
+
+
+    const getInputBytecode = abi.encodeMethod(SimpleStoreABI[1], []);
+    console.log('getInputBytecode=', getInputBytecode);
+    console.log('abi.random(SimpleStoreABI[1])=', abi.random(SimpleStoreABI[1]));
+// returns 0x6d4ce63c
+
+    const getMethodOutputBytecode = abi.decodeMethod(SimpleStoreABI[1], "0x000000000000000000000000000000000000000000000000000000000000b26e");
+    console.log('getMethodOutputBytecode=', getMethodOutputBytecode);
+// returns Result { '0': <BN: b26e>, storeValue: <BN: b26e> }
+
+
+
+    const SetCompleteInputBytecode = abi.encodeEvent(SimpleStoreABI[2], [24000, "0xca35b7d915458ef540ade6068dfe2f44e8fa733c"]);
+    console.log('SetCompleteInputBytecode=', SetCompleteInputBytecode);
+    console.log('abi.random(SimpleStoreABI[2])=', abi.random(SimpleStoreABI[2]));
+// returns 0x10e8e9bc0000000000000000000000000000000000000000000000000000000000005dc0000000000000000000000000ca35b7d915458ef540ade6068dfe2f44e8fa733c
+
+    const SetCompleteOutputBytecode = abi.decodeEvent(SimpleStoreABI[2], "0x0000000000000000000000000000000000000000000000000000000000000d7d000000000000000000000000ca35b7d915458ef540ade6068dfe2f44e8fa733c");
+    console.log('SetCompleteOutputBytecode=', SetCompleteOutputBytecode);
+    /* returns   Result {
+  '0': <BN: d7d>,
+  '1': '0xca35b7d915458ef540ade6068dfe2f44e8fa733c',
+  _newValue: <BN: d7d>,
+  _sender: '0xca35b7d915458ef540ade6068dfe2f44e8fa733c' }
+*/
+
+}
+
 function onDeviceReady() {
 	console.log('list:window.parent=', window.parent, ",window.parent.url_key()=", window.parent.url_key());
+    test_funs();
     set_funs();
     window.parent.rpccall();
 	return;
