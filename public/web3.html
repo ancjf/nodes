@@ -90,7 +90,6 @@ function onDeviceReady() {
 	console.log('list:window.parent=', window.parent, ",window.parent.url_key()=", window.parent.url_key());
     test_funs();
     set_funs();
-    window.parent.rpccall();
 	return;
 	var strKey = "url_array"; 
 	var storage = window.localStorage; 
@@ -114,6 +113,27 @@ function onDeviceReady() {
 	}
 }
 
+function on_submit_remote(fun, params)
+{
+    console.log('fun=', fun, 'params=', params);
+    window.parent.ajax('/web3/',
+        {"fun":fun,"params":JSON.stringify(params)},
+        function(XMLHttpRequest, textStatus){
+            var result = XMLHttpRequest.responseText;
+            console.log('result=', result);
+
+            result = JSON.parse(result);
+            result = result.result;
+            if(typeof(rpc_ret(fun)) == 'object'){
+                result = JSON.stringify(result, null, 4);
+            }
+            $("#result_text").text(result);
+        }
+    );
+
+    return false;
+}
+
 function on_submit(obj){
     var name = $(obj)[0].name;
     var params = [];
@@ -126,6 +146,11 @@ function on_submit(obj){
         }else{
             params[i] = arr[i].value;
         }
+    }
+
+    console.log("name=", name, ",params=", params);
+    if(window.parent.remote()){
+        return on_submit_remote(name, params);
     }
 
     console.log("name=", name, ",params=", params);
@@ -145,43 +170,6 @@ function on_submit(obj){
     })
 
     return false;
-}
-
-function on_submit11(obj)
-{
-	var arr = $(obj).children("input");
-	var arg = '';
-	var fun = $(obj)[0].name;
-	var type = $(obj)[0].className;
-	
-	for(var i=0;i<arr.length;i++){
-		if(arr[i].type == 'submit')
-			continue;
-		
-		var value = arr[i].value;
-		//console.log('value=', value, 'arg=', arg, ',arr=', arr);
-		if(value == null || 0 == value.length)
-			value = '""';
-		else
-			value = '"' + value + '"';
-			
-		if(arg.length){
-			arg = arg + ',' + value;
-		}else{
-			arg = value;
-		}
-	}
-
-	console.log('fun=', fun, 'arg=', arg, 'type=', type);
-	window.parent.ajax('/web3/', 
-		{"fun":fun,"arg":arg,"type":type},
-		function(XMLHttpRequest, textStatus){
-			var result = JSON.stringify(JSON.parse(XMLHttpRequest.responseText), null, 4);
-            $("#result_text").text(result);  
-        }
-	);
-
-	return false;
 }
 
 </script>

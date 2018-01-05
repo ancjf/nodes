@@ -106,12 +106,50 @@ function transReceipt(){
     });
 }
 
+var g_eth = {};
+
+function query_con(){
+    var url = rpc();
+    if(g_eth[url] != undefined)
+        return;
+
+    rpc_call(url, "net_version", [], function (err, result) {
+        if(err)
+            return;
+
+        result = JSON.parse(result);
+        if(g_eth[url] == undefined)
+            g_eth[url] = {"network":result.result};
+
+        rpc_call(url, "personal_listAccounts", [], function (err, result) {
+            if(err)
+                return;
+
+            result = JSON.parse(result);
+            g_eth[url].accs = result.result;
+
+            ajax("/cons", {"netword":g_eth[url].network}, function(XMLHttpRequest, textStatus){
+                //console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
+                var result = JSON.parse(XMLHttpRequest.responseText);
+                g_eth[url].cons = result;
+                //console.log('g_eth=', g_eth);
+            })
+        })
+    })
+}
+
+function random_addr(addr) // [Min, Max)
+{
+    var rand = Math.floor(Math.random() * (addr.length+1));
+    return addr[rand];
+}
+
 function trans(con, fun, data, callback){
     console.log('con=', con);
     var url = rpc();
-    var net = "5678";
+    var net = g_eth[url].network;
     var to = con.networks[net].address;
-    var from = "0x18a3cbbf884d0fd94cd1d10dec041c3b5a08b5b5";
+    var from = random_addr(g_eth[url].accs);
 
     var params = [{"from":from,"to":to,"data":data}];
     console.log('data=', data);
@@ -134,9 +172,9 @@ function trans(con, fun, data, callback){
 function call(con, fun, data, callback){
     console.log('con=', con);
     var url = rpc();
-    var net = "5678";
+    var net = g_eth[url].network;
     var to = con.networks[net].address;
-    var from = "0x18a3cbbf884d0fd94cd1d10dec041c3b5a08b5b5";
+    var from = random_addr(g_eth[url].accs);
 
     var params = [{"from":from,"to":to,"data":data}, "-1"];
     console.log('data=', data);
@@ -258,9 +296,9 @@ function onDeviceReady() {
 			select.add(new Option(strs[i],""));
 		}
 	}
+
+    query_con();
 }
-
-
 
 function save_url_array(url)
 {

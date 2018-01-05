@@ -229,9 +229,31 @@ utils.funs = function(con, rpc){
     for (var f in con.abi){
         if(con.abi[f].type == "function"){
             ret.push(con.abi[f]);
-            logs.logvar(signatureEncoded);
         }
 
+    }
+
+    return ret;
+}
+
+utils.cons = function(network){
+    var ret = {};
+
+    logs.logvar(network);
+    for (var f in utils.jsons){
+        //logs.logvar(f);
+        var net = utils.jsons[f].networks[network];
+
+        //logs.logvar(network);
+        if(net == undefined){
+            logs.logvar(net);
+            continue;
+        }
+
+
+        ret[f] = {};
+        ret[f].network = net;
+        ret[f].abi = utils.funs(utils.jsons[f]);
     }
 
     return ret;

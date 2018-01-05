@@ -21,6 +21,43 @@ web3.extend({
     }]
 });
 */
+
+if (typeof window !== 'undefined' && window.XMLHttpRequest) {
+    XMLHttpRequest = window.XMLHttpRequest // jshint ignore: line
+// node
+} else {
+    XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest // jshint ignore: line
+}
+
+var XHR2 = require('xhr2') // jshint ignore: line
+
+function rpc_call(url, name, params, fun) {
+    var xhr = new XHR2();
+    //var xhr = new XMLHttpRequest();
+
+    xhr.onload = function(event) {
+        fun(false, xhr.responseText);
+    };
+
+    xhr.onerror = function(event) {
+        fun(true, event.type);
+    };
+
+    xhr.open('POST', url, true);
+    var data = {"jsonrpc":"2.0","id":"2","method":name,"params":JSON.parse(params)};
+    data = JSON.stringify(data);
+    logs.logvar(data);
+    xhr.send(data);
+}
+/*
+rpc_call("http://192.168.153.128:8545", "net_version", "[]", function (err, result) {
+    logs.logvar(err, result);
+
+    rpc_call("http://192.168.153.128:8545", "eth_protocolVersion", "[]", function (err, result) {
+        logs.logvar(err, result);
+    })
+})
+*/
 function result_fun(result) {
     if(typeof(result) == "number")
         result = result.toString();
@@ -32,57 +69,20 @@ function result_fun(result) {
 
 function root(args, res) {
     var fun = args.fun;
-    var arg = args.arg;
-    var type = args.type;
-    //var url = "http://" + host +  ':' + port;
+    var params = args.params;
     var url = args[".rpc"];
 
-    logs.logvar(url, fun, arg, type, typeof(type));
-    //logs.logvar(args);
-
-    var callback = function (error, result) {
+    //logs.logvar(args, url, fun, params);
+    rpc_call(url, fun, params, function (error, result) {
+        //logs.logvar(error, result);
         if (!error) {
-            //logs.log(result);
-            res.send(result_fun(result));
+            logs.logvar(result);
+            res.send(result);
         }else {
             //logs.log(error);
             res.send({});
         }
-    }
-
-    try {
-        var line;
-        var result
-        var web3 = new Web3(new Web3.providers.HttpProvider(url));
-
-        //logs.logvar(web3.eth.blockNumber);
-
-        if(type == 'fun.sync') {
-            line = 'web3.' + fun + '(' + arg + ', callback)';
-            eval(line);
-        }else if(type == 'fun'){
-            line = 'web3.' + fun + '(' + arg + ')';
-            //logs.logvar(line);
-            result = eval(line);
-
-            //logs.logvar("line=", line, "result=", result, ',typeof(result)=', typeof(result));
-            res.send(result_fun(result));
-        }else{
-            line = 'result = web3.' + fun;
-            //logs.log("line=", line);
-            eval(line);
-
-            //logs.log("line=", line, "result=", result, ',typeof(result)=', typeof(result));
-            res.send(result_fun(result));
-        }
-
-        //logs.log("web3=", web3);
-        //web3.eth.getBlock(number, callback)
-    } catch (err) {
-        res.send(err);
-        //logs.log("err=", err);
-    }
-    //res.send(args);
+    });
 };
 
 router.post('/', function(req, res, next) {

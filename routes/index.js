@@ -4,27 +4,35 @@ var utils = require('./utils.js');
 var webs = require('./webs.js');
 var logs = require('./logs.js');
 
-function root(res) {
-  var names = {"contract test":"/contract_test", "pressure test":"/pressure_test"};
-  res.send(webs.button_list(names));
+function root(args, res) {
+  var cons = utils.cons(args.netword);
+
+  //logs.logvar(cons);
+  res.send(cons);
 }
+
+function test(args, res) {
+    var names = {"contract test":"/contract_test", "pressure test":"/pressure_test"};
+    res.send(webs.button_list(names));
+}
+
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  logs.log("req.query=", req.query, ",req.path=", req.path);
+router.get('/cons', function(req, res, next) {
+  logs.logvar(req.query, req.path);
   //res.sendFile();
-  root(res);
+  root(req.query, res);
 });
 
-router.post('/', function(req, res, next) {
-  root(res);
+router.post('/cons', function(req, res, next) {
+  root(req.body, res);
 });
 
 router.get('/test', function(req, res, next) {
-  root(res);
+    root(req.query, res);
 });
 
 router.post('/test', function(req, res, next) {
-  root(res);
+    root(req.body, res);
 });
 
 module.exports = router;
