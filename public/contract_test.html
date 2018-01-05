@@ -10,6 +10,7 @@ function QueryString(item){
 	return svalue ? svalue[1] : "";
 }
 
+var g_cons;
 var g_abis;
 
 function set_table(abi, index){
@@ -24,7 +25,7 @@ function set_table(abi, index){
 	
 	var type = abi.constant ? 'call' : 'transaction';
 	var funname = QueryString("name") + '.' + abi.name + '.' + type;
-	ret += '<tr> <td> <input type="submit" id="submitName" value="'  + funname + '">  </td></tr></table></form>';
+	ret += '<tr> <td> <input type="submit" id="submit" value="'  + funname + '">  </td></tr></table></form>';
 	//console.log('ret=', ret);
 	/*
 	var html = '';
@@ -38,12 +39,12 @@ function set_table(abi, index){
 }
 
 function set_contracts(abis){
-	g_abis = abis;
+	g_cons = abis;
 	console.log('abis=', abis);
 
 	var html = '';
-	for(var i=0; i<abis.length; i++){
-		html += set_table(abis[i], i);
+	for(var i=0; i<g_cons.abi.length; i++){
+		html += set_table(g_cons.abi[i], i);
 	}
 	
 	//console.log('html=', html);
@@ -70,27 +71,59 @@ function precoss_result(objResult){
 
 function form_data(obj){
 	var id = parseInt($(obj)[0].id);
-	var ret = {".contract":QueryString("name"),".function":g_abis[id]};
-	
+	var ret = {".contract":QueryString("name"),".function":g_cons.abi[id]};
+
+	var value = [];
 	var arr = $(obj).find(".input");
+	var type = $(obj).find("#submit")[0].value;
+    type = type.split('.')[2];
 	for(var i=0; i<arr.length; i++){
 		ret[arr[i].name] = arr[i].value;
+        value[i] = arr[i].value;
 	}
-	
-	console.log("id=", id, ",ret=", ret);
-	return ret;
+
+	var data = window.parent.ethabi.encodeMethod(g_cons.abi[id], value);
+
+    console.log("id=", id, "type=", type, ",ret=", ret);
+
+    var fun = window.parent.trans;
+    if(type == 'call')
+        fun = window.parent.call;
+
+    fun(g_cons, g_cons.abi[id], data, function (err, result) {
+        console.log('err=', err, 'result=', result);
+        if(!err)
+            result = JSON.stringify(result, null, 4);
+        $("#result_text").text(result);
+    });
 }
 
 function on_submit(obj)
 {
-	var reqdata = form_data(obj);
+    if(!window.parent.remote()){
+        form_data(obj);
+        return false;
+    }
+
+    var id = parseInt($(obj)[0].id);
+    var reqdata = {".contract":QueryString("name"),".function":g_cons.abi[id]};
+    var arr = $(obj).find(".input");
+
+    for(var i=0; i<arr.length; i++){
+        reqdata[arr[i].name] = arr[i].value;
+    }
+
 	console.log('reqdata=', reqdata);
-	
 	window.parent.ajax('/contract_test/transaction', 
 		reqdata,
 		function(XMLHttpRequest, textStatus){
-			var result = JSON.stringify(JSON.parse(XMLHttpRequest.responseText), null, 4);
-			$("#result_text").text(result); 
+            console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
+            try{
+			    var result = JSON.stringify(JSON.parse(XMLHttpRequest.responseText), null, 4);
+			    $("#result_text").text(result);
+            }catch(err){
+                $("#result_text").text(XMLHttpRequest.responseText);
+            }
         }
 	);
 	

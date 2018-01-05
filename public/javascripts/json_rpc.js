@@ -92,7 +92,8 @@ function rpc_call(url, name, params, fun) {
         "data": data,
         complete:function(XMLHttpRequest, textStatus){
             console.log('textStatus=', textStatus);
-            if(textStatus == 'timeout'){
+            if(textStatus == 'timeout'/* || textStatus == 'parsererror'*/){
+                console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
                 var xmlhttp = getRequest();
                 xmlhttp.abort();
                 console.log('timeout');

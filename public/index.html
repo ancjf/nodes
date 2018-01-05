@@ -71,12 +71,85 @@ function port() {
 	return $("#text_port").val();
 }
 
+function remote() {
+    return $("#remote")[0].checked;
+}
+
 function rpc(){
 	return "http://" + $("#text_host").val() + ":" + $("#text_port").val();
 }
 
 function json_rpc(name, params, fun) {
     return rpc_call(rpc(), name, params, fun);
+}
+
+var g_receipt;
+
+function transReceipt(){
+    console.log('transReceipt');
+    console.log('url=', g_receipt.url, 'params=', g_receipt.params, ",new Date().getTime()=", new Date().getTime());
+    rpc_call(g_receipt.url, "eth_getTransactionReceipt", g_receipt.params, function (err, result) {
+        console.log('err=', err, 'result=', result);
+        if(!err){
+            result = JSON.parse(result);
+            if(result.result == null){
+                console.log('null err=', err, 'res=', result);
+                window.setTimeout("transReceipt()", 1000);
+                return;
+            }
+
+            g_receipt.fun(err, result.result);
+            return;
+        }
+
+        g_receipt.fun(err, result);
+    });
+}
+
+function trans(con, fun, data, callback){
+    console.log('con=', con);
+    var url = rpc();
+    var net = "5678";
+    var to = con.networks[net].address;
+    var from = "0x18a3cbbf884d0fd94cd1d10dec041c3b5a08b5b5";
+
+    var params = [{"from":from,"to":to,"data":data}];
+    console.log('data=', data);
+    rpc_call(url, "eth_sendTransaction", params, function (err, result){
+        console.log('err=', err, 'result=', result);
+        if(err){
+            fun(err, result);
+        }else{
+            result = JSON.parse(result);
+            result = [result.result];
+
+            console.log('err=', err, 'result=', result, ",new Date().getTime()=", new Date().getTime());
+            g_receipt = {"url":url,"params":result,"fun":callback};
+            window.setTimeout("transReceipt()", 1);
+        }
+
+    });
+}
+
+function call(con, fun, data, callback){
+    console.log('con=', con);
+    var url = rpc();
+    var net = "5678";
+    var to = con.networks[net].address;
+    var from = "0x18a3cbbf884d0fd94cd1d10dec041c3b5a08b5b5";
+
+    var params = [{"from":from,"to":to,"data":data}, "-1"];
+    console.log('data=', data);
+    rpc_call(url, "eth_call", params, function (err, result){
+        console.log('err=', err, 'result=', result);
+        if(!err){
+            result = JSON.parse(result);
+            console.log('fun=', fun);
+            result = window.ethabi.decodeMethod(fun, result.result);
+        }
+
+        callback(err, result);
+    });
 }
 
 function ajax(url, data, callback){
@@ -117,6 +190,9 @@ function rpccall(){
         console.log('err=', err, 'result=', result);
     });
     return;*/
+    var params = {"from":"0x18a3cbbf884d0fd94cd1d10dec041c3b5a08b5b5",
+        "to":"0xb24a9cdd7d9b8a71ddd0f50479187ac4370a34e3",
+        "data":"0x812600df0000000000000000000000000000000000000000000000000000000000000001"};
     $.ajax({
         "url":"http://192.168.153.128:8545",
         "type": 'post',
@@ -130,7 +206,7 @@ function rpccall(){
         */
         crossDomain:true,
         //processData: false,
-        "data": '{"jsonrpc":"2.0","id":"2","method":"eth_getBlockByNumber","params":["", false]}',
+        "data": '{"jsonrpc":"2.0","id":"2","method":"eth_sendTransaction","params":[{"from":"0x18a3cbbf884d0fd94cd1d10dec041c3b5a08b5b5","to":"0xb24a9cdd7d9b8a71ddd0f50479187ac4370a34e3","data":"0x812600df0000000000000000000000000000000000000000000000000000000000000001"}]}',
 
         complete:function(XMLHttpRequest, textStatus){
             if(textStatus == 'timeout'){
@@ -261,9 +337,10 @@ function jump_url(obj){
 <p>
 	<input type="text" id="text_host" value="192.168.1.1"> </input>
 	<input type="number" id="text_port" min="1" max="65535" value="8545"> </input>
-    <select id="url_list" onChange="on_change(this)">
-    </select>
-    
+    <select id="url_list" onChange="on_change(this)"></select>
+
+    remote:<input class="input" id="remote" type="checkbox">
+
     <button name="web3.html" onClick="jump_url(this)">web3</button>
     <button name="contract.html" onClick="jump_url(this)">contract</button>
     <button name="contract_list.html" onClick="jump_url(this)">contract_test</button>

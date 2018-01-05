@@ -219,24 +219,6 @@ utils.fun = function(con, name){
     return {};
 }
 
-function getKeys(params, key, allowEmpty) {
-    var result = []; // eslint-disable-line
-
-    if (!Array.isArray(params)) { throw new Error(`[ethjs-abi] while getting keys, invalid params value ${JSON.stringify(params)}`); }
-
-    for (var i = 0; i < params.length; i++) { // eslint-disable-line
-        var value = params[i][key];  // eslint-disable-line
-        if (allowEmpty && !value) {
-            value = '';
-        } else if (typeof(value) !== 'string') {
-            throw new Error('[ethjs-abi] while getKeys found invalid ABI data structure, type value not string');
-        }
-        result.push(value);
-    }
-
-    return result;
-}
-
 utils.funs = function(con, rpc){
     if(typeof(con) == "string")
         con = utils.contract(con, rpc);
@@ -246,17 +228,31 @@ utils.funs = function(con, rpc){
     //logs.logvar(con.abi);
     for (var f in con.abi){
         if(con.abi[f].type == "function"){
-            const method = con.abi[f];
-            const signature = `${method.name}(${getKeys(method.inputs, 'type').join(',')})`;
-            const signatureEncoded = `0x${(new Buffer(keccak256(signature), 'hex')).slice(0, 4).toString('hex')}`;
-
-            con.abi[f].sign = signatureEncoded;
             ret.push(con.abi[f]);
             logs.logvar(signatureEncoded);
         }
 
     }
 
+    return ret;
+}
+
+utils.res_con = function(con, rpc){
+    logs.logvar(con, rpc);
+    con = utils.jsons[con];
+
+    var ret = [];
+
+    logs.logvar(con);
+    for (var f in con.abi){
+        if(con.abi[f].type == "function"){
+            ret.push(con.abi[f]);
+        }
+
+    }
+
+    ret = {"networks":con.networks, "abi":ret};
+    logs.logvar(ret);
     return ret;
 }
 

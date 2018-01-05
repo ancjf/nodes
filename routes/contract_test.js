@@ -84,10 +84,10 @@ router.post('/transaction', function(req, res, next) {
 
 function contract(args, res) {
     logs.logvar(args);
-    var abi = utils.funs(args.name, args[".rpc"]);
+    var con = utils.res_con(args.name, args[".rpc"]);
 
     //logs.logvar(abi);
-    res.send(abi);
+    res.send(con);
     /*
     var link = '';
 
