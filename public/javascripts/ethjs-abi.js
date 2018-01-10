@@ -4049,11 +4049,8 @@ function randomNumber(size, signed) {
 	return random_number(size);
 }
 
-function randomBoolean(size, signed) {
-	if(signed)
-		return random_integer(size);
-	
-	return get_random_num(0, 2) == 0 ? false : true;
+function randomBoolean() {
+	return get_random_num(0, 2) == 0 ? 0 : 1;
 }
 
 function randomString() {
@@ -4145,7 +4142,6 @@ function randomType(typeInput) {
     }
   }
 
-  if (!coder) { throw new Error(invalidTypeErrorMessage); }
   return coder;
 }
   

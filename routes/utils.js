@@ -8,6 +8,11 @@ var contract = require("truffle-contract");
 var Web3 = require('web3');
 
 const keccak256 = require('js-sha3').keccak_256;
+var webs = require('./webs.js');
+var browserify = require("browserify");
+var beefy = require('beefy')
+
+
 
 /*
 var httpProvider = "http://" + truffle.networks.development.host + ":" +  truffle.networks.development.port;
@@ -109,10 +114,7 @@ utils.add = function(file, name){
         return false;
     }
 
-    if(!fs.renameSync(file, name)){
-        logs.logvar("rename:", file, name);
-        return false;
-    }
+    fs.renameSync(file, name);
 
     logs.logvar(conname, name);
     var json = JSON.parse(fs.readFileSync(name, "utf-8"));
@@ -250,9 +252,8 @@ utils.cons = function(network){
             continue;
         }
 
-
         ret[f] = {};
-        ret[f].network = net;
+        ret[f].networks = utils.jsons[f].networks;
         ret[f].abi = utils.funs(utils.jsons[f]);
     }
 
@@ -265,7 +266,7 @@ utils.res_con = function(con, rpc){
 
     var ret = [];
 
-    logs.logvar(con);
+    //logs.logvar(con);
     for (var f in con.abi){
         if(con.abi[f].type == "function"){
             ret.push(con.abi[f]);
@@ -274,7 +275,7 @@ utils.res_con = function(con, rpc){
     }
 
     ret = {"networks":con.networks, "abi":ret};
-    logs.logvar(ret);
+    //logs.logvar(ret);
     return ret;
 }
 
@@ -318,5 +319,43 @@ utils.transaction_option = function(){
 }
 
 utils.load();
+
+var testint = utils.json("TestInt");
+//logs.logvar(testint.networks['5678'].address);
+
+var trans = [];
+testint.abi.forEach(function (result, index) {
+
+    if(result.type == "function")
+        trans.push({"abi":result,"to":testint.networks['5678'].address});
+    /*
+    trans[index].abi = result;
+    trans[index].from = "0x18a3cbbf884d0fd94cd1d10dec041c3b5a08b5b5";
+    trans[index].to = testint.networks['5678'].address;
+    */
+});
+
+/*
+webs.trans("http://192.168.153.128:8545", trans, function(err, result) {
+    logs.logvar(err, result);
+});
+*/
+
+var b = browserify();
+//var file = fs.openSync('./routes/webs.js', "w");
+const file = fs.createWriteStream('./public/javascripts/webs.js');
+//logs.logvar(process.stdout);
+
+b.add('./routes/webs.js');
+b.bundle().pipe(file);
+
+file.end();
+//b.bundle().pipe(process.stdout);
+
+//fs.closeSync(file);
+
+
+//var out = browserify('./routes/webs.js')
+//logs.logvar(out);
 
 module.exports = utils;

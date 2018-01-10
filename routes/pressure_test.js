@@ -183,34 +183,8 @@ function test(args, res) {
     });
 }
 
-function link_table_input(text, conname, funname){
-    var inputs = {"count": "count", "perCount": "perCount"};
-
-    return webs.from(text, "/pressure_test/test", inputs, conname, funname, "number", "5");
-}
-
 function contract(args, res) {
-    var name = args.name;
-    var abi = utils.abi(name);
-
-    var link = link_table_input(name, name, "");
-
-    for (var i in abi){
-        var fun = abi[i];
-        if(fun.type != "function"){
-            //logs.log("type fun=", fun);
-            continue;
-        }
-
-        var type =  fun.constant ? ".call" : ".transaction";
-        var text = name + "." + fun.name + type;
-        var funname = utils.fun_name(fun);
-
-        link += link_table_input(text, name, funname);
-    }
-
-    logs.logvar(name);
-    res.send(link);
+    res.send("");
 }
 
 function log(args, res) {
@@ -242,17 +216,8 @@ function query(args, res) {
 function root(args, res) {
     var rpc = args[".rpc"];
     var names = utils.names(rpc);
-    var args = {};
 
-    for (var f in names){
-        var name = names[f];
-        args[name] = "/pressure_test/contract";
-    }
-
-    var ret = webs.button_list(args);
-    ret += link_table_input("", "", "");
-
-    res.send(ret);
+    res.send("");
 }
 
 router.post('/', function(req, res, next) {

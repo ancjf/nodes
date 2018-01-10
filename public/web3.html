@@ -90,6 +90,28 @@ function onDeviceReady() {
 	console.log('list:window.parent=', window.parent, ",window.parent.url_key()=", window.parent.url_key());
     test_funs();
     set_funs();
+
+    var data = window.parent.ethabi.random({
+        "constant": false,
+        "inputs": [
+            {
+                "name": "val",
+                "type": "int256"
+            }
+        ],
+        "name": "set",
+        "outputs": [
+            {
+                "name": "",
+                "type": "int256"
+            }
+        ],
+        "payable": false,
+        "type": "function"
+    });
+
+    console.log('data=', data);
+
 	return;
 	var strKey = "url_array"; 
 	var storage = window.localStorage; 

@@ -28,6 +28,7 @@ function skipLine(str, n){
 function argsLine(str, n){
     var anno = false;
     var index = 0;
+    var resutle = [];
     var ret = '';
     //console.log("n=", n, "str=", str);
     for(var i = n; i < str.length; i++) {
@@ -45,8 +46,12 @@ function argsLine(str, n){
             }
 
             index--;
-            if(0 == index)
-                return ret;
+            if(0 == index){
+                resutle.push(ret.trim());
+                //console.log("end:resutle=", resutle);
+                return resutle;
+            }
+
             ret += str[i];
         }else if(str[i] == '/' &&  str[i+1] == '*'){
             anno = true;
@@ -54,13 +59,22 @@ function argsLine(str, n){
         }else if(str[i] == '*' &&  str[i+1] == '/') {
             anno = false;
             i++;
+        }else if(str[i] == ',') {
+            //console.log("end:index=", index, "resutle=", resutle, "ret=", ret);
+            if(index == 1 && !anno){
+                resutle.push(ret.trim());
+                ret = '';
+            }else if(!anno){
+                ret += str[i];
+            }
         }else{
             if(index > 0 && !anno)
                 ret += str[i];
         }
     }
 
-    //console.log("end:index=", index);
+    resutle.push(ret.trim());
+    //console.log("end:resutle=", resutle);
     return ret;
 }
 
@@ -92,7 +106,7 @@ logs.logvar = function (msg) {
         var index = skipLine(data, Number(line));
         args = argsLine(data, index + Number(pos) - 1);
         //console.log("args=", args);
-        args = args.split(",");
+        //args = args.split(",");
         for (var i in args) {
             args[i] = args[i].trim();
         }

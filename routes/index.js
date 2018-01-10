@@ -11,11 +11,6 @@ function root(args, res) {
   res.send(cons);
 }
 
-function test(args, res) {
-    var names = {"contract test":"/contract_test", "pressure test":"/pressure_test"};
-    res.send(webs.button_list(names));
-}
-
 /* GET home page. */
 router.get('/cons', function(req, res, next) {
   logs.logvar(req.query, req.path);
@@ -25,14 +20,6 @@ router.get('/cons', function(req, res, next) {
 
 router.post('/cons', function(req, res, next) {
   root(req.body, res);
-});
-
-router.get('/test', function(req, res, next) {
-    root(req.query, res);
-});
-
-router.post('/test', function(req, res, next) {
-    root(req.body, res);
 });
 
 module.exports = router;

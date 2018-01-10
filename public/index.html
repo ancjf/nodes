@@ -132,24 +132,44 @@ function query_con(){
                 //console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
                 var result = JSON.parse(XMLHttpRequest.responseText);
                 g_eth[url].cons = result;
-                //console.log('g_eth=', g_eth);
+                for(i in g_eth[url].cons)
+                    g_eth[url].cons[i].contract_name = i;
+                console.log('g_eth=', g_eth);
             })
         })
     })
 }
 
-function random_addr(addr) // [Min, Max)
+function random_item(addr) // [Min, Max)
 {
-    var rand = Math.floor(Math.random() * (addr.length+1));
+    console.log('addr.length=', addr.length);
+    if(0 == addr.length)
+        return undefined;
+
+    var rand = Math.floor(Math.random() * (addr.length));
+    console.log('rand=', rand, ",addr=", addr);
     return addr[rand];
 }
 
-function trans(con, fun, data, callback){
+function random_map(addr) // [Min, Max)
+{
+    var value = [];
+    for(i in addr)
+        value.push(i);
+
+    if(0 == value.length)
+        return undefined;
+
+    var rand = Math.floor(Math.random() * value.length);
+    return addr[value[rand]];
+}
+
+function trans_url(url, con, fun, data, callback){
     console.log('con=', con);
-    var url = rpc();
     var net = g_eth[url].network;
+    console.log('con.networks=', con.networks);
     var to = con.networks[net].address;
-    var from = random_addr(g_eth[url].accs);
+    var from = random_item(g_eth[url].accs);
 
     var params = [{"from":from,"to":to,"data":data}];
     console.log('data=', data);
@@ -169,12 +189,17 @@ function trans(con, fun, data, callback){
     });
 }
 
-function call(con, fun, data, callback){
-    console.log('con=', con);
+function trans(con, fun, data, callback) {
+    console.log('con=', con, ",fun=", fun);
     var url = rpc();
+    trans_url(url, con, fun, data, callback);
+}
+
+function call_url(url, con, fun, data, callback){
+    console.log('con=', con, ",fun=", fun);
     var net = g_eth[url].network;
     var to = con.networks[net].address;
-    var from = random_addr(g_eth[url].accs);
+    var from = random_item(g_eth[url].accs);
 
     var params = [{"from":from,"to":to,"data":data}, "-1"];
     console.log('data=', data);
@@ -182,12 +207,18 @@ function call(con, fun, data, callback){
         console.log('err=', err, 'result=', result);
         if(!err){
             result = JSON.parse(result);
-            console.log('fun=', fun);
+            console.log('fun=', fun, ",result.result=", result.result);
             result = window.ethabi.decodeMethod(fun, result.result);
         }
 
         callback(err, result);
     });
+}
+
+function call(con, fun, data, callback) {
+    console.log('con=', con);
+    var url = rpc();
+    call_url(url, con, fun, data, callback);
 }
 
 function ajax(url, data, callback){
@@ -348,6 +379,186 @@ function jump_url(obj){
 	document.getElementById("main_frame").src = obj.name;
 }
 
+
+function stat_init(req_count) {
+    return {"id": new Date().getTime(),
+        "start": new Date().getTime(),
+        "req_count": req_count,
+        "count": 0,
+        "err": 0,
+        "nolog": 0,
+        "succeed": 0,
+        "gasUsed" : 0,
+        "costTime" : 0,
+        "contract": {}};
+}
+
+function stat_stat(stat, arg) {
+    stat.costTime = new Date().getTime() - stat.start;
+    var funname = arg.fun.name;
+    var conname = arg.con.contract_name;
+    if(typeof stat.contract[conname] === "undefined"){
+        stat.contract[conname] = {count:0, err:0, nolog:0, succeed:0, gasUsed : 0, function:{}};
+    }
+
+    if(typeof stat.contract[conname].function[funname] === "undefined"){
+        //logs.log("conname=", conname, ",funname=", funname)
+        if(arg.fun.constant)
+            stat.contract[conname].function[funname] = {count: 0, err: 0, succeed: 0};
+        else
+            stat.contract[conname].function[funname] = {count: 0, err: 0, nolog:0, succeed: 0, gasUsed : 0};
+    }
+
+    stat.count++;
+    stat.contract[conname].count++;
+    stat.contract[conname].function[funname].count++;
+
+    if(arg.err){
+        stat.err++;
+        stat.contract[conname].err++;
+        stat.contract[conname].function[funname].err++;
+        //logs.log("stat=", logs.inspect(stat));
+        return stat;
+    }
+
+    console.log('arg=', arg);
+    if(arg.fun.constant ==  false && arg.result.logs.length == 0){
+        stat.nolog++;
+        stat.contract[conname].nolog++;
+        stat.contract[conname].function[funname].nolog++;
+        //logs.log("stat=", logs.inspect(stat));
+        return stat;
+    }
+
+    stat.succeed++;
+    stat.contract[conname].succeed++;
+    stat.contract[conname].function[funname].succeed++;
+
+    if(!arg.fun.constant){
+        var gasUsed = Number(arg.result.gasUsed);
+        if(gasUsed == undefined)
+            gasUsed = 0;
+
+        stat.gasUsed += gasUsed;
+        stat.contract[conname].gasUsed += gasUsed;
+        stat.contract[conname].function[funname].gasUsed += gasUsed;
+        //logs.log("stat=", logs.inspect(stat));
+        return stat;
+    }
+
+    //logs.log("stat=", logs.inspect(stat));
+    return stat;
+}
+
+function stat_trans(url, con, fun, arg, callback) {
+    console.log("fun=", fun);
+    var f = trans_url;
+    if(fun.constant)
+        f = call_url;
+
+    f(url, con, fun, arg, function(err, result){
+        //logs.log("result=", result);
+        arg = {"con": con,
+            "fun": fun,
+            "err": false,
+            "result": result};
+
+        callback(arg);
+    });
+}
+
+function pressure_test_transaction(url, con, con_fun, count, perCount, callback) {
+    var back_count = 0;
+
+    for(var i = 0; i < perCount; i++){
+        var params = window.ethabi.random(con_fun);
+        stat_trans(con, con_fun, params, function (result) {
+            g_eth[url].stat = stat_stat(g_eth[url].stat, result);
+
+            back_count++;
+            assert.ok(back_count <= perCount, "back_count > perCount");
+            if(back_count >= perCount){
+
+                if(count > 1){
+                    pressure_test_transaction(url, con, con_fun, count-1, perCount, callback);
+                }else{
+                    callback(g_eth[url].stat);
+                }
+
+            }
+        });
+    }
+}
+
+function pressure_test_contract(url, con, count, perCount, callback) {
+
+    var back_count = 0;
+
+    for(var i = 0; i < perCount; i++){
+        var abi = random_item(con.abi);
+        console.log("con=", con, ",abi=", abi);
+        var params = window.ethabi.random(abi);
+        //var number = utils.get_random_num(0, abi.length);
+        //logs.logvar(number, abi.length);
+        //logs.logvar(number, abi.length, count, i);
+
+        stat_trans(url, con, abi, params, function (result) {
+            g_eth[url].stat = stat_stat(g_eth[url].stat, result);
+
+            back_count++;
+            if(back_count >= perCount){
+                //logs.logvar(count, result.con.contract_name, result.fun.name);
+
+                if(count > 1){
+                    pressure_test_contract(url, con, count-1, perCount, callback);
+                }else{
+                    callback(g_eth[url].stat);
+                }
+            }
+        });
+    }
+}
+
+function pressure_test(url, count, perCount, callback) {
+    var con = random_map(g_eth[url].cons);
+    if(con == undefined){
+        return;
+    }
+
+    //res.send(stat.id);
+    console.log("con=", con);
+    pressure_test_contract(url, con, 1, perCount, function (result) {
+        //logs.logvar(stat, result);
+        //stat = trans.stat_add(stat, result);
+        //logs.logvar(count, perCount, name);
+        if(count > 1){
+            pressure_test(url, count-1, perCount, callback);
+        }else{
+            callback(g_eth[url].stat);
+        }
+    });
+}
+
+function log_url(url){
+    return g_eth[url].stat;
+}
+
+function test(count, perCount) {
+    var url = rpc();
+    var begin = new Date().getTime();
+    g_eth[url].stat = stat_init(count*perCount);
+
+    console.log(count, perCount);
+    pressure_test(url, count, perCount, function (result) {
+        var end = new Date().getTime();
+        result.costTime = end - begin;
+        g_eth[url].stat = result;
+        //logs.log("result=", logs.inspect(result));
+        //res.send(result);
+    });
+}
+
+
 </script>
 
 <style type="text/css">
@@ -384,6 +595,7 @@ function jump_url(obj){
     <button name="contract_list.html" onClick="jump_url(this)">contract_test</button>
     <button name="test_stress.html" onClick="jump_url(this)">test stress</button>
     <a href="Mailto:ancjf@163.com">Contact me!</a>
+    <a href="/web3/example/balance.html">contract_array</a>
 </p>
 
 <iframe id="main_frame" width="98%" height="95%" src="/web3.html"></iframe>

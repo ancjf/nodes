@@ -70,6 +70,12 @@ function time_get_log(id){
 	);
 }
 
+function time_get_log_url(url){
+    console.log('url=', url);
+
+    precoss_result(window.parent.log_url(url));
+}
+
 function on_submit(obj)
 {
 	if(time_id != undefined){
@@ -83,7 +89,15 @@ function on_submit(obj)
 	var rpc = window.parent.rpc();
 	
 	console.log('count=', count, 'perCount=', perCount, ',$(obj).find("#count")=', $(obj).find("#count"));
-	
+
+    if(!window.parent.remote()){
+        window.parent.test(count,perCount);
+        var str = "time_get_log_url('" + rpc + "')";
+        console.log('str=', str);
+        time_id = setInterval(str, 1000);
+        return false;
+    }
+
 	window.parent.ajax('/pressure_test/test', 
 		{"count":count,"perCount":perCount},
 		function(XMLHttpRequest, textStatus){
@@ -92,37 +106,6 @@ function on_submit(obj)
 			time_id = setInterval("time_get_log(" + XMLHttpRequest.responseText + ")", 1000);
         }
 	);
-	
-	return false;
-	
-	$.ajax({    
-		url: '/pressure_test/test',    
-		type: 'get',    
-		dataType: 'json',   
-		contentType: 'application/json',    
-		data: {".rpc":rpc,"count":count,"perCount":perCount}, 
-		error: function(XMLHttpRequest, textStatus, errorThrown) {
-			console.log("XMLHttpRequest.status=", XMLHttpRequest.status, ",XMLHttpRequest.readyState=", XMLHttpRequest.readyState, ",textStatus=", textStatus, ",XMLHttpRequest=", XMLHttpRequest);
-			if(XMLHttpRequest.status == 200 && XMLHttpRequest.readyState == 4 && XMLHttpRequest.responseText != ''){
-				$("#result_text").text(XMLHttpRequest.responseText);
-				time_id = setInterval("time_get_log(" + XMLHttpRequest.responseText + ")", 1000);
-				//setTimeout("time_get_log(" + result + ")", 1000);
-			}
-   		},   
-		success: function(objResult) {
-			console.log("objResult=", objResult);
-			var result = JSON.stringify(objResult, null, 4);
-			console.log("result.length=", result.length, "result=", result);
-			$("#result_text").text(result);
-			
-			if(objResult != null && objResult != undefined && result != ''  && result != '{}'){
-				time_id = setInterval("time_get_log(" + result + ")", 1000);
-				//setTimeout("time_get_log(" + result + ")", 1000);
-			}else{
-				console.log("recv err");
-			}
-		}
-	});
 	
 	return false;
 }

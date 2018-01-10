@@ -5,25 +5,6 @@ var trans = require('./trans.js');
 var logs = require('./logs.js');
 var webs = require('./webs.js');
 
-function abi2inputs(abi){
-    var ret = {};
-    for (var i in abi.inputs){
-        var name = abi.inputs[i].name;
-        var type = abi.inputs[i].type;
-        var text = name + "." + type;
-
-        ret[text] = name;
-    }
-
-    return ret;
-}
-
-function transaction_link(conname, abi){
-    var text = conname + "." + abi.name;
-
-    return webs.from(text, "/contract_test/transaction", abi2inputs(abi), conname, utils.fun_name(abi));
-}
-
 function root(args, res) {
     logs.logvar(rpc, names);
     var rpc = args[".rpc"];
@@ -88,21 +69,6 @@ function contract(args, res) {
 
     //logs.logvar(abi);
     res.send(con);
-    /*
-    var link = '';
-
-    for (var i in abi){
-        var fun = abi[i];
-        if(fun.type != "function"){
-            //console.log("type fun=", fun);
-            continue;
-        }
-        link += transaction_link(name, fun);
-    }
-
-    //logs.log("name=", name, ",req.body=", req.body);
-    res.send(link);.
-    */
 }
 
 router.get('/contract', function(req, res, next) {

@@ -95,7 +95,7 @@ trans.stat = function (stat, arg) {
         return stat;
     }
 
-    if(!arg.fun.constant && arg.result.logs.length == 0){
+    if(!arg.fun.constant && arg.result.receipt.logs.length == 0){
         stat.nolog++;
         stat.contract[conname].nolog++;
         stat.contract[conname].function[funname].nolog++;
