@@ -341,15 +341,28 @@ webs.trans("http://192.168.153.128:8545", trans, function(err, result) {
 });
 */
 
-var b = browserify();
+
 //var file = fs.openSync('./routes/webs.js', "w");
-const file = fs.createWriteStream('./public/javascripts/webs.js');
 //logs.logvar(process.stdout);
 
-b.add('./routes/webs.js');
-b.bundle().pipe(file);
+var srcfile = './routes/webs.js';
+var destfile = './public/javascripts/webs.js';
 
-file.end();
+if(!fs.existsSync(destfile) || fs.statSync(srcfile).mtime > fs.statSync(destfile).mtime){
+    var b = browserify();
+    b.add(srcfile);
+    b.bundle().pipe(fs.createWriteStream(destfile));
+    logs.logvar("end");
+}
+
+/*
+var stat = fs.statSync('./routes/webs.js');
+logs.logvar(stat, Date.parse(fs.statSync('./routes/webs.js').mtime));
+
+b.add('./routes/webs.js');
+b.bundle().pipe(fs.createWriteStream('./public/javascripts/webs.js'));
+logs.logvar("end");
+*/
 //b.bundle().pipe(process.stdout);
 
 //fs.closeSync(file);
