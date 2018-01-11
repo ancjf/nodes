@@ -2,6 +2,7 @@
  * Created by cjf on 2017/9/30.
  */
 
+var Web3 = require('web3');
 var logs = require('./logs.js');
 var coder = require('../node_modules/web3/lib/solidity/coder');
 var RequestManager = require('../node_modules/web3/lib/web3/requestmanager');
@@ -197,31 +198,38 @@ webs.validateArgs = function validateArgs(inputTypes, args) {
     }
 };
 
-webs.toPayload = function toPayload(tran) {
-    var options = {};
-
-    var inputTypes = tran.abi.inputs.map(function (i) {
+webs.random_data = function (abi, params) // [Min, Max)
+{
+    var inputTypes = abi.inputs.map(function (i) {
         return i.type;
     });
 
-
-    options.from = tran.from;
-    options.to = tran.to;
-
-    var params = tran.params;
-    if(params == undefined)
+    if(params === undefined)
         params = randomInput(inputTypes);
-
-    const signature = tran.abi.name + '(' + inputTypes.join(',') + ')';
-    var hash = sha3(signature).slice(0, 8);
-    //logs.logvar(signature, hash, inputTypes, params, coder.encodeParams(inputTypes, params));
     this.validateArgs(inputTypes, params);
-    options.data = '0x' + hash + coder.encodeParams(inputTypes, params);
-    //return JSON.stringify(options);
+
+    const signature = abi.name + '(' + inputTypes.join(',') + ')';
+    var hash = sha3(signature).slice(0, 8);
+
+    return '0x' + hash + coder.encodeParams(inputTypes, params);
+}
+
+webs.toPayload = function toPayload(tran) {
+    var options = {};
+    Object.keys(tran).forEach(function (f) {
+        if(f != 'abi' && f != 'params' && f != 'events')
+            options[f] = tran[f];
+    });
+
+    //logs.logvar(options);
+    if(options.data === undefined){
+        options.data = webs.random_data(tran.abi, tran.params);
+    }
+
     return options;
 };
 
-function getReceipt(eth, txHash, callback){
+webs.getReceipt = function(eth, txHash, callback){
     var timeout = 240000;
     var start = new Date().getTime();
 
@@ -253,19 +261,55 @@ function getReceipt(eth, txHash, callback){
     getTransactionReceipt_UntilNotNull(txHash);
 }
 
+webs.unpackOutput = function (outputs, output) {
+    if (!output) {
+        return;
+    }
+
+    var outputTypes = outputs.map(function (i) {
+        return i.type;
+    });
+    output = output.length >= 2 ? output.slice(2) : output;
+    var result = coder.decodeParams(outputTypes, output);
+    return result.length === 1 ? result[0] : result;
+};
+
+webs.decode_logs = function (tran, receipt) {
+    if (tran.events === undefined) {
+        logs.logvar(tran, receipt.logs);
+        return receipt.logs;
+    }
+
+    var ret = [];
+
+    for(var i = 0; i < receipt.logs.length; i++){
+        ret[i] = receipt.logs[i];
+        var topics = receipt.logs[i].topics[0];
+        logs.logvar(topics);
+        if(tran.events[topics] != undefined)
+            ret[i].result = webs.unpackOutput(tran.events[topics].inputs, receipt.logs[i].data);
+    }
+
+    return ret;
+};
+
 function  eth_one(eth, tran, i, fun){
     try{
         var payload = webs.toPayload(tran);
         if(tran.abi.constant){
             var result = eth.call(payload);
+            if (result && tran.abi === undefined) {
+                result = webs.unpackOutput(tran.abi.outputs, result);
+            }
             //logs.logvar(result);
             fun(i, {"err":false,"result":result});
         }else{
             eth.sendTransaction(payload, function(err, result){
                 //logs.logvar(err, result);
 
-                getReceipt(eth, result, function(err, receipt){
+                webs.getReceipt(eth, result, function(err, receipt){
                     //logs.logvar(indes, trans.length, err, receipt);
+                    receipt.logs = webs.decode_logs(tran, receipt);
                     fun(i, {"err":false,"result":receipt});
                 });
             });
@@ -275,7 +319,7 @@ function  eth_one(eth, tran, i, fun){
     }
 }
 
-function random_item(addr) // [Min, Max)
+webs.random_item = function (addr) // [Min, Max)
 {
     //console.log('addr.length=', addr.length);
     if(0 == addr.length)
@@ -301,7 +345,7 @@ webs.trans = function(rpc, trans, fun) {
         for(var i = 0; i < trans.length; i++)
         {
             if(trans[i].from == undefined)
-                trans[i].from = random_item(personal.listAccounts);
+                trans[i].from = webs.random_item(personal.listAccounts);
 
             eth_one(eth, trans[i], i, function (index, result) {
                 ret[index] = result;
@@ -314,9 +358,53 @@ webs.trans = function(rpc, trans, fun) {
 
     }catch(err){
         //logs.logvar(err);
-        fun(true, {"err":true,"result":err});
+        fun(true, {err:true,result:err});
     }
 }
+
+function result_fun(result) {
+    if(typeof(result) == "number")
+        result = result.toString();
+    if(result == null)
+        result = "null";
+
+    return result;
+}
+
+webs.call = function(args, callback) {
+    var fun = args.fun;
+    var arg = args.arg;
+    var type = args.type;
+    var rpc = args[".rpc"];
+
+    try {
+        var line;
+        var result;
+        var web3 = new Web3(new Web3.providers.HttpProvider(rpc));
+
+        //logs.logvar(web3.eth.blockNumber);
+
+        if(type == 'fun.sync') {
+            line = 'web3.' + fun + '(' + arg + ', callback)';
+            eval(line);
+        }else if(type == 'fun'){
+            line = 'web3.' + fun + '(' + arg + ')';
+            result = eval(line);
+
+            callback(false, result_fun(result));
+        }else{
+            line = 'result = web3.' + fun;
+            //logs.log("line=", line);
+            eval(line);
+
+            callback(false, result_fun(result));
+        }
+    } catch (err) {
+        callback(true, err);
+    }
+
+    callback(true, "no support");
+};
 
 if(typeof window!=="undefined")
     window.webs = webs

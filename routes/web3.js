@@ -85,12 +85,48 @@ function root(args, res) {
     });
 };
 
+function trans_call(args, res) {
+    var trans = JSON.parse(args.trans);
+    var rpc = args[".rpc"];
+
+    logs.logvar(trans);
+    webs.trans(rpc, trans, function (error, result) {
+        logs.logvar(error, result);
+        res.send({"err":error, "result":result});
+    });
+};
+
+function call(args, res) {
+    webs.call(args, function (error, result) {
+        logs.logvar(error, result);
+        res.send({"err":error, "result":result});
+    });
+};
+
 router.post('/', function(req, res, next) {
     root(req.body, res);
 });
 
-router.get('/*', function(req, res, next) {
+router.get('/', function(req, res, next) {
     root(req.query, res);
+});
+
+router.post('/trans', function(req, res, next) {
+    trans_call(req.body, res);
+});
+
+router.get('/trans', function(req, res, next) {
+    console.log("end:index=");
+    logs.logvar("11111111111");
+    trans_call(req.query, res);
+});
+
+router.post('/call', function(req, res, next) {
+    call(req.body, res);
+});
+
+router.get('/call', function(req, res, next) {
+    call(req.query, res);
 });
 
 module.exports = router;

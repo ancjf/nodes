@@ -9,10 +9,6 @@ var Web3 = require('web3');
 
 const keccak256 = require('js-sha3').keccak_256;
 var webs = require('./webs.js');
-var browserify = require("browserify");
-var beefy = require('beefy')
-
-
 
 /*
 var httpProvider = "http://" + truffle.networks.development.host + ":" +  truffle.networks.development.port;
@@ -334,8 +330,9 @@ testint.abi.forEach(function (result, index) {
     trans[index].to = testint.networks['5678'].address;
     */
 });
-
 /*
+logs.logvar(trans);
+
 webs.trans("http://192.168.153.128:8545", trans, function(err, result) {
     logs.logvar(err, result);
 });
@@ -348,11 +345,21 @@ webs.trans("http://192.168.153.128:8545", trans, function(err, result) {
 var srcfile = './routes/webs.js';
 var destfile = './public/javascripts/webs.js';
 
-if(!fs.existsSync(destfile) || fs.statSync(srcfile).mtime > fs.statSync(destfile).mtime){
+//if(!fs.existsSync(destfile) || fs.statSync(srcfile).mtime > fs.statSync(destfile).mtime)
+{
+    var gulp = require('gulp');
+    //var minify = require('gulp-minify-css');
+    var less = require('gulp-less');
+    var browserify = require("browserify");
     var b = browserify();
     b.add(srcfile);
     b.bundle().pipe(fs.createWriteStream(destfile));
-    logs.logvar("end");
+
+    gulp.src(destfile)
+        .pipe(less())
+        .pipe(gulp.dest('build'));
+
+    logs.logvar("generate:", destfile);
 }
 
 /*
