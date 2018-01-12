@@ -8,7 +8,7 @@ var utils = require('./utils.js');
 var args = require('./args.js');
 var trans = require('./trans.js');
 var logs = require('./logs.js');
-var webs = require('./webs.js');
+var Webs = require('./webs.js');
 var assert = require('assert');
 var Web3 = require('web3');
 var web3 = new Web3(new Web3.providers.HttpProvider());
@@ -85,22 +85,73 @@ function root(args, res) {
     });
 };
 
-function trans_call(args, res) {
-    var trans = JSON.parse(args.trans);
-    var rpc = args[".rpc"];
+function trans_trans(args, res) {
+    try{
+        var trans = JSON.parse(args.trans);
+        var rpc = args[".rpc"];
+        var webs = new Webs(rpc);
 
-    logs.logvar(trans);
-    webs.trans(rpc, trans, function (error, result) {
-        logs.logvar(error, result);
-        res.send({"err":error, "result":result});
-    });
+        webs.trans(trans, function (error, result) {
+            //logs.logvar(error, result);
+            res.send({"err":error, "result":result});
+        });
+    }catch(err){
+        res.send({"err":error, "result":err});
+    }
 };
 
-function call(args, res) {
-    webs.call(args, function (error, result) {
-        logs.logvar(error, result);
-        res.send({"err":error, "result":result});
-    });
+function test(args, res) {
+    try{
+        var id = args["id"];
+        if(id !== undefined){
+            res.send({"err":error, "result":webs.log(id)});
+            return;
+        }
+
+        var count = Number(args["count"]);
+        var perCount = Number(args["perCount"]);
+        var conname = args[".contract"];
+        var fun = args[".function"];
+        var address = args["address"];
+        var rpc = args[".rpc"];
+
+        var webs = new Webs(rpc);
+        logs.logvar(conname);
+
+        if(conname === undefined){
+            var cons = utils.cons(webs.web3.version.network);
+            id = webs.test(count, perCount, cons);
+        }else if(fun === undefined){
+            var cons = utils.cons(webs.web3.version.network);
+            id = webs.test_con(count, perCount, cons[conname]);
+        }else{
+            id = webs.test_con(count, perCount, fun, conname, address);
+        }
+
+        res.send({"err":error, "result":id});
+    }catch(err){
+        res.send({"err":error, "result":err});
+    }
+};
+
+function query(args, res) {
+    try{
+        res.send({"err":error, "result":id});
+    }catch(err){
+        res.send({"err":error, "result":err});
+    }
+};
+
+function trans_call(args, res) {
+    try{
+        logs.logvar(args);
+        Webs.prototype.call(args, function (error, result) {
+            logs.logvar(args);
+            res.send({"err":error, "result":result});
+        });
+    }catch(err){
+        res.send({"err":error, "result":err});
+    }
 };
 
 router.post('/', function(req, res, next) {
@@ -111,22 +162,36 @@ router.get('/', function(req, res, next) {
     root(req.query, res);
 });
 
-router.post('/trans', function(req, res, next) {
+router.post('/call', function(req, res, next) {
     trans_call(req.body, res);
 });
 
-router.get('/trans', function(req, res, next) {
-    console.log("end:index=");
-    logs.logvar("11111111111");
+router.get('/call', function(req, res, next) {
     trans_call(req.query, res);
 });
 
-router.post('/call', function(req, res, next) {
-    call(req.body, res);
+router.post('/trans', function(req, res, next) {
+    trans_trans(req.body, res);
 });
 
-router.get('/call', function(req, res, next) {
-    call(req.query, res);
+router.get('/trans', function(req, res, next) {
+    trans_trans(req.query, res);
+});
+
+router.post('/test', function(req, res, next) {
+    test(req.body, res);
+});
+
+router.get('/test', function(req, res, next) {
+    test(req.query, res);
+});
+
+router.post('/query', function(req, res, next) {
+    query(req.body, res);
+});
+
+router.get('/query', function(req, res, next) {
+    query(req.query, res);
 });
 
 module.exports = router;

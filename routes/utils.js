@@ -8,7 +8,7 @@ var contract = require("truffle-contract");
 var Web3 = require('web3');
 
 const keccak256 = require('js-sha3').keccak_256;
-var webs = require('./webs.js');
+var Webs = require('./webs.js');
 
 /*
 var httpProvider = "http://" + truffle.networks.development.host + ":" +  truffle.networks.development.port;
@@ -250,6 +250,7 @@ utils.cons = function(network){
 
         ret[f] = {};
         ret[f].networks = utils.jsons[f].networks;
+        ret[f].contract_name = utils.jsons[f].contract_name;
         ret[f].abi = utils.funs(utils.jsons[f]);
     }
 
@@ -316,6 +317,12 @@ utils.transaction_option = function(){
 
 utils.load();
 
+function arg_test(){
+    logs.logvar(arguments);
+}
+
+arg_test(['a','b']);
+
 var testint = utils.json("TestInt");
 //logs.logvar(testint.networks['5678'].address);
 
@@ -323,7 +330,7 @@ var trans = [];
 testint.abi.forEach(function (result, index) {
 
     if(result.type == "function")
-        trans.push({"abi":result,"to":testint.networks['5678'].address});
+        trans.push({"abi":result,"conname":testint.contract_name,"to":testint.networks['5678'].address});
     /*
     trans[index].abi = result;
     trans[index].from = "0x18a3cbbf884d0fd94cd1d10dec041c3b5a08b5b5";
@@ -332,12 +339,25 @@ testint.abi.forEach(function (result, index) {
 });
 /*
 logs.logvar(trans);
+*/
 
-webs.trans("http://192.168.153.128:8545", trans, function(err, result) {
+
+var webs = new Webs("http://192.168.153.128:8545");
+logs.logvar(webs.web3.version.network);
+/*
+webs.trans(trans, function(err, result) {
     logs.logvar(err, result);
 });
 */
 
+var cons = utils.cons(webs.web3.version.network);
+//logs.logvar(cons);
+//webs.test(5, 2, cons);
+//logs.logvar(webs.web3.version.network, cons['TestInt']);
+var testint = cons['TestInt'];
+//webs.test_con(5, 2, testint);
+
+//webs.test_fun(5, 2, testint.abi[2], testint.contract_name, testint.networks[webs.web3.version.network].address);
 
 //var file = fs.openSync('./routes/webs.js', "w");
 //logs.logvar(process.stdout);

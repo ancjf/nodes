@@ -5,18 +5,15 @@
 var Web3 = require('web3');
 var logs = require('./logs.js');
 var coder = require('../node_modules/web3/lib/solidity/coder');
-var RequestManager = require('../node_modules/web3/lib/web3/requestmanager');
-var Eth = require('../node_modules/web3/lib/web3/methods/eth');
-var Personal = require('../node_modules/web3/lib/web3/methods/Personal');
-var HttpProvider = require('../node_modules/web3/lib/web3/httpprovider');
-var sha3 = require('../node_modules/web3/lib/utils/sha3');
+//var RequestManager = require('../node_modules/web3/lib/web3/requestmanager');
+//var Eth = require('../node_modules/web3/lib/web3/methods/eth');
+//var Personal = require('../node_modules/web3/lib/web3/methods/Personal');
 var utils = require('../node_modules/web3/lib/utils/utils');
+//var SolidityFunction = require('../node_modules/web3/lib/web3/function');
 
 var Jsonrpc = {
     messageId: 0
 };
-
-var webs = {};
 
 function get_random_num(Min, Max) // [Min, Max)
 {
@@ -185,7 +182,7 @@ function randomInput(inputTypes) {
     return parts;
 }
 
-webs.validateArgs = function validateArgs(inputTypes, args) {
+function validateArgs(inputTypes, args) {
     var inputArgs = args.filter(function (a) {
         // filter the options object but not arguments that are arrays
         return !( (utils.isObject(a) === true) &&
@@ -198,38 +195,18 @@ webs.validateArgs = function validateArgs(inputTypes, args) {
     }
 };
 
-webs.random_data = function (abi, params) // [Min, Max)
-{
-    var inputTypes = abi.inputs.map(function (i) {
-        return i.type;
-    });
 
-    if(params === undefined)
-        params = randomInput(inputTypes);
-    this.validateArgs(inputTypes, params);
-
-    const signature = abi.name + '(' + inputTypes.join(',') + ')';
-    var hash = sha3(signature).slice(0, 8);
-
-    return '0x' + hash + coder.encodeParams(inputTypes, params);
-}
-
-webs.toPayload = function toPayload(tran) {
-    var options = {};
-    Object.keys(tran).forEach(function (f) {
-        if(f != 'abi' && f != 'params' && f != 'events')
-            options[f] = tran[f];
-    });
-
-    //logs.logvar(options);
+function toPayload(tran, params) {
+    var options = tran.options;
     if(options.data === undefined){
-        options.data = webs.random_data(tran.abi, tran.params);
+        options.data = webs.prototype.random_data(tran.abi, params);
     }
 
+    options.to = tran.to;
     return options;
 };
 
-webs.getReceipt = function(eth, txHash, callback){
+function getReceipt(eth, txHash, callback){
     var timeout = 240000;
     var start = new Date().getTime();
 
@@ -261,7 +238,7 @@ webs.getReceipt = function(eth, txHash, callback){
     getTransactionReceipt_UntilNotNull(txHash);
 }
 
-webs.unpackOutput = function (outputs, output) {
+function unpackOutput(outputs, output) {
     if (!output) {
         return;
     }
@@ -274,9 +251,9 @@ webs.unpackOutput = function (outputs, output) {
     return result.length === 1 ? result[0] : result;
 };
 
-webs.decode_logs = function (tran, receipt) {
+function decode_logs(tran, receipt) {
     if (tran.events === undefined) {
-        logs.logvar(tran, receipt.logs);
+        //logs.logvar(tran, receipt.logs);
         return receipt.logs;
     }
 
@@ -285,21 +262,21 @@ webs.decode_logs = function (tran, receipt) {
     for(var i = 0; i < receipt.logs.length; i++){
         ret[i] = receipt.logs[i];
         var topics = receipt.logs[i].topics[0];
-        logs.logvar(topics);
+        //logs.logvar(topics);
         if(tran.events[topics] != undefined)
-            ret[i].result = webs.unpackOutput(tran.events[topics].inputs, receipt.logs[i].data);
+            ret[i].result = unpackOutput(tran.events[topics].inputs, receipt.logs[i].data);
     }
 
     return ret;
 };
 
-function  eth_one(eth, tran, i, fun){
+function trans_params(eth, tran, params, i, fun){
     try{
-        var payload = webs.toPayload(tran);
+        var payload = toPayload(tran, params);
         if(tran.abi.constant){
             var result = eth.call(payload);
-            if (result && tran.abi === undefined) {
-                result = webs.unpackOutput(tran.abi.outputs, result);
+            if (result && tran.abi !== undefined) {
+                result = unpackOutput(tran.abi.outputs, result);
             }
             //logs.logvar(result);
             fun(i, {"err":false,"result":result});
@@ -307,9 +284,9 @@ function  eth_one(eth, tran, i, fun){
             eth.sendTransaction(payload, function(err, result){
                 //logs.logvar(err, result);
 
-                webs.getReceipt(eth, result, function(err, receipt){
+                getReceipt(eth, result, function(err, receipt){
                     //logs.logvar(indes, trans.length, err, receipt);
-                    receipt.logs = webs.decode_logs(tran, receipt);
+                    receipt.logs = decode_logs(tran, receipt);
                     fun(i, {"err":false,"result":receipt});
                 });
             });
@@ -319,8 +296,59 @@ function  eth_one(eth, tran, i, fun){
     }
 }
 
-webs.random_item = function (addr) // [Min, Max)
+function trans_one(eth, tran, i, fun){
+    if(tran.params == undefined){
+        return trans_params(eth, tran, undefined, 0,  function callback(index, result){
+            fun(i, [result]);
+        });
+    }
+
+    var ret = [];
+    var count = 0;
+    for(var f = 0; f < tran.params.length; f++){
+        trans_params(eth, tran, tran.params[f], f,  function callback(index, result){
+            ret[index] = result;
+            count++;
+            if(count == tran.params.length)
+                fun(i, ret);
+        });
+    }
+}
+
+var webs = function (rpc) {
+    this.web3 = new Web3(new Web3.providers.HttpProvider(rpc));
+    logs.logvar(rpc);
+    this.logs = {};
+};
+
+webs.prototype.logs = {};
+
+webs.prototype.random_data = function (abi, params) // [Min, Max)
 {
+    var inputTypes = abi.inputs.map(function (i) {
+        return i.type;
+    });
+
+    if(params === undefined)
+        params = randomInput(inputTypes);
+    validateArgs(inputTypes, params);
+
+    const signature = abi.name + '(' + inputTypes.join(',') + ')';
+    var hash = Web3.prototype.sha3(signature).slice(0, 10);
+
+    return hash + coder.encodeParams(inputTypes, params);
+}
+
+webs.prototype.random_item = function (addr)
+{
+    if(utils.isObject(addr)){
+        var keys = Object.keys(addr);
+        if(0 == keys.length)
+            return undefined;
+
+        var rand = Math.floor(Math.random() * keys.length);
+        return addr[keys[rand]];
+    }
     //console.log('addr.length=', addr.length);
     if(0 == addr.length)
         return undefined;
@@ -330,24 +358,30 @@ webs.random_item = function (addr) // [Min, Max)
     return addr[rand];
 }
 
-webs.trans = function(rpc, trans, fun) {
+webs.prototype.trans = function(trans, fun) {
     try{
-        var provider = new HttpProvider(rpc);
-        var request = new RequestManager(provider);
-        var web = {"_requestManager":request,"currentProvider":rpc};
-        var eth = new Eth(web);
-        var personal = new Personal(web);
-        //logs.logvar(personal.listAccounts);
+        var web3 = this.web3;
+        //this.web3 = web3;
+        //var provider = new Web3.providers.HttpProvider(rpc);
+        //var request = new RequestManager(provider);
+        //var web = {"_requestManager":request,"currentProvider":rpc};
+        //var eth = new Eth(web);
+        //var personal = new Personal(web);
+        var eth = web3.eth;
+        var accounts = web3.personal.listAccounts;
+        //logs.logvar(accounts);
 
         var ret = [];
         var count = 0;
         //var i = 3;
         for(var i = 0; i < trans.length; i++)
         {
-            if(trans[i].from == undefined)
-                trans[i].from = webs.random_item(personal.listAccounts);
+            if(trans[i].options == undefined)
+                trans[i].options = {};
+            if(trans[i].options.from == undefined)
+                trans[i].options.from = this.random_item(accounts);
 
-            eth_one(eth, trans[i], i, function (index, result) {
+            trans_one(eth, trans[i], i, function (index, result) {
                 ret[index] = result;
                 count++;
                 //logs.logvar(count, index, trans.length);
@@ -371,40 +405,220 @@ function result_fun(result) {
     return result;
 }
 
-webs.call = function(args, callback) {
+webs.prototype.call = function(args, callback) {
     var fun = args.fun;
-    var arg = args.arg;
+    var params = args.params;
     var type = args.type;
     var rpc = args[".rpc"];
+
+    if(params !== undefined){
+        params = JSON.stringify(params);
+        params = params.substring(1, params.length-1);
+    }
 
     try {
         var line;
         var result;
         var web3 = new Web3(new Web3.providers.HttpProvider(rpc));
 
-        //logs.logvar(web3.eth.blockNumber);
-
         if(type == 'fun.sync') {
-            line = 'web3.' + fun + '(' + arg + ', callback)';
+            line = 'web3.' + fun + '(' + params + ', callback)';
             eval(line);
         }else if(type == 'fun'){
-            line = 'web3.' + fun + '(' + arg + ')';
+            line = 'web3.' + fun + '(' + params + ')';
             result = eval(line);
 
             callback(false, result_fun(result));
         }else{
-            line = 'result = web3.' + fun;
-            //logs.log("line=", line);
-            eval(line);
-
+            var arr = fun.split('.');
+            result = web3[arr[0]][arr[1]];
             callback(false, result_fun(result));
         }
     } catch (err) {
         callback(true, err);
     }
-
-    callback(true, "no support");
 };
+
+webs.prototype.stat_init = function (req_count) {
+    return {"id": new Date().getTime(),
+        "start": new Date().getTime(),
+        "req_count": req_count,
+        "count": 0,
+        "err": 0,
+        "nolog": 0,
+        "succeed": 0,
+        "gasUsed" : 0,
+        "costTime" : 0,
+        "contract": {}};
+}
+
+webs.prototype.stat_one = function (stat, conname, fun, result) {
+    stat.costTime = new Date().getTime() - stat.start;
+    var funname = fun.name;
+    if(typeof stat.contract[conname] === "undefined"){
+        stat.contract[conname] = {count:0, err:0, nolog:0, succeed:0, gasUsed : 0, function:{}};
+    }
+
+    if(typeof stat.contract[conname].function[funname] === "undefined"){
+        //logs.log("conname=", conname, ",funname=", funname)
+        if(fun.constant)
+            stat.contract[conname].function[funname] = {count: 0, err: 0, succeed: 0};
+        else
+            stat.contract[conname].function[funname] = {count: 0, err: 0, nolog:0, succeed: 0, gasUsed : 0};
+    }
+
+    stat.count++;
+    stat.contract[conname].count++;
+    stat.contract[conname].function[funname].count++;
+
+    if(result == undefined || result.err){
+        stat.err++;
+        stat.contract[conname].err++;
+        stat.contract[conname].function[funname].err++;
+        return stat;
+    }
+
+    if(!fun.constant && result.result.logs.length == 0){
+        stat.nolog++;
+        stat.contract[conname].nolog++;
+        stat.contract[conname].function[funname].nolog++;
+        return stat;
+    }
+
+    stat.succeed++;
+    stat.contract[conname].succeed++;
+    stat.contract[conname].function[funname].succeed++;
+
+    if(!fun.constant){
+        var gasUsed = result.result.gasUsed;
+        if(gasUsed == undefined)
+            gasUsed = 0;
+
+        stat.gasUsed += gasUsed;
+        stat.contract[conname].gasUsed += gasUsed;
+        stat.contract[conname].function[funname].gasUsed += gasUsed;
+        return stat;
+    }
+
+    return stat;
+}
+
+webs.prototype.stat = function (stat, trans, result) {
+    //logs.logvar(trans, result);
+    for(var i = 0; i < trans.length; i++){
+        if(trans[i].params == undefined){
+            var val = undefined;
+            if(typeof (result[i][0]) !== "undefined")
+                val = result[i][0];
+            stat = this.stat_one(stat, trans[i].conname, trans[i].abi, val);
+            continue;
+        }
+        for(var j = 0; j < trans[i].params.length; j++) {
+            stat = this.stat_one(stat, trans[i].conname, trans[i].abi, result[i][j]);
+        }
+    }
+
+    return stat;
+}
+
+webs.prototype.test_fun_trans = function (stat, count, trans) {
+    var me = this;
+    me.trans(trans, function (err, result) {
+        if(err)
+            result = [];
+        stat = me.stat(stat, trans, result);
+        webs.prototype.logs[stat.id] = stat;
+        logs.logvar(count, stat);
+        if(count > 1)
+            me.test_fun_trans(stat, count-1, trans);
+    });
+}
+
+webs.prototype.test_fun = function (count, perCount, abi, conname, address) {
+    var trans = [{"abi":abi,"conname":conname,"to":address, "params":new Array(perCount)}];
+
+    var stat = this.stat_init(count*perCount);
+    webs.prototype.logs[stat.id] = stat;
+
+    this.test_fun_trans(stat, count, trans);
+
+    return stat.id;
+}
+
+webs.prototype.test_con_trans = function (perCount, con) {
+    var trans = [];
+
+    for(var i = 0; i < perCount; i++){
+        var abi = this.random_item(con.abi);
+
+        //logs.logvar(this.web3.net.version, con.networks);
+        var tran = {"abi":abi,"conname":con.contract_name,"to":con.networks[this.web3.version.network].address};
+        trans[i] = tran;
+    }
+
+    return trans;
+}
+
+webs.prototype.test_con = function (count, perCount, con, stat) {
+    if(stat == undefined)
+        stat = this.stat_init(count*perCount);
+    var trans = this.test_con_trans(perCount, con);
+
+    var me = this;
+    me.trans(trans, function (err, result) {
+        if(err)
+            result = [];
+        stat = me.stat(stat, trans, result);
+        webs.prototype.logs[stat.id] = stat;
+        logs.logvar(count, stat);
+        if(count > 1)
+            me.test_con(count-1, perCount, con, stat);
+    });
+
+    return stat.id;
+}
+
+webs.prototype.test_trans = function (perCount, cons) {
+    var trans = [];
+
+    for(var i = 0; i < perCount; i++){
+        //logs.logvar(cons);
+        var con = this.random_item(cons);
+        //logs.logvar(con);
+        var abi = this.random_item(con.abi);
+
+        //logs.logvar(con.contract_name);
+        var tran = {"abi":abi,"conname":con.contract_name,"to":con.networks[this.web3.version.network].address};
+
+        trans[i] = tran;
+    }
+
+    return trans;
+}
+
+webs.prototype.test = function (count, perCount, cons, stat) {
+    if(stat == undefined)
+        stat = this.stat_init(count*perCount);
+    var trans = this.test_trans(perCount, cons);
+
+    var me = this;
+    me.trans(trans, function (err, result) {
+        if(err)
+            result = [];
+        stat = webs.prototype.stat(stat, trans, result);
+        logs.logvar(webs.logs, stat);
+        //logs.logvar("1111111111111111111111111111111111111111111111111111111111111111");
+        webs.prototype.logs[stat.id] = stat;
+        if(count > 1)
+            me.test(count-1, perCount, cons, stat);
+    });
+
+    return stat.id;
+}
+
+webs.prototype.log = function (id) {
+    return webs.prototype.logs(id);
+}
 
 if(typeof window!=="undefined")
     window.webs = webs
