@@ -171,6 +171,13 @@ function on_submit(obj)
         params.push(value);
     }
 
+    var data = {"fun":fun,"params":params,"type":type};
+    window.parent.call(data, function(error, result){
+        $("#result_text").text(result);
+    });
+
+    return false;
+
     console.log('fun=', fun, 'params=', params, 'type=', type);
     window.parent.ajax('/web3/call',
         {"fun":fun,"params":params,"type":type},

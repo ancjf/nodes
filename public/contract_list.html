@@ -19,8 +19,8 @@ function set_contracts(con){
 function onDeviceReady() {
 	console.log('list:window.parent=', window.parent);
 	
-	window.parent.ajax('/contract_test/', 
-		{},
+	window.parent.ajax('/web3/query',
+		{"type":"names"},
 		function(XMLHttpRequest, textStatus){
             set_contracts(JSON.parse(XMLHttpRequest.responseText));   
         }

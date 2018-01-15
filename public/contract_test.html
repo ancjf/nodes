@@ -54,8 +54,8 @@ function set_contracts(abis){
 function onDeviceReady() {
 	console.log('list:window.parent=', window.parent);
 	
-	window.parent.ajax('/contract_test/contract', 
-		{"name":QueryString("name")},
+	window.parent.ajax('/web3/query',
+		{"type":"contract","name":QueryString("name")},
 		function(XMLHttpRequest, textStatus){
             set_contracts(JSON.parse(XMLHttpRequest.responseText));   
         }
@@ -82,15 +82,31 @@ function form_data(obj){
         value[i] = arr[i].value;
 	}
 
-	var data = window.parent.ethabi.encodeMethod(g_cons.abi[id], value);
+	var trans = [{"to":g_cons.to, "abi":g_cons.abi[id],"params":[value]}];
+	var data = window.parent.trans_1(trans, function (err, result) {
+        console.log('err=', err, 'result=', result);
+        if(!err){
+            console.log('err=', err, ',typeof(result[0][0].result)=', typeof(result[0][0].result), 'result[0][0].result=', result[0][0].result);
+            //result = JSON.stringify(result[0][0].result, null, 4);
+            result = result[0][0];
+            if(result.err){
+                console.log('err=', err, ',result=', typeof(result), 'result=', result);
+                $("#result_text").text(result.result);
+            }else{
+                if(typeof(result.result) == 'object')
+                    result.result = JSON.stringify(result.result, null, 4);
+                $("#result_text").text(result.result);
+            }
+        }else
+            $("#result_text").text(result);
+    });
 
+	return;
     console.log("id=", id, "type=", type, ",ret=", ret);
 
-    var fun = window.parent.trans;
-    if(type == 'call')
-        fun = window.parent.call;
+    var fun = window.parent.trans_1;
 
-    fun(g_cons, g_cons.abi[id], data, function (err, result) {
+    fun(data, function (err, result) {
         console.log('err=', err, 'result=', result);
         if(!err)
             result = JSON.stringify(result, null, 4);
@@ -100,7 +116,8 @@ function form_data(obj){
 
 function on_submit(obj)
 {
-    if(!window.parent.remote()){
+    //if(!window.parent.remote())
+    {
         form_data(obj);
         return false;
     }

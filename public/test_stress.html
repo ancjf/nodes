@@ -19,8 +19,8 @@ function set_contracts(con){
 function onDeviceReady() {
 	console.log('list:window.parent=', window.parent);
 	
-	window.parent.ajax('/pressure_test/query', 
-		{},
+	window.parent.ajax('/web3/query',
+		{"type":"test"},
 		function(XMLHttpRequest, textStatus){
 			console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
             set_contracts(JSON.parse(XMLHttpRequest.responseText));   
@@ -59,21 +59,21 @@ function precoss_result(objResult){
 		$("#result_text").text(result);
 }
 
-function time_get_log(id){
-	console.log('id=', id);
+function time_get_log(id, remote){
+	console.log('id=', id, 'remote=', remote);
 	
-	window.parent.log(id,
-		function(result){
-			console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
+	window.parent.log(id, remote,
+		function(err, result){
+			console.log('result=', result);
             precoss_result(result);
         }
 	);
 }
 
-function time_get_log_url(url){
-    console.log('url=', url);
+function time_get_log_url(url, id){
+    console.log('url=', url, 'id=', id);
 
-    precoss_result(window.parent.log_url(url));
+    precoss_result(window.parent.log_url(url, id));
 }
 
 function on_submit(obj)
@@ -89,6 +89,21 @@ function on_submit(obj)
 	var rpc = window.parent.rpc();
 	
 	console.log('count=', count, 'perCount=', perCount, ',$(obj).find("#count")=', $(obj).find("#count"));
+	var args = {"count":count,"perCount":perCount};
+
+
+    window.parent.test_1(args, function (err, result) {
+        var id = result;
+
+        var str = "time_get_log(" + id + ", false)";
+        if(window.parent.remote())
+            str = "time_get_log(" + id + ", true)";
+
+        console.log('err=', err, 'result=', result, ",str=", str);
+        time_id = setInterval(str, 1000);
+    });
+
+    return false;
 
     if(!window.parent.remote()){
         window.parent.test(count,perCount);

@@ -243,11 +243,18 @@ function unpackOutput(outputs, output) {
         return;
     }
 
-    var outputTypes = outputs.map(function (i) {
-        return i.type;
-    });
-    output = output.length >= 2 ? output.slice(2) : output;
-    var result = coder.decodeParams(outputTypes, output);
+    var result = [];
+
+    try{
+        var outputTypes = outputs.map(function (i) {
+            return i.type;
+        });
+        output = output.length >= 2 ? output.slice(2) : output;
+        var result = coder.decodeParams(outputTypes, output);
+    }catch(err) {
+        logs.logvar(err);
+    }
+
     return result.length === 1 ? result[0] : result;
 };
 
@@ -273,12 +280,11 @@ function decode_logs(tran, receipt) {
 function trans_params(eth, tran, params, i, fun){
     try{
         var payload = toPayload(tran, params);
-        if(tran.abi.constant){
+        if(tran.abi.constant == true || tran.abi.constant == 'true'){
             var result = eth.call(payload);
             if (result && tran.abi !== undefined) {
                 result = unpackOutput(tran.abi.outputs, result);
             }
-            //logs.logvar(result);
             fun(i, {"err":false,"result":result});
         }else{
             eth.sendTransaction(payload, function(err, result){
@@ -297,8 +303,11 @@ function trans_params(eth, tran, params, i, fun){
 }
 
 function trans_one(eth, tran, i, fun){
+    //logs.logvar(tran);
     if(tran.params == undefined){
+        //logs.logvar(tran);
         return trans_params(eth, tran, undefined, 0,  function callback(index, result){
+            logs.logvar(index, result);
             fun(i, [result]);
         });
     }
@@ -309,6 +318,7 @@ function trans_one(eth, tran, i, fun){
         trans_params(eth, tran, tran.params[f], f,  function callback(index, result){
             ret[index] = result;
             count++;
+            logs.logvar(count, tran.params.length);
             if(count == tran.params.length)
                 fun(i, ret);
         });
@@ -317,7 +327,7 @@ function trans_one(eth, tran, i, fun){
 
 var webs = function (rpc) {
     this.web3 = new Web3(new Web3.providers.HttpProvider(rpc));
-    logs.logvar(rpc);
+    //logs.logvar(rpc);
     this.logs = {};
 };
 
@@ -325,16 +335,22 @@ webs.prototype.logs = {};
 
 webs.prototype.random_data = function (abi, params) // [Min, Max)
 {
+    if(abi.inputs == undefined || abi.inputs.length == 0){
+        const signature = abi.name + '()';
+        var hash = Web3.prototype.sha3(signature).slice(0, 10);
+        return hash;
+    }
+
     var inputTypes = abi.inputs.map(function (i) {
         return i.type;
     });
 
+    const signature = abi.name + '(' + inputTypes.join(',') + ')';
+    var hash = Web3.prototype.sha3(signature).slice(0, 10);
+
     if(params === undefined)
         params = randomInput(inputTypes);
     validateArgs(inputTypes, params);
-
-    const signature = abi.name + '(' + inputTypes.join(',') + ')';
-    var hash = Web3.prototype.sha3(signature).slice(0, 10);
 
     return hash + coder.encodeParams(inputTypes, params);
 }
@@ -384,9 +400,12 @@ webs.prototype.trans = function(trans, fun) {
             trans_one(eth, trans[i], i, function (index, result) {
                 ret[index] = result;
                 count++;
-                //logs.logvar(count, index, trans.length);
-                if(count >= trans.length)
+                logs.logvar(count, index, trans.length);
+                if(count >= trans.length){
+                    logs.logvar(ret);
                     fun(false, ret);
+                }
+
             });
         }
 
@@ -528,7 +547,7 @@ webs.prototype.test_fun_trans = function (stat, count, trans) {
             result = [];
         stat = me.stat(stat, trans, result);
         webs.prototype.logs[stat.id] = stat;
-        logs.logvar(count, stat);
+        //logs.logvar(count, stat);
         if(count > 1)
             me.test_fun_trans(stat, count-1, trans);
     });
@@ -570,7 +589,7 @@ webs.prototype.test_con = function (count, perCount, con, stat) {
             result = [];
         stat = me.stat(stat, trans, result);
         webs.prototype.logs[stat.id] = stat;
-        logs.logvar(count, stat);
+        //logs.logvar(count, stat);
         if(count > 1)
             me.test_con(count-1, perCount, con, stat);
     });
@@ -602,11 +621,13 @@ webs.prototype.test = function (count, perCount, cons, stat) {
     var trans = this.test_trans(perCount, cons);
 
     var me = this;
+    logs.logvar(count, perCount);
     me.trans(trans, function (err, result) {
+        logs.logvar(err, result);
         if(err)
             result = [];
         stat = webs.prototype.stat(stat, trans, result);
-        logs.logvar(webs.logs, stat);
+        logs.logvar(stat.id, stat);
         //logs.logvar("1111111111111111111111111111111111111111111111111111111111111111");
         webs.prototype.logs[stat.id] = stat;
         if(count > 1)

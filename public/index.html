@@ -10,6 +10,7 @@
     <script type="text/javascript" src="javascripts/webs.js"></script>
 <script>
 
+
 var url_array = new Array();
 
 function getRequest() {
@@ -216,11 +217,132 @@ function call_url(url, con, fun, data, callback){
     });
 }
 
-function call(con, fun, data, callback) {
-    console.log('con=', con);
-    var url = rpc();
-    call_url(url, con, fun, data, callback);
+function call(data, callback) {
+    if(remote()){
+        ajax('/web3/call',
+            data,
+            function(XMLHttpRequest, textStatus){
+                var result = JSON.parse(XMLHttpRequest.responseText);
+                callback(result.err, JSON.stringify(result.result, null, 4));
+            }
+        );
+    }else{
+        if(data[".rpc"] == undefined)
+            data[".rpc"] = rpc();
+        console.log('window.webs.prototype=', window.webs.prototype);
+        console.log('data=', data, ",window.webs.call=", window.webs.call);
+
+        window.webs.prototype.call(data, function (error, result) {
+            console.log('error=', error, ",result=", result);
+            if(typeof(result) === 'object')
+                result = JSON.stringify(result, null, 4);
+            callback(error, result);
+        });
+    }
 }
+
+function query(trans, callback) {
+    try{
+        if(remote()){
+            var data = {".rpc":rpc(),"trans":trans};
+            ajax('/web3/trans',
+                data,
+                function(XMLHttpRequest, textStatus){
+                    console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
+                    var result = JSON.parse(XMLHttpRequest.responseText);
+                    callback(result.err, result.result);
+                }
+            );
+        }else{
+            var webs = new window.webs.prototype.constructor(rpc());
+
+            console.log('webs=', window.webs.prototype);
+            console.log('trans=', trans, ",webs=", webs);
+
+            webs.trans(trans, function (error, result) {
+                console.log('error=', error, ",result=", result);
+                callback(error, result);
+            });
+        }
+    }catch(err){
+        callback(true, err);
+    }
+}
+
+function trans_1(trans, callback) {
+    try{
+        if(remote()){
+            var data = {".rpc":rpc(),"trans":trans};
+            ajax('/web3/trans',
+                data,
+                function(XMLHttpRequest, textStatus){
+                    console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
+                    var result = JSON.parse(XMLHttpRequest.responseText);
+                    callback(result.err, result.result);
+                }
+            );
+        }else{
+            var webs = new window.webs.prototype.constructor(rpc());
+
+            console.log('webs=', window.webs.prototype);
+            console.log('trans=', trans, ",webs=", webs);
+
+            webs.trans(trans, function (error, result) {
+                console.log('error=', error, ",result=", result);
+                callback(error, result);
+            });
+        }
+    }catch(err){
+        callback(true, err);
+    }
+}
+
+function test_1(args, callback) {
+    try{
+        if(remote()){
+            ajax('/web3/test',
+                args,
+                function(XMLHttpRequest, textStatus){
+                    console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
+                    var result = JSON.parse(XMLHttpRequest.responseText);
+                    callback(result.err, result.result);
+                }
+            );
+
+            return;
+        }
+
+        var id = args["id"];
+        if(id !== undefined){
+            res.send({"err":error, "result":webs.log(id)});
+            return;
+        }
+
+        var count = Number(args["count"]);
+        var perCount = Number(args["perCount"]);
+        var conname = args[".contract"];
+        var fun = args[".function"];
+        var address = args["address"];
+
+        var cons = g_eth[rpc()].cons;
+        var webs = new window.webs.prototype.constructor(rpc());
+
+        console.log('conname=', conname);
+        if(conname === undefined){
+            id = webs.test(count, perCount, cons);
+        }else if(fun === undefined){
+            id = webs.test_con(count, perCount, cons[conname]);
+        }else{
+            id = webs.test_con(count, perCount, fun, conname, address);
+        }
+
+        console.log('id=', id);
+        callback(false, id);
+    }catch(err){
+        console.log('err=', err);
+        callback(true, err);
+    }
+};
 
 function ajax(url, data, callback){
     console.log('data=', data);
@@ -293,15 +415,23 @@ function rpccall(){
     });
 }
 
-function log(id, callback){
-	ajax('/pressure_test/log', 
-		{"id":id,"remove":"true"},
+function log(id, remote, callback){
+    if(!remote){
+        console.log('window.webs.prototype=', window.webs.prototype);
+        console.log('window.webs.prototype.logs=', window.webs.prototype.logs);
+        callback(false, window.webs.prototype.logs[id]);
+        return;
+    }
+
+	ajax('/web3/query',
+		{"type":"log","id":id,"remove":"true"},
 		function(XMLHttpRequest, textStatus){
-			//console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
+			console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
 			try{
-            	callback(JSON.parse(XMLHttpRequest.responseText));
+                callback(false, XMLHttpRequest.responseText);
 			}catch(err){
 				console.log('err=', err);
+                callback(true, err);
 			}
         }
 	);
@@ -540,7 +670,8 @@ function pressure_test(url, count, perCount, callback) {
     });
 }
 
-function log_url(url){
+function log_url(id, url){
+    //return g_eth[url].stat;
     return g_eth[url].stat;
 }
 

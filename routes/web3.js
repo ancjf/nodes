@@ -87,12 +87,15 @@ function root(args, res) {
 
 function trans_trans(args, res) {
     try{
-        var trans = JSON.parse(args.trans);
+        //var trans = JSON.parse(args.trans);
+        var trans = args.trans;
         var rpc = args[".rpc"];
         var webs = new Webs(rpc);
-
+        logs.logvar(args);
+        logs.logvar(JSON.stringify(trans));
         webs.trans(trans, function (error, result) {
-            //logs.logvar(error, result);
+            var out = JSON.stringify(result);
+            logs.logvar(error, out);
             res.send({"err":error, "result":result});
         });
     }catch(err){
@@ -128,17 +131,70 @@ function test(args, res) {
             id = webs.test_con(count, perCount, fun, conname, address);
         }
 
-        res.send({"err":error, "result":id});
+        logs.logvar(id);
+        res.send({"err":false, "result":id});
     }catch(err){
-        res.send({"err":error, "result":err});
+        res.send({"err":true, "result":err});
     }
 };
 
+function query_contract(args, res) {
+    logs.logvar(args);
+    var con = utils.res_con(args.name, args[".rpc"]);
+
+    //logs.logvar(abi);
+    res.send(con);
+}
+
+function query_names(args, res) {
+    logs.logvar(rpc, names);
+    var rpc = args[".rpc"];
+    logs.logvar( rpc, names);
+    var names = utils.names(rpc);
+
+    logs.logvar(rpc, names);
+    res.send(names);
+}
+
+function query_test(args, res) {
+    var name = args.name;
+    var rpc = args[".rpc"];
+    logs.logvar(rpc, name);
+    if(name == undefined){
+        res.send(utils.names(rpc));
+        logs.log("name=", name);
+        return;
+    }
+
+    var abi = utils.funs(name, rpc);
+
+    //logs.logvar(name, abi);
+    res.send(abi);
+}
+
+function query_log(args, res) {
+    var id = args.id;
+    var rpc = args[".rpc"];
+
+    var log = Webs.prototype.logs[id];
+    logs.log("id=", id, "log=", log);
+    res.send(Webs.prototype.logs[id]);
+}
+
 function query(args, res) {
     try{
-        res.send({"err":error, "result":id});
+        var type = args["type"];
+        if(type == 'contract'){
+            return query_contract(args, res);
+        }else if(type == 'names'){
+            return query_names(args, res);
+        }else if(type == 'test'){
+            return query_test(args, res);
+        }else if(type == 'log'){
+            return query_log(args, res);
+        }
     }catch(err){
-        res.send({"err":error, "result":err});
+        res.send({"err":true, "result":err});
     }
 };
 
@@ -193,5 +249,43 @@ router.post('/query', function(req, res, next) {
 router.get('/query', function(req, res, next) {
     query(req.query, res);
 });
+
+
+function test_1(args) {
+    try{
+        logs.logvar('*******************************************************************************');
+        var id = args["id"];
+        if(id !== undefined){
+            res.send({"err":error, "result":webs.log(id)});
+            return;
+        }
+
+        var count = Number(args["count"]);
+        var perCount = Number(args["perCount"]);
+        var conname = args[".contract"];
+        var fun = args[".function"];
+        var address = args["address"];
+        var rpc = args[".rpc"];
+
+        var webs = new Webs(rpc);
+        logs.logvar(conname);
+
+        if(conname === undefined){
+            var cons = utils.cons(webs.web3.version.network);
+            id = webs.test(count, perCount, cons);
+        }else if(fun === undefined){
+            var cons = utils.cons(webs.web3.version.network);
+            id = webs.test_con(count, perCount, cons[conname]);
+        }else{
+            id = webs.test_con(count, perCount, fun, conname, address);
+        }
+
+        logs.logvar(id);
+    }catch(err){
+        res.send({"err":true, "result":err});
+    }
+}
+
+test_1({"count":5,"perCount":2});
 
 module.exports = router;
