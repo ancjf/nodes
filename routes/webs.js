@@ -307,7 +307,7 @@ function trans_one(eth, tran, i, fun){
     if(tran.params == undefined){
         //logs.logvar(tran);
         return trans_params(eth, tran, undefined, 0,  function callback(index, result){
-            logs.logvar(index, result);
+            //logs.logvar(index, result);
             fun(i, [result]);
         });
     }
@@ -318,7 +318,7 @@ function trans_one(eth, tran, i, fun){
         trans_params(eth, tran, tran.params[f], f,  function callback(index, result){
             ret[index] = result;
             count++;
-            logs.logvar(count, tran.params.length);
+            //logs.logvar(count, tran.params.length);
             if(count == tran.params.length)
                 fun(i, ret);
         });
@@ -400,9 +400,9 @@ webs.prototype.trans = function(trans, fun) {
             trans_one(eth, trans[i], i, function (index, result) {
                 ret[index] = result;
                 count++;
-                logs.logvar(count, index, trans.length);
+                //logs.logvar(count, index, trans.length);
                 if(count >= trans.length){
-                    logs.logvar(ret);
+                    //logs.logvar(ret);
                     fun(false, ret);
                 }
 
@@ -579,8 +579,11 @@ webs.prototype.test_con_trans = function (perCount, con) {
 }
 
 webs.prototype.test_con = function (count, perCount, con, stat) {
-    if(stat == undefined)
+    if(stat == undefined){
         stat = this.stat_init(count*perCount);
+        webs.prototype.logs[stat.id] = stat;
+    }
+
     var trans = this.test_con_trans(perCount, con);
 
     var me = this;
@@ -616,18 +619,21 @@ webs.prototype.test_trans = function (perCount, cons) {
 }
 
 webs.prototype.test = function (count, perCount, cons, stat) {
-    if(stat == undefined)
+    if(stat == undefined){
         stat = this.stat_init(count*perCount);
+        webs.prototype.logs[stat.id] = stat;
+    }
+
     var trans = this.test_trans(perCount, cons);
 
     var me = this;
-    logs.logvar(count, perCount);
+    //logs.logvar(count, perCount);
     me.trans(trans, function (err, result) {
-        logs.logvar(err, result);
+        //logs.logvar(err, result);
         if(err)
             result = [];
         stat = webs.prototype.stat(stat, trans, result);
-        logs.logvar(stat.id, stat);
+        //logs.logvar(count, stat.id, stat);
         //logs.logvar("1111111111111111111111111111111111111111111111111111111111111111");
         webs.prototype.logs[stat.id] = stat;
         if(count > 1)

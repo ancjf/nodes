@@ -130,6 +130,47 @@ function query_con(){
             result = JSON.parse(result);
             g_eth[url].accs = result.result;
 
+            ajax("/web3/query", {"type":"cons","netword":g_eth[url].network}, function(XMLHttpRequest, textStatus){
+                //console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
+                var result = JSON.parse(XMLHttpRequest.responseText);
+                g_eth[url].cons = result;
+                for(i in g_eth[url].cons){
+                    g_eth[url].cons[i].contract_name = i;
+                    g_eth[url].cons[i].address = g_eth[url].cons[i].networks[g_eth[url].network].address;
+                }
+
+                console.log('g_eth=', g_eth);
+            })
+        })
+    })
+}
+
+function con_name(name){
+    var url = rpc();
+    if(g_eth[url] == undefined)
+        return undefined;
+
+    if(name == undefined)
+        return g_eth[url].cons;
+
+    console.log('name=', name);
+    return g_eth[url].cons[name];
+
+    rpc_call(url, "net_version", [], function (err, result) {
+        if(err)
+            return;
+
+        result = JSON.parse(result);
+        if(g_eth[url] == undefined)
+            g_eth[url] = {"network":result.result};
+
+        rpc_call(url, "personal_listAccounts", [], function (err, result) {
+            if(err)
+                return;
+
+            result = JSON.parse(result);
+            g_eth[url].accs = result.result;
+
             ajax("/cons", {"netword":g_eth[url].network}, function(XMLHttpRequest, textStatus){
                 //console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
                 var result = JSON.parse(XMLHttpRequest.responseText);
@@ -269,6 +310,7 @@ function query(trans, callback) {
     }
 }
 
+
 function trans_1(trans, callback) {
     try{
         if(remote()){
@@ -333,7 +375,7 @@ function test_1(args, callback) {
         }else if(fun === undefined){
             id = webs.test_con(count, perCount, cons[conname]);
         }else{
-            id = webs.test_con(count, perCount, fun, conname, address);
+            id = webs.test_fun(count, perCount, fun, conname, address);
         }
 
         console.log('id=', id);
@@ -428,13 +470,51 @@ function log(id, remote, callback){
 		function(XMLHttpRequest, textStatus){
 			console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
 			try{
-                callback(false, XMLHttpRequest.responseText);
+                callback(false, JSON.parse(XMLHttpRequest.responseText));
 			}catch(err){
 				console.log('err=', err);
                 callback(true, err);
 			}
         }
 	);
+}
+
+function time_get_log(id, remote){
+    window.log(id, remote,
+        function(err, result){
+            console.log('err=', err, 'typeof(result)=', typeof(result), 'result=', result);
+            console.log("*******************err=", err, "result.count=", result.count, "result.req_count=", result.req_count, ",str=", str);
+            window.logback(err, result);
+            if(!err && result.count < result.req_count){
+
+                var str = "time_get_log(" + id + ", false)";
+                if(remote)
+                    str = "time_get_log(" + id + ", true)";
+
+                window.setTimeout(str, 1000);
+            }
+        }
+    );
+}
+
+function time_log(id, remote, callback){
+    window.logback = callback;
+
+    window.log(id, remote,
+        function(err, result){
+            console.log('err=', err, 'typeof(result)=', typeof(result), 'result=', result);
+            console.log("*******************err=", err, "result.count=", result.count, "result.req_count=", result.req_count, ",str=", str);
+            window.logback(err, result);
+            if(!err && result.count < result.req_count){
+
+                var str = "time_get_log(" + id + ", false)";
+                if(remote)
+                    str = "time_get_log(" + id + ", true)";
+
+                window.setTimeout(str, 1000);
+            }
+        }
+    );
 }
 
 function onDeviceReady() {

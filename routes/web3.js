@@ -128,7 +128,8 @@ function test(args, res) {
             var cons = utils.cons(webs.web3.version.network);
             id = webs.test_con(count, perCount, cons[conname]);
         }else{
-            id = webs.test_con(count, perCount, fun, conname, address);
+            id = webs.test_fun(count, perCount, fun, conname, address);
+            logs.logvar(id);
         }
 
         logs.logvar(id);
@@ -181,6 +182,13 @@ function query_log(args, res) {
     res.send(Webs.prototype.logs[id]);
 }
 
+function query_cons(args, res) {
+    var cons = utils.cons(args.netword);
+
+    //logs.logvar(cons);
+    res.send(cons);
+}
+
 function query(args, res) {
     try{
         var type = args["type"];
@@ -192,6 +200,8 @@ function query(args, res) {
             return query_test(args, res);
         }else if(type == 'log'){
             return query_log(args, res);
+        }else if(type == 'cons'){
+            return query_cons(args, res);
         }
     }catch(err){
         res.send({"err":true, "result":err});
@@ -282,10 +292,15 @@ function test_1(args) {
 
         logs.logvar(id);
     }catch(err){
+        logs.logvar(err);
         res.send({"err":true, "result":err});
     }
 }
 
-test_1({"count":5,"perCount":2});
+//test_1({"count":5,"perCount":2});
+var cons = utils.cons('5678');
+var con = cons['TestInt'];
+var address = con.networks['5678'].address;
+//test_1({".rpc":"http://192.168.153.128:8545","count":5,"perCount":2,"conname":"TestInt",".function":con.abi[1],"address":address});
 
 module.exports = router;

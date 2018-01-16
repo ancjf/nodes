@@ -47,16 +47,16 @@ function onDeviceReady() {
 
 var time_id;
 
-function precoss_result(objResult){
-	if(objResult.count >= objResult.req_count){
-		console.log("*******************objResult.count=", objResult.count, "objResult.req_count=", objResult.req_count, ",time_id=", time_id);
-		clearInterval(time_id);
-	}
-	
+function precoss_result(objResult, id, remote){
 	var result = JSON.stringify(objResult, null, 4);
 	//console.log("result.length=", result.length, "result=", result);
 	if(result.length)
 		$("#result_text").text(result);
+
+    if(objResult.count < objResult.req_count){
+        console.log("*******************objResult.count=", objResult.count, "objResult.req_count=", objResult.req_count, ",time_id=", time_id);
+        clearInterval(time_id);
+    }
 }
 
 function time_get_log(id, remote){
@@ -64,8 +64,8 @@ function time_get_log(id, remote){
 	
 	window.parent.log(id, remote,
 		function(err, result){
-			console.log('result=', result);
-            precoss_result(result);
+			console.log('typeof(result)=', typeof(result), 'result=', result);
+            precoss_result(result, id, remote);
         }
 	);
 }
@@ -93,14 +93,24 @@ function on_submit(obj)
 
 
     window.parent.test_1(args, function (err, result) {
-        var id = result;
+        console.log('err=', err, 'result=', result, ",str=", str);
 
+        var id = result;
+        var remote = window.parent.remote();
+        window.parent.time_log(id, remote, function (err, result) {
+            var result = JSON.stringify(result, null, 4);
+            //console.log("result.length=", result.length, "result=", result);
+            if(result.length)
+                $("#result_text").text(result);
+        });
+
+        return;
         var str = "time_get_log(" + id + ", false)";
         if(window.parent.remote())
             str = "time_get_log(" + id + ", true)";
 
-        console.log('err=', err, 'result=', result, ",str=", str);
-        time_id = setInterval(str, 1000);
+
+        window.setTimeout(str, 1000);
     });
 
     return false;

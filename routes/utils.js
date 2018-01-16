@@ -374,7 +374,7 @@ var testint = cons['TestInt'];
 var srcfile = './routes/webs.js';
 var destfile = './public/javascripts/webs.js';
 
-
+/*
 if(!fs.existsSync(destfile) || fs.statSync(srcfile).mtime > fs.statSync(destfile).mtime)
 {
     var gulp = require('gulp');
@@ -391,7 +391,7 @@ if(!fs.existsSync(destfile) || fs.statSync(srcfile).mtime > fs.statSync(destfile
 
     logs.logvar("generate:", destfile);
 }
-
+*/
 /*
 var stat = fs.statSync('./routes/webs.js');
 logs.logvar(stat, Date.parse(fs.statSync('./routes/webs.js').mtime));

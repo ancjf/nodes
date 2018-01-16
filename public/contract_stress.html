@@ -5,6 +5,7 @@
 	<script type="text/javascript" src="javascripts/jquery-3.2.1.min.js"></script>
 <script>
 
+var g_con;
 var g_abis;
 
 function QueryString(item){
@@ -16,13 +17,13 @@ function set_table(text, index) {
     return  '<form action="/pressure_test/test" method="get" id = "' + index.toString() + '" onsubmit="return on_submit(this);">  <table border="0" cellspacing="5" cellpadding="5" style="border:1px #666666 solid;"><tr> <td>count:</td>  <td> <input id="count" type="number" value="5" min="1" ></td></tr><tr><td>perCount:</td>  <td> <input id="perCount" type="number" value="5" min="1" ></td></tr><tr> <td> <input type="submit" id="text" value="' + text + '" />  </td> </tr> </table> </form>';
 }
 
-function set_contracts(abis){
-	g_abis = abis;
+function set_contracts(con){
+    g_con = con;
 	
 	var html = set_table(QueryString("name"), -1);
-	for(var i=0; i<abis.length; i++){
-		var type = abis[i].constant ? 'call' : 'transaction';
-		var text = QueryString("name") + '.' + abis[i].name + '.' + type;
+	for(var i=0; i<g_con.abi.length; i++){
+		var type = g_con.abi[i].constant ? 'call' : 'transaction';
+		var text = QueryString("name") + '.' + g_con.abi[i].name + '.' + type;
 		html += set_table(text, i);
 	}
 	
@@ -32,6 +33,12 @@ function set_contracts(abis){
 
 function onDeviceReady() {
 	console.log('list:window.parent=', window.parent);
+
+	var name = QueryString("name");
+	var con = window.parent.con_name(name);
+    console.log('name=', name, 'con=', con);
+    set_contracts(con);
+    return;
 	
 	window.parent.ajax('/pressure_test/query', 
 		{"name":QueryString("name")},
@@ -44,27 +51,31 @@ function onDeviceReady() {
 
 var time_id;
 
-function precoss_result(objResult){
-	if(objResult.count >= objResult.req_count){
-		console.log("*******************objResult.count=", objResult.count, "objResult.req_count=", objResult.req_count, ",time_id=", time_id);
-		clearInterval(time_id);
-	}
-	
+function precoss_result(objResult, id, remote){
 	var result = JSON.stringify(objResult, null, 4);
 	//console.log("result.length=", result.length, "result=", result);
 	if(result.length)
 		$("#result_text").text(result);
+
+    if(objResult.count < objResult.req_count){
+        console.log("*******************objResult.count=", objResult.count, "objResult.req_count=", objResult.req_count, ",time_id=", time_id);
+
+        var str = "time_get_log(" + id + ", false)";
+        if(remote)
+            str = "time_get_log(" + id + ", true)";
+        window.setTimeout(str, 1000);
+    }
 }
 
-function time_get_log(id){
-	console.log('id=', id);
-	
-	window.parent.log(id,
-		function(result){
-			//console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
-            precoss_result(result);
+function time_get_log(id, remote){
+    console.log('id=', id, 'remote=', remote);
+
+    window.parent.log(id, remote,
+        function(err, result){
+            console.log('err=', err, 'typeof(result)=', typeof(result), 'result=', result);
+            precoss_result(result, id, remote);
         }
-	);
+    );
 }
 
 function on_submit(obj)
@@ -81,11 +92,42 @@ function on_submit(obj)
 	var text = $(obj).find("#text")[0].value;
 	var contract = text.split(".")[0];
 	var rpc = window.parent.rpc();
-	var reqdata = {".rpc":rpc,"count":count,"perCount":perCount,".contract":contract};
-	if(id >= 0)
-		reqdata[".function"] = g_abis[id];
+	var args = {".rpc":rpc,"count":count,"perCount":perCount,".contract":contract};
+	if(id >= 0){
+        args[".function"] = g_con.abi[id];
+        args["address"] = g_con.address;
+    }
+
 	
 	console.log('count=', count, 'perCount=', perCount, ',text=', text, ",contract=", contract);
+
+    window.parent.test_1(args, function (err, result) {
+        if(err){
+            $("#result_text").text(result);
+            return;
+        }
+
+        var id = result;
+        var remote = window.parent.remote();
+        window.parent.time_log(id, remote, function (err, result) {
+            var result = JSON.stringify(result, null, 4);
+            //console.log("result.length=", result.length, "result=", result);
+            if(result.length)
+                $("#result_text").text(result);
+        });
+
+        return;
+
+
+        var str = "time_get_log(" + id + ", false)";
+        if(window.parent.remote())
+            str = "time_get_log(" + id + ", true)";
+
+        console.log('err=', err, 'result=', result, ",str=", str);
+        window.setTimeout(str, 1000);
+    });
+
+    return false;
 	
 	window.parent.ajax('/pressure_test/test', 
 		reqdata,
