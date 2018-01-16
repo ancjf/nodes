@@ -63,7 +63,8 @@ function on_submit(obj)
         value[i] = arr[i].value;
     }
 
-    var trans = [{"to":g_cons.address, "abi":g_cons.abi[id],"params":[value]}];
+    var trans = [{"to":g_cons.address, "abi":g_cons.abi[id],"events":g_cons.events,"params":[value]}];
+    console.log('trans=', trans);
     var data = window.parent.trans(trans, function (err, result) {
         console.log('err=', err, 'result=', result);
         if(!err){

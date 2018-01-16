@@ -91,8 +91,16 @@ function query_cons(callback){
     ajax('/web3/query',
         data,
         function(err, result){
-            //console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
+            console.log('err=', err, 'result=', result);
+            if(err){
+                callback();
+                return;
+            }
             var result = JSON.parse(result);
+            if(result.err){
+                callback();
+                return;
+            }
             g_eth[url] = {'cons':result};
             for(i in g_eth[url].cons){
                 g_eth[url].cons[i].contract_name = i;
@@ -103,6 +111,12 @@ function query_cons(callback){
             console.log('g_eth=', g_eth);
         }
     );
+}
+
+function delete_cons(url){
+    if(g_eth[url] != undefined){
+        delete g_eth[url];
+    }
 }
 
 function get_names(){

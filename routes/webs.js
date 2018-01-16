@@ -249,10 +249,39 @@ function unpackOutput(outputs, output) {
         var outputTypes = outputs.map(function (i) {
             return i.type;
         });
+
         output = output.length >= 2 ? output.slice(2) : output;
         var result = coder.decodeParams(outputTypes, output);
     }catch(err) {
-        logs.logvar(err);
+        //logs.logvar(err);
+        return [err];
+    }
+
+    return result.length === 1 ? result[0] : result;
+};
+
+function unpack_logs(outputs, output) {
+    if (!output) {
+        return;
+    }
+
+    var result = [];
+
+    try{
+        var outputTypes = [];
+        for(var i = 0; i < outputs.length; i++){
+            //logs.logvar(typeof(outputs[i].type), outputs[i]['[type]']);
+            outputTypes[i] = outputs[i].type;
+            if(outputTypes[i] == undefined)
+                outputTypes[i] = outputs[i]['[type]'];
+        }
+
+        //logs.logvar(outputs, outputTypes);
+        output = output.length >= 2 ? output.slice(2) : output;
+        var result = coder.decodeParams(outputTypes, output);
+    }catch(err) {
+        //logs.logvar(err);
+        return [err];
     }
 
     return result.length === 1 ? result[0] : result;
@@ -269,9 +298,8 @@ function decode_logs(tran, receipt) {
     for(var i = 0; i < receipt.logs.length; i++){
         ret[i] = receipt.logs[i];
         var topics = receipt.logs[i].topics[0];
-        //logs.logvar(topics);
         if(tran.events[topics] != undefined)
-            ret[i].result = unpackOutput(tran.events[topics].inputs, receipt.logs[i].data);
+            ret[i].result = unpack_logs(tran.events[topics].inputs, receipt.logs[i].data);
     }
 
     return ret;
@@ -571,7 +599,7 @@ webs.prototype.test_con_trans = function (perCount, con) {
         var abi = this.random_item(con.abi);
 
         //logs.logvar(this.web3.net.version, con.networks);
-        var tran = {"abi":abi,"conname":con.contract_name,"to":con.networks[this.web3.version.network].address};
+        var tran = {"abi":abi,"conname":con.contract_name,"to":con.address};
         trans[i] = tran;
     }
 
@@ -609,8 +637,8 @@ webs.prototype.test_trans = function (perCount, cons) {
         //logs.logvar(con);
         var abi = this.random_item(con.abi);
 
-        //logs.logvar(con.contract_name);
-        var tran = {"abi":abi,"conname":con.contract_name,"to":con.networks[this.web3.version.network].address};
+        //logs.logvar(con.networks[this.web3.version.network].address, con.address);
+        var tran = {"abi":abi,"conname":con.contract_name,"to":con.address};
 
         trans[i] = tran;
     }

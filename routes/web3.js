@@ -91,11 +91,11 @@ function trans_trans(args, res) {
         var trans = args.trans;
         var rpc = args[".rpc"];
         var webs = new Webs(rpc);
-        logs.logvar(args);
-        logs.logvar(JSON.stringify(trans));
+        //logs.logvar(args);
+        //logs.logvar(JSON.stringify(trans));
         webs.trans(trans, function (error, result) {
-            var out = JSON.stringify(result);
-            logs.logvar(error, out);
+            //var out = JSON.stringify(result);
+            //logs.logvar(error, out);
             res.send({"err":error, "result":result});
         });
     }catch(err){
@@ -134,40 +134,6 @@ function test(args, res) {
     }
 };
 
-function query_contract(args, res) {
-    logs.logvar(args);
-    var con = utils.res_con(args.name, args[".rpc"]);
-
-    //logs.logvar(abi);
-    res.send(con);
-}
-
-function query_names(args, res) {
-    logs.logvar(rpc, names);
-    var rpc = args[".rpc"];
-    logs.logvar( rpc, names);
-    var names = utils.names(rpc);
-
-    logs.logvar(rpc, names);
-    res.send(names);
-}
-
-function query_test(args, res) {
-    var name = args.name;
-    var rpc = args[".rpc"];
-    logs.logvar(rpc, name);
-    if(name == undefined){
-        res.send(utils.names(rpc));
-        logs.log("name=", name);
-        return;
-    }
-
-    var abi = utils.funs(name, rpc);
-
-    //logs.logvar(name, abi);
-    res.send(abi);
-}
-
 function query_log(args, res) {
     var id = args.id;
     var rpc = args[".rpc"];
@@ -187,19 +153,13 @@ function query_cons(args, res) {
 function query(args, res) {
     try{
         var type = args["type"];
-        /*
-        if(type == 'contract'){
-            return query_contract(args, res);
-        }else if(type == 'names'){
-            return query_names(args, res);
-        }else if(type == 'test'){
-            return query_test(args, res);
-        }else */if(type == 'log'){
+        if(type == 'log'){
             return query_log(args, res);
         }else if(type == 'cons'){
             return query_cons(args, res);
         }
     }catch(err){
+        logs.logvar(err);
         res.send({"err":true, "result":err});
     }
 };

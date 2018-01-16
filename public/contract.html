@@ -23,13 +23,16 @@ function on_submit(obj)
 {
 	var arr = $(obj).children("input");
 	var name = arr[0].value;
+	var rpc = window.parent.rpc();
 	console.log('obj=', obj, ",name=", name);
 	
 	window.parent.ajax('/upload/delete', 
 		{"name":name},
         function(err, result){
-            if(!err)
+            if(!err){
+                window.parent.delete_cons(rpc);
                 set_files(JSON.parse(result));
+            }
         }
 	);
 
@@ -40,6 +43,7 @@ function on_upload(obj)
 {
 	var fd = new FormData();
 	var files = $("#upload")[0].files;
+    var rpc = window.parent.rpc();
 	
 	console.log('files', files);
 	
@@ -68,7 +72,8 @@ function on_upload(obj)
 	// ajax过程成功完成事件
 	xhr.onload = function(event) {
 		console.log(xhr.responseText);
-		set_files(JSON.parse(xhr.responseText));  
+		set_files(JSON.parse(xhr.responseText));
+        window.parent.delete_cons(rpc);
 	};
 	
 	// ajax过程发生错误事件
