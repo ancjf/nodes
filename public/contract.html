@@ -27,8 +27,9 @@ function on_submit(obj)
 	
 	window.parent.ajax('/upload/delete', 
 		{"name":name},
-		function(XMLHttpRequest, textStatus){
-            set_files(JSON.parse(XMLHttpRequest.responseText));  
+        function(err, result){
+            if(!err)
+                set_files(JSON.parse(result));
         }
 	);
 
@@ -111,8 +112,9 @@ function onDeviceReady() {
 	
 	window.parent.ajax('/upload/query', 
 		{},
-		function(XMLHttpRequest, textStatus){
-            set_files(JSON.parse(XMLHttpRequest.responseText));   
+		function(err, result){
+	        if(!err)
+                set_files(JSON.parse(result));
         }
 	);	
 }

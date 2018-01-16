@@ -105,12 +105,6 @@ function trans_trans(args, res) {
 
 function test(args, res) {
     try{
-        var id = args["id"];
-        if(id !== undefined){
-            res.send({"err":error, "result":webs.log(id)});
-            return;
-        }
-
         var count = Number(args["count"]);
         var perCount = Number(args["perCount"]);
         var conname = args[".contract"];
@@ -122,10 +116,10 @@ function test(args, res) {
         logs.logvar(conname);
 
         if(conname === undefined){
-            var cons = utils.cons(webs.web3.version.network);
+            var cons = utils.cons(rpc);
             id = webs.test(count, perCount, cons);
         }else if(fun === undefined){
-            var cons = utils.cons(webs.web3.version.network);
+            var cons = utils.cons(rpc);
             id = webs.test_con(count, perCount, cons[conname]);
         }else{
             id = webs.test_fun(count, perCount, fun, conname, address);
@@ -135,6 +129,7 @@ function test(args, res) {
         logs.logvar(id);
         res.send({"err":false, "result":id});
     }catch(err){
+        logs.logvar(err);
         res.send({"err":true, "result":err});
     }
 };
@@ -177,13 +172,13 @@ function query_log(args, res) {
     var id = args.id;
     var rpc = args[".rpc"];
 
-    var log = Webs.prototype.logs[id];
-    logs.log("id=", id, "log=", log);
-    res.send(Webs.prototype.logs[id]);
+    var log = Webs.prototype.log(id);
+    //logs.log("id=", id, "log=", log);
+    res.send(log);
 }
 
 function query_cons(args, res) {
-    var cons = utils.cons(args.netword);
+    var cons = utils.cons(args[".rpc"]);
 
     //logs.logvar(cons);
     res.send(cons);
@@ -192,13 +187,14 @@ function query_cons(args, res) {
 function query(args, res) {
     try{
         var type = args["type"];
+        /*
         if(type == 'contract'){
             return query_contract(args, res);
         }else if(type == 'names'){
             return query_names(args, res);
         }else if(type == 'test'){
             return query_test(args, res);
-        }else if(type == 'log'){
+        }else */if(type == 'log'){
             return query_log(args, res);
         }else if(type == 'cons'){
             return query_cons(args, res);
@@ -297,10 +293,12 @@ function test_1(args) {
     }
 }
 
+/*
 //test_1({"count":5,"perCount":2});
-var cons = utils.cons('5678');
+var cons = utils.cons('http://192.168.153.128:8545/');
 var con = cons['TestInt'];
 var address = con.networks['5678'].address;
 //test_1({".rpc":"http://192.168.153.128:8545","count":5,"perCount":2,"conname":"TestInt",".function":con.abi[1],"address":address});
+*/
 
 module.exports = router;

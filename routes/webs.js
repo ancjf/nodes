@@ -331,7 +331,7 @@ var webs = function (rpc) {
     this.logs = {};
 };
 
-webs.prototype.logs = {};
+webs.prototype.logs = new Map();
 
 webs.prototype.random_data = function (abi, params) // [Min, Max)
 {
@@ -546,7 +546,7 @@ webs.prototype.test_fun_trans = function (stat, count, trans) {
         if(err)
             result = [];
         stat = me.stat(stat, trans, result);
-        webs.prototype.logs[stat.id] = stat;
+        webs.prototype.set_log(stat);
         //logs.logvar(count, stat);
         if(count > 1)
             me.test_fun_trans(stat, count-1, trans);
@@ -557,7 +557,7 @@ webs.prototype.test_fun = function (count, perCount, abi, conname, address) {
     var trans = [{"abi":abi,"conname":conname,"to":address, "params":new Array(perCount)}];
 
     var stat = this.stat_init(count*perCount);
-    webs.prototype.logs[stat.id] = stat;
+    webs.prototype.set_log(stat);
 
     this.test_fun_trans(stat, count, trans);
 
@@ -581,7 +581,7 @@ webs.prototype.test_con_trans = function (perCount, con) {
 webs.prototype.test_con = function (count, perCount, con, stat) {
     if(stat == undefined){
         stat = this.stat_init(count*perCount);
-        webs.prototype.logs[stat.id] = stat;
+        webs.prototype.set_log(stat);
     }
 
     var trans = this.test_con_trans(perCount, con);
@@ -591,7 +591,7 @@ webs.prototype.test_con = function (count, perCount, con, stat) {
         if(err)
             result = [];
         stat = me.stat(stat, trans, result);
-        webs.prototype.logs[stat.id] = stat;
+        webs.prototype.set_log(stat);
         //logs.logvar(count, stat);
         if(count > 1)
             me.test_con(count-1, perCount, con, stat);
@@ -621,7 +621,7 @@ webs.prototype.test_trans = function (perCount, cons) {
 webs.prototype.test = function (count, perCount, cons, stat) {
     if(stat == undefined){
         stat = this.stat_init(count*perCount);
-        webs.prototype.logs[stat.id] = stat;
+        webs.prototype.set_log(stat);
     }
 
     var trans = this.test_trans(perCount, cons);
@@ -635,7 +635,7 @@ webs.prototype.test = function (count, perCount, cons, stat) {
         stat = webs.prototype.stat(stat, trans, result);
         //logs.logvar(count, stat.id, stat);
         //logs.logvar("1111111111111111111111111111111111111111111111111111111111111111");
-        webs.prototype.logs[stat.id] = stat;
+        webs.prototype.set_log(stat);
         if(count > 1)
             me.test(count-1, perCount, cons, stat);
     });
@@ -643,8 +643,34 @@ webs.prototype.test = function (count, perCount, cons, stat) {
     return stat.id;
 }
 
-webs.prototype.log = function (id) {
-    return webs.prototype.logs(id);
+var s_timeout = 0;
+webs.prototype.set_log = function (stat) {
+    var now = new Date().getTime();
+
+    if(now > s_timeout){
+        s_timeout = now + 1000*60*5;
+        for (var key of webs.prototype.logs.keys()) {
+            var stat = webs.prototype.logs[key];
+            stat.costTime = stat.start + stat.costTime;
+            if(costTime + 1000*60*10 > now){
+                delete webs.prototype.logs[id];
+            }
+        }
+    }
+
+    webs.prototype.logs[stat.id] = stat;
+}
+
+webs.prototype.log = function (id, keep) {
+    var log = webs.prototype.logs[id];
+
+    if(keep == true || keep == 'true'){
+        return log;
+    }
+
+    if(log.count >= log.req_count)
+        delete webs.prototype.logs[id];
+    return log;
 }
 
 if(typeof window!=="undefined")

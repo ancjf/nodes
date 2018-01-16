@@ -234,7 +234,9 @@ utils.funs = function(con, rpc){
     return ret;
 }
 
-utils.cons = function(network){
+utils.cons = function(rpc){
+    var web3 = new Web3(new Web3.providers.HttpProvider(rpc));
+    var network = web3.version.network;
     var ret = {};
 
     logs.logvar(network);
@@ -250,6 +252,7 @@ utils.cons = function(network){
 
         ret[f] = {};
         ret[f].networks = utils.jsons[f].networks;
+        ret[f].address = ret[f].networks[network].address;
         ret[f].contract_name = utils.jsons[f].contract_name;
         ret[f].abi = utils.funs(utils.jsons[f]);
     }
@@ -342,27 +345,29 @@ testint.abi.forEach(function (result, index) {
 logs.logvar(trans);
 */
 
-
+/*
 var webs = new Webs("http://192.168.153.128:8545");
 logs.logvar(webs.web3.version.network);
 
 var trans = [{"to":testint.networks[webs.web3.version.network].address, "abi":testint.abi[0],"params":[[]]}];
+
+
 logs.logvar(trans);
 webs.trans(trans, function (error, result) {
     logs.logvar(error, result);
 });
-
+*/
 /*
 webs.trans(trans, function(err, result) {
     logs.logvar(err, result);
 });
 */
 
-var cons = utils.cons(webs.web3.version.network);
+//var cons = utils.cons('http://192.168.153.128:8545/');
 //logs.logvar(cons);
 //webs.test(5, 2, cons);
 //logs.logvar(webs.web3.version.network, cons['TestInt']);
-var testint = cons['TestInt'];
+//var testint = cons['TestInt'];
 //webs.test_con(5, 2, testint);
 
 
@@ -374,7 +379,7 @@ var testint = cons['TestInt'];
 var srcfile = './routes/webs.js';
 var destfile = './public/javascripts/webs.js';
 
-/*
+
 if(!fs.existsSync(destfile) || fs.statSync(srcfile).mtime > fs.statSync(destfile).mtime)
 {
     var gulp = require('gulp');
@@ -391,7 +396,7 @@ if(!fs.existsSync(destfile) || fs.statSync(srcfile).mtime > fs.statSync(destfile
 
     logs.logvar("generate:", destfile);
 }
-*/
+
 /*
 var stat = fs.statSync('./routes/webs.js');
 logs.logvar(stat, Date.parse(fs.statSync('./routes/webs.js').mtime));

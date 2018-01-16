@@ -18,7 +18,12 @@ function set_contracts(con){
 
 function onDeviceReady() {
 	console.log('list:window.parent=', window.parent);
-	
+
+    window.parent.query_cons(function () {
+        set_contracts(window.parent.get_names());
+    });
+
+    return;
 	window.parent.ajax('/web3/query',
 		{"type":"test"},
 		function(XMLHttpRequest, textStatus){
@@ -26,113 +31,34 @@ function onDeviceReady() {
             set_contracts(JSON.parse(XMLHttpRequest.responseText));   
         }
 	);
-	
-	return;
-	
-	$.ajax({    
-		url: '/pressure_test/query',    
-		type: 'get',    
-		dataType: 'json',   
-		contentType: 'application/json',    
-		data: {}, 
-		error: function(XMLHttpRequest, textStatus, errorThrown) {
-			console.log("XMLHttpRequest.status=", XMLHttpRequest.status, ",XMLHttpRequest.readyState=", XMLHttpRequest.readyState, ",textStatus=", textStatus, ",XMLHttpRequest=", XMLHttpRequest);
-   		},   
-		success: function(objResult) {
-			//console.log("objResult=", objResult);
-			set_contracts(objResult);
-		}
-	});	
-}
-
-var time_id;
-
-function precoss_result(objResult, id, remote){
-	var result = JSON.stringify(objResult, null, 4);
-	//console.log("result.length=", result.length, "result=", result);
-	if(result.length)
-		$("#result_text").text(result);
-
-    if(objResult.count < objResult.req_count){
-        console.log("*******************objResult.count=", objResult.count, "objResult.req_count=", objResult.req_count, ",time_id=", time_id);
-        clearInterval(time_id);
-    }
-}
-
-function time_get_log(id, remote){
-	console.log('id=', id, 'remote=', remote);
-	
-	window.parent.log(id, remote,
-		function(err, result){
-			console.log('typeof(result)=', typeof(result), 'result=', result);
-            precoss_result(result, id, remote);
-        }
-	);
-}
-
-function time_get_log_url(url, id){
-    console.log('url=', url, 'id=', id);
-
-    precoss_result(window.parent.log_url(url, id));
 }
 
 function on_submit(obj)
 {
-	if(time_id != undefined){
-		console.log("time_id=", time_id);
-		clearInterval(time_id);
-		time_id = undefined;
-	}
-	
 	var count = $(obj).find("#count")[0].value;
 	var perCount = $(obj).find("#perCount")[0].value;
 	var rpc = window.parent.rpc();
 	
 	console.log('count=', count, 'perCount=', perCount, ',$(obj).find("#count")=', $(obj).find("#count"));
 	var args = {"count":count,"perCount":perCount};
-
-
-    window.parent.test_1(args, function (err, result) {
-        console.log('err=', err, 'result=', result, ",str=", str);
+    window.parent.test(args, function (err, result) {
+        if(err){
+            $("#result_text").text(result);
+            return;
+        }
 
         var id = result;
         var remote = window.parent.remote();
         window.parent.time_log(id, remote, function (err, result) {
-            var result = JSON.stringify(result, null, 4);
-            //console.log("result.length=", result.length, "result=", result);
+            if(typeof(result) == 'object')
+                var result = JSON.stringify(result, null, 4);
+
             if(result.length)
                 $("#result_text").text(result);
         });
-
-        return;
-        var str = "time_get_log(" + id + ", false)";
-        if(window.parent.remote())
-            str = "time_get_log(" + id + ", true)";
-
-
-        window.setTimeout(str, 1000);
     });
 
     return false;
-
-    if(!window.parent.remote()){
-        window.parent.test(count,perCount);
-        var str = "time_get_log_url('" + rpc + "')";
-        console.log('str=', str);
-        time_id = setInterval(str, 1000);
-        return false;
-    }
-
-	window.parent.ajax('/pressure_test/test', 
-		{"count":count,"perCount":perCount},
-		function(XMLHttpRequest, textStatus){
-			console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
-            $("#result_text").text(XMLHttpRequest.responseText);
-			time_id = setInterval("time_get_log(" + XMLHttpRequest.responseText + ")", 1000);
-        }
-	);
-	
-	return false;
 }
 
 </script>

@@ -11,7 +11,6 @@ function QueryString(item){
 }
 
 var g_cons;
-var g_abis;
 
 function set_table(abi, index){
 	var ret = '<form action="/contract_test/transaction" method="get" id = "' + index.toString() + '" onsubmit="return on_submit(this);"> <table border="0" cellspacing="5" cellpadding="5" style="border:1px #666666 solid;">'
@@ -26,15 +25,6 @@ function set_table(abi, index){
 	var type = abi.constant ? 'call' : 'transaction';
 	var funname = QueryString("name") + '.' + abi.name + '.' + type;
 	ret += '<tr> <td> <input type="submit" id="submit" value="'  + funname + '">  </td></tr></table></form>';
-	//console.log('ret=', ret);
-	/*
-	var html = '';
-	for(var i=0;i<con.length;i++){
-		html += '<form action="/contract_test.html" method="get"><input type="submit" name="name" style="font-size:20px;width:200px;" value="' + con[i] + '"> </form>';
-	}
-	
-	$("#left_list").html(html);
-	*/
 	return ret;
 }
 
@@ -53,37 +43,28 @@ function set_contracts(abis){
 
 function onDeviceReady() {
 	console.log('list:window.parent=', window.parent);
-	
-	window.parent.ajax('/web3/query',
-		{"type":"contract","name":QueryString("name")},
-		function(XMLHttpRequest, textStatus){
-            set_contracts(JSON.parse(XMLHttpRequest.responseText));   
-        }
-	);
+
+    window.parent.query_cons(function () {
+        set_contracts(window.parent.get_con(QueryString("name")));
+    });
 }
 
-function precoss_result(objResult){
-	var result = JSON.stringify(objResult, null, 4);
-	//console.log("result.length=", result.length, "result=", result);
-	if(result.length)
-		$("#result_text").text(result);
-}
+function on_submit(obj)
+{
+    var id = parseInt($(obj)[0].id);
+    var ret = {".contract":QueryString("name"),".function":g_cons.abi[id]};
 
-function form_data(obj){
-	var id = parseInt($(obj)[0].id);
-	var ret = {".contract":QueryString("name"),".function":g_cons.abi[id]};
-
-	var value = [];
-	var arr = $(obj).find(".input");
-	var type = $(obj).find("#submit")[0].value;
+    var value = [];
+    var arr = $(obj).find(".input");
+    var type = $(obj).find("#submit")[0].value;
     type = type.split('.')[2];
-	for(var i=0; i<arr.length; i++){
-		ret[arr[i].name] = arr[i].value;
+    for(var i=0; i<arr.length; i++){
+        ret[arr[i].name] = arr[i].value;
         value[i] = arr[i].value;
-	}
+    }
 
-	var trans = [{"to":g_cons.to, "abi":g_cons.abi[id],"params":[value]}];
-	var data = window.parent.trans_1(trans, function (err, result) {
+    var trans = [{"to":g_cons.address, "abi":g_cons.abi[id],"params":[value]}];
+    var data = window.parent.trans(trans, function (err, result) {
         console.log('err=', err, 'result=', result);
         if(!err){
             console.log('err=', err, ',typeof(result[0][0].result)=', typeof(result[0][0].result), 'result[0][0].result=', result[0][0].result);
@@ -101,50 +82,7 @@ function form_data(obj){
             $("#result_text").text(result);
     });
 
-	return;
-    console.log("id=", id, "type=", type, ",ret=", ret);
-
-    var fun = window.parent.trans_1;
-
-    fun(data, function (err, result) {
-        console.log('err=', err, 'result=', result);
-        if(!err)
-            result = JSON.stringify(result, null, 4);
-        $("#result_text").text(result);
-    });
-}
-
-function on_submit(obj)
-{
-    //if(!window.parent.remote())
-    {
-        form_data(obj);
-        return false;
-    }
-
-    var id = parseInt($(obj)[0].id);
-    var reqdata = {".contract":QueryString("name"),".function":g_cons.abi[id]};
-    var arr = $(obj).find(".input");
-
-    for(var i=0; i<arr.length; i++){
-        reqdata[arr[i].name] = arr[i].value;
-    }
-
-	console.log('reqdata=', reqdata);
-	window.parent.ajax('/contract_test/transaction', 
-		reqdata,
-		function(XMLHttpRequest, textStatus){
-            console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
-            try{
-			    var result = JSON.stringify(JSON.parse(XMLHttpRequest.responseText), null, 4);
-			    $("#result_text").text(result);
-            }catch(err){
-                $("#result_text").text(XMLHttpRequest.responseText);
-            }
-        }
-	);
-	
-	return false;
+    return false;
 }
 
 </script>

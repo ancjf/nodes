@@ -6,7 +6,6 @@
 <script>
 
 var g_con;
-var g_abis;
 
 function QueryString(item){
 	var svalue = location.search.match(new RegExp("[\?\&]" + item + "=([^\&]*)(\&?)","i"));
@@ -34,58 +33,19 @@ function set_contracts(con){
 function onDeviceReady() {
 	console.log('list:window.parent=', window.parent);
 
+    window.parent.query_cons(function () {
+        set_contracts(window.parent.get_con(QueryString("name")));
+    });
+
+    return;
 	var name = QueryString("name");
 	var con = window.parent.con_name(name);
     console.log('name=', name, 'con=', con);
     set_contracts(con);
-    return;
-	
-	window.parent.ajax('/pressure_test/query', 
-		{"name":QueryString("name")},
-		function(XMLHttpRequest, textStatus){
-			//console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
-            set_contracts(JSON.parse(XMLHttpRequest.responseText));   
-        }
-	);
-}
-
-var time_id;
-
-function precoss_result(objResult, id, remote){
-	var result = JSON.stringify(objResult, null, 4);
-	//console.log("result.length=", result.length, "result=", result);
-	if(result.length)
-		$("#result_text").text(result);
-
-    if(objResult.count < objResult.req_count){
-        console.log("*******************objResult.count=", objResult.count, "objResult.req_count=", objResult.req_count, ",time_id=", time_id);
-
-        var str = "time_get_log(" + id + ", false)";
-        if(remote)
-            str = "time_get_log(" + id + ", true)";
-        window.setTimeout(str, 1000);
-    }
-}
-
-function time_get_log(id, remote){
-    console.log('id=', id, 'remote=', remote);
-
-    window.parent.log(id, remote,
-        function(err, result){
-            console.log('err=', err, 'typeof(result)=', typeof(result), 'result=', result);
-            precoss_result(result, id, remote);
-        }
-    );
 }
 
 function on_submit(obj)
 {
-	if(time_id != undefined){
-		console.log("time_id=", time_id);
-		clearInterval(time_id);
-		time_id = undefined;
-	}
-	
 	var id = parseInt($(obj)[0].id);
 	var count = $(obj).find("#count")[0].value;
 	var perCount = $(obj).find("#perCount")[0].value;
@@ -98,10 +58,8 @@ function on_submit(obj)
         args["address"] = g_con.address;
     }
 
-	
 	console.log('count=', count, 'perCount=', perCount, ',text=', text, ",contract=", contract);
-
-    window.parent.test_1(args, function (err, result) {
+    window.parent.test(args, function (err, result) {
         if(err){
             $("#result_text").text(result);
             return;
@@ -110,35 +68,15 @@ function on_submit(obj)
         var id = result;
         var remote = window.parent.remote();
         window.parent.time_log(id, remote, function (err, result) {
-            var result = JSON.stringify(result, null, 4);
-            //console.log("result.length=", result.length, "result=", result);
+            if(typeof(result) == 'object')
+                var result = JSON.stringify(result, null, 4);
+
             if(result.length)
                 $("#result_text").text(result);
         });
-
-        return;
-
-
-        var str = "time_get_log(" + id + ", false)";
-        if(window.parent.remote())
-            str = "time_get_log(" + id + ", true)";
-
-        console.log('err=', err, 'result=', result, ",str=", str);
-        window.setTimeout(str, 1000);
     });
 
     return false;
-	
-	window.parent.ajax('/pressure_test/test', 
-		reqdata,
-		function(XMLHttpRequest, textStatus){
-			console.log('XMLHttpRequest.responseText=', XMLHttpRequest.responseText);
-            $("#result_text").text(XMLHttpRequest.responseText);
-			time_id = setInterval("time_get_log(" + XMLHttpRequest.responseText + ")", 1000);
-        }
-	);
-	
-	return false;
 }
 
 </script>
