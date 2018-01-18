@@ -189,25 +189,4 @@ utils.cons = function(rpc){
 
 utils.load();
 
-var srcfile = './routes/webs.js';
-var destfile = './public/javascripts/webs.js';
-
-/*
-if(!fs.existsSync(destfile) || fs.statSync(srcfile).mtime > fs.statSync(destfile).mtime)
-{
-    var gulp = require('gulp');
-    //var minify = require('gulp-minify-css');
-    var less = require('gulp-less');
-    var browserify = require("browserify");
-    var b = browserify();
-    b.add(srcfile);
-    b.bundle().pipe(fs.createWriteStream(destfile));
-
-    gulp.src(destfile)
-        .pipe(less())
-        .pipe(gulp.dest('build'));
-
-    logs.logvar("generate:", destfile);
-}
-*/
 module.exports = utils;

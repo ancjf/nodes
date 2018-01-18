@@ -17,6 +17,7 @@
   "devDependencies": {
     "connect-multiparty": "^2.1.0",
     "fs": "0.0.1-security",
-    "web3": "^0.20.4"
+    "web3": "^0.20.4",
+    "webpack": "^3.10.0"
   }
 }

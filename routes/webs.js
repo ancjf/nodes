@@ -3,7 +3,7 @@
  */
 
 var Web3 = require('web3');
-var logs = require('./logs.js');
+//var logs = require('./logs.js');
 var coder = require('../node_modules/web3/lib/solidity/coder');
 //var RequestManager = require('../node_modules/web3/lib/web3/requestmanager');
 //var Eth = require('../node_modules/web3/lib/web3/methods/eth');

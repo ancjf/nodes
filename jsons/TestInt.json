@@ -1,0 +1,260 @@
+{
+  "contract_name": "TestInt",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "get",
+      "outputs": [
+        {
+          "name": "",
+          "type": "int256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "count",
+          "type": "uint256"
+        }
+      ],
+      "name": "inc",
+      "outputs": [
+        {
+          "name": "",
+          "type": "int256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "val",
+          "type": "int256"
+        }
+      ],
+      "name": "add",
+      "outputs": [
+        {
+          "name": "",
+          "type": "int256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "count",
+          "type": "uint256"
+        }
+      ],
+      "name": "dec",
+      "outputs": [
+        {
+          "name": "",
+          "type": "int256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "val",
+          "type": "int256"
+        }
+      ],
+      "name": "set",
+      "outputs": [
+        {
+          "name": "",
+          "type": "int256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "val",
+          "type": "int256"
+        }
+      ],
+      "name": "sub",
+      "outputs": [
+        {
+          "name": "",
+          "type": "int256"
+        }
+      ],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "value",
+          "type": "int256"
+        }
+      ],
+      "name": "setEvent",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "value",
+          "type": "int256"
+        }
+      ],
+      "name": "addEvent",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "value",
+          "type": "int256"
+        }
+      ],
+      "name": "subEvent",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "value",
+          "type": "int256"
+        },
+        {
+          "indexed": false,
+          "name": "count",
+          "type": "uint256"
+        }
+      ],
+      "name": "incEvent",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "value",
+          "type": "int256"
+        },
+        {
+          "indexed": false,
+          "name": "count",
+          "type": "uint256"
+        }
+      ],
+      "name": "decEvent",
+      "type": "event"
+    }
+  ],
+  "unlinked_binary": "0x6060604052341561000f57600080fd5b5b61033e8061001f6000396000f300606060405236156100755763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416636d4ce63c811461007a578063812600df1461009f57806387db03b7146100c7578063c20efb90146100ef578063e5c19b2d14610117578063fa3bd6c51461013f575b600080fd5b341561008557600080fd5b61008d610167565b60405190815260200160405180910390f35b34156100aa57600080fd5b61008d60043561016e565b60405190815260200160405180910390f35b34156100d257600080fd5b61008d6004356101d8565b60405190815260200160405180910390f35b34156100fa57600080fd5b61008d60043561021e565b60405190815260200160405180910390f35b341561012257600080fd5b61008d600435610289565b60405190815260200160405180910390f35b341561014a57600080fd5b61008d6004356102cb565b60405190815260200160405180910390f35b6000545b90565b6000805b8261ffff16811015610190576000805460010190555b600101610172565b7f05cccf31edd9b3407926270e7580cad15220bbfc052fdcb85fff19ed5bca726b6000548260405191825260208201526040908101905180910390a160005491505b50919050565b6000805482018082557fe0cba81e4315630a64fe905c624e89c11dd9af9171c68dfc776d34bbc4db78ca9060405190815260200160405180910390a1506000545b919050565b6000805b8261ffff1681101561024157600080546000190190555b600101610222565b7f27e03773ce4b4c943775dfc244d779efb6b08c0ba20aa41b4d0d4c6df7d86c7a6000548260405191825260208201526040908101905180910390a160005491505b50919050565b60008181557fd255e9e5c33ed0911b49cfee6d1e4b880df079cd19f4e53f7a8273cdd08180d68260405190815260200160405180910390a1506000545b919050565b600080548290038082557f1d48e9653be5100db2db34466e3c5fd9b88469865aea235c53bb98e7cb0198719060405190815260200160405180910390a1506000545b9190505600a165627a7a72305820191c0003019c2feb33b7adf53367e2d75ae388c27d99b924fa326a37005aeb170029",
+  "networks": {
+    "5678": {
+      "events": {
+        "0xd255e9e5c33ed0911b49cfee6d1e4b880df079cd19f4e53f7a8273cdd08180d6": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "value",
+              "type": "int256"
+            }
+          ],
+          "name": "setEvent",
+          "type": "event"
+        },
+        "0xe0cba81e4315630a64fe905c624e89c11dd9af9171c68dfc776d34bbc4db78ca": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "value",
+              "type": "int256"
+            }
+          ],
+          "name": "addEvent",
+          "type": "event"
+        },
+        "0x1d48e9653be5100db2db34466e3c5fd9b88469865aea235c53bb98e7cb019871": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "value",
+              "type": "int256"
+            }
+          ],
+          "name": "subEvent",
+          "type": "event"
+        },
+        "0x05cccf31edd9b3407926270e7580cad15220bbfc052fdcb85fff19ed5bca726b": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "value",
+              "type": "int256"
+            },
+            {
+              "indexed": false,
+              "name": "count",
+              "type": "uint256"
+            }
+          ],
+          "name": "incEvent",
+          "type": "event"
+        },
+        "0x27e03773ce4b4c943775dfc244d779efb6b08c0ba20aa41b4d0d4c6df7d86c7a": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "value",
+              "type": "int256"
+            },
+            {
+              "indexed": false,
+              "name": "count",
+              "type": "uint256"
+            }
+          ],
+          "name": "decEvent",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0xe3065491a3e318198b8ace7d44b1531931cdad45",
+      "updated_at": 1515569432486
+    }
+  },
+  "schema_version": "0.0.5",
+  "updated_at": 1515569432486
+}
