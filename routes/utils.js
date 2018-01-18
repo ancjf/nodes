@@ -2,14 +2,9 @@
  * Created by cjf on 2017/8/30.
  */
 var logs = require('./logs.js');
-var truffle = require('../solidity/truffle.js');
-
-var contract = require("truffle-contract");
 var Web3 = require('web3');
-
-const keccak256 = require('js-sha3').keccak_256;
 var Webs = require('./webs.js');
-
+var fs = require('fs');
 /*
 var httpProvider = "http://" + truffle.networks.development.host + ":" +  truffle.networks.development.port;
 logs.log(httpProvider);
@@ -26,7 +21,7 @@ if(defaultAccount === undefined){
 }
 logs.log(defaultAccount);
 */
-var fs = require('fs');
+
 const json_path = './jsons/';
 
 //logs.log(files);
@@ -197,6 +192,7 @@ utils.load();
 var srcfile = './routes/webs.js';
 var destfile = './public/javascripts/webs.js';
 
+/*
 if(!fs.existsSync(destfile) || fs.statSync(srcfile).mtime > fs.statSync(destfile).mtime)
 {
     var gulp = require('gulp');
@@ -213,5 +209,5 @@ if(!fs.existsSync(destfile) || fs.statSync(srcfile).mtime > fs.statSync(destfile
 
     logs.logvar("generate:", destfile);
 }
-
+*/
 module.exports = utils;

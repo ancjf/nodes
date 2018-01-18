@@ -6,18 +6,10 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var logs = require('./routes/logs.js');
 
-var index = require('./routes/index');
-//var users = require('./routes/users');
-var contract_test = require('./routes/contract_test');
-var pressure_test = require('./routes/pressure_test');
 var upload = require('./routes/upload');
 var web3 = require('./routes/web3');
-//var test_integer = require('./routes/test_integer');
 
 var app = express();
-
-var cors = require('cors');
-app.use(cors());
 
 //设置跨域访问
 app.all('*', function(req, res, next) {
@@ -41,13 +33,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', index);
-//app.use('/users', users);
 app.use('/web3', web3);
-app.use('/contract_test', contract_test);
-app.use('/pressure_test', pressure_test);
 app.use('/upload', upload);
-//app.use('/test_integer', test_integer);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
