@@ -63,7 +63,17 @@ function on_submit(obj)
         value[i] = arr[i].value;
     }
 
-    var trans = [{"to":g_cons.address, "abi":g_cons.abi[id],"events":g_cons.events,"params":[value]}];
+    var abi = g_cons.abi[id];
+    var events = g_cons.events;
+    var paramsdata = window.parent.webs.prototype.random_data(abi, value);
+
+    console.log('paramsdata=', paramsdata);
+    var trans = [{"to":g_cons.address,/*"abi":{'constant':abi.constant}"events":g_cons.events,*/"params":[paramsdata]}];
+    if(abi.constant == true){
+        console.log('abi.constant=', abi.constant);
+        trans[0].abi = {'constant':abi.constant};
+    }
+
     console.log('trans=', trans);
     var data = window.parent.trans(trans, function (err, result) {
         console.log('err=', err, 'result=', result);
@@ -75,8 +85,18 @@ function on_submit(obj)
                 console.log('err=', err, ',result=', typeof(result), 'result=', result);
                 $("#result_text").text(result.result);
             }else{
-                if(typeof(result.result) == 'object')
-                    result.result = JSON.stringify(result.result, null, 4);
+                if(abi.constant == true || abi.constant == 'true'){
+                    console.log('result.result=', result.result);
+                    result.result = window.parent.webs.prototype.unpackOutput(abi.outputs, result.result);
+                }else{
+                    if(typeof(result.result) == 'object'){
+                        if(typeof(result.result.logs) == 'object') {
+                            result.result.logs = window.parent.webs.prototype.decode_logs(events, result.result);
+                        }
+                        result.result = JSON.stringify(result.result, null, 4);
+                    }
+                }
+
                 $("#result_text").text(result.result);
             }
         }else

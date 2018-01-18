@@ -198,10 +198,8 @@ function validateArgs(inputTypes, args) {
 
 function toPayload(tran, params) {
     var options = tran.options;
-    if(options.data === undefined){
-        options.data = webs.prototype.random_data(tran.abi, params);
-    }
 
+    options.data = webs.prototype.random_data(tran.abi, params);
     options.to = tran.to;
     return options;
 };
@@ -238,7 +236,17 @@ function getReceipt(eth, txHash, callback){
     getTransactionReceipt_UntilNotNull(txHash);
 }
 
-function unpackOutput(outputs, output) {
+var webs = function (rpc) {
+    this.web3 = new Web3(new Web3.providers.HttpProvider(rpc));
+    //logs.logvar(rpc);
+    this.logs = {};
+};
+
+webs.prototype.logs = new Map();
+
+webs.prototype.decodeParams = coder.decodeParams;
+
+webs.prototype.unpackOutput = function (outputs, output) {
     if (!output) {
         return;
     }
@@ -260,7 +268,7 @@ function unpackOutput(outputs, output) {
     return result.length === 1 ? result[0] : result;
 };
 
-function unpack_logs(outputs, output) {
+webs.prototype.unpack_logs = function(outputs, output) {
     if (!output) {
         return;
     }
@@ -287,8 +295,8 @@ function unpack_logs(outputs, output) {
     return result.length === 1 ? result[0] : result;
 };
 
-function decode_logs(tran, receipt) {
-    if (tran.events === undefined) {
+webs.prototype.decode_logs = function(events, receipt) {
+    if (events === undefined) {
         //logs.logvar(tran, receipt.logs);
         return receipt.logs;
     }
@@ -298,43 +306,38 @@ function decode_logs(tran, receipt) {
     for(var i = 0; i < receipt.logs.length; i++){
         ret[i] = receipt.logs[i];
         var topics = receipt.logs[i].topics[0];
-        if(tran.events[topics] != undefined)
-            ret[i].result = unpack_logs(tran.events[topics].inputs, receipt.logs[i].data);
+        if(events[topics] != undefined)
+            ret[i].result = webs.prototype.unpack_logs(events[topics].inputs, receipt.logs[i].data);
     }
 
     return ret;
 };
 
-function trans_params(eth, tran, params, i, fun){
-    try{
-        var payload = toPayload(tran, params);
-        if(tran.abi.constant == true || tran.abi.constant == 'true'){
-            var result = eth.call(payload);
-            if (result && tran.abi !== undefined) {
-                result = unpackOutput(tran.abi.outputs, result);
-            }
-            fun(i, {"err":false,"result":result});
-        }else{
-            eth.sendTransaction(payload, function(err, result){
-                //logs.logvar(err, result);
-
-                getReceipt(eth, result, function(err, receipt){
-                    //logs.logvar(indes, trans.length, err, receipt);
-                    receipt.logs = decode_logs(tran, receipt);
-                    fun(i, {"err":false,"result":receipt});
-                });
-            });
+webs.prototype.trans_params = function(eth, tran, params, i, fun){
+    var payload = toPayload(tran, params);
+    if(typeof(tran.abi) !== 'undefined' && (tran.abi.constant == true || tran.abi.constant == 'true')){
+        var result = eth.call(payload);
+        if (result && typeof(tran.abi.outputs) !== 'undefined') {
+            result = webs.prototype.unpackOutput(tran.abi.outputs, result);
         }
-    }catch(err){
-        fun(i, {"err":true,"result":err});
+        fun(i, {"err":false,"result":result});
+    }else{
+        eth.sendTransaction(payload, function(err, result){
+            //logs.logvar(err, result);
+            getReceipt(eth, result, function(err, receipt){
+                //logs.logvar(indes, trans.length, err, receipt);
+                receipt.logs = webs.prototype.decode_logs(tran.events, receipt);
+                fun(i, {"err":false,"result":receipt});
+            });
+        });
     }
 }
 
-function trans_one(eth, tran, i, fun){
+webs.prototype.trans_one = function(eth, tran, i, fun){
     //logs.logvar(tran);
     if(tran.params == undefined){
         //logs.logvar(tran);
-        return trans_params(eth, tran, undefined, 0,  function callback(index, result){
+        return webs.prototype.trans_params(eth, tran, undefined, 0,  function callback(index, result){
             //logs.logvar(index, result);
             fun(i, [result]);
         });
@@ -343,7 +346,7 @@ function trans_one(eth, tran, i, fun){
     var ret = [];
     var count = 0;
     for(var f = 0; f < tran.params.length; f++){
-        trans_params(eth, tran, tran.params[f], f,  function callback(index, result){
+        webs.prototype.trans_params(eth, tran, tran.params[f], f,  function callback(index, result){
             ret[index] = result;
             count++;
             //logs.logvar(count, tran.params.length);
@@ -353,16 +356,12 @@ function trans_one(eth, tran, i, fun){
     }
 }
 
-var webs = function (rpc) {
-    this.web3 = new Web3(new Web3.providers.HttpProvider(rpc));
-    //logs.logvar(rpc);
-    this.logs = {};
-};
-
-webs.prototype.logs = new Map();
-
 webs.prototype.random_data = function (abi, params) // [Min, Max)
 {
+    if(typeof(params) == 'string'){
+        return params;
+    }
+
     if(abi.inputs == undefined || abi.inputs.length == 0){
         const signature = abi.name + '()';
         var hash = Web3.prototype.sha3(signature).slice(0, 10);
@@ -380,7 +379,8 @@ webs.prototype.random_data = function (abi, params) // [Min, Max)
         params = randomInput(inputTypes);
     validateArgs(inputTypes, params);
 
-    return hash + coder.encodeParams(inputTypes, params);
+    var ret = hash + coder.encodeParams(inputTypes, params);
+    return ret;
 }
 
 webs.prototype.random_item = function (addr)
@@ -403,43 +403,37 @@ webs.prototype.random_item = function (addr)
 }
 
 webs.prototype.trans = function(trans, fun) {
-    try{
-        var web3 = this.web3;
-        //this.web3 = web3;
-        //var provider = new Web3.providers.HttpProvider(rpc);
-        //var request = new RequestManager(provider);
-        //var web = {"_requestManager":request,"currentProvider":rpc};
-        //var eth = new Eth(web);
-        //var personal = new Personal(web);
-        var eth = web3.eth;
-        var accounts = web3.personal.listAccounts;
-        //logs.logvar(accounts);
+    var web3 = this.web3;
+    //this.web3 = web3;
+    //var provider = new Web3.providers.HttpProvider(rpc);
+    //var request = new RequestManager(provider);
+    //var web = {"_requestManager":request,"currentProvider":rpc};
+    //var eth = new Eth(web);
+    //var personal = new Personal(web);
+    var eth = web3.eth;
+    var accounts = web3.personal.listAccounts;
+    //logs.logvar(accounts);
 
-        var ret = [];
-        var count = 0;
-        //var i = 3;
-        for(var i = 0; i < trans.length; i++)
-        {
-            if(trans[i].options == undefined)
-                trans[i].options = {};
-            if(trans[i].options.from == undefined)
-                trans[i].options.from = this.random_item(accounts);
+    var ret = [];
+    var count = 0;
+    //var i = 3;
+    for(var i = 0; i < trans.length; i++)
+    {
+        if(trans[i].options == undefined)
+            trans[i].options = {};
+        if(trans[i].options.from == undefined)
+            trans[i].options.from = this.random_item(accounts);
 
-            trans_one(eth, trans[i], i, function (index, result) {
-                ret[index] = result;
-                count++;
-                //logs.logvar(count, index, trans.length);
-                if(count >= trans.length){
-                    //logs.logvar(ret);
-                    fun(false, ret);
-                }
+        webs.prototype.trans_one(eth, trans[i], i, function (index, result) {
+            ret[index] = result;
+            count++;
+            //logs.logvar(count, index, trans.length);
+            if(count >= trans.length){
+                //logs.logvar(ret);
+                fun(false, ret);
+            }
 
-            });
-        }
-
-    }catch(err){
-        //logs.logvar(err);
-        fun(true, {err:true,result:err});
+        });
     }
 }
 
@@ -463,26 +457,22 @@ webs.prototype.call = function(args, callback) {
         params = params.substring(1, params.length-1);
     }
 
-    try {
-        var line;
-        var result;
-        var web3 = new Web3(new Web3.providers.HttpProvider(rpc));
+    var line;
+    var result;
+    var web3 = new Web3(new Web3.providers.HttpProvider(rpc));
 
-        if(type == 'fun.sync') {
-            line = 'web3.' + fun + '(' + params + ', callback)';
-            eval(line);
-        }else if(type == 'fun'){
-            line = 'web3.' + fun + '(' + params + ')';
-            result = eval(line);
+    if(type == 'fun.sync') {
+        line = 'web3.' + fun + '(' + params + ', callback)';
+        eval(line);
+    }else if(type == 'fun'){
+        line = 'web3.' + fun + '(' + params + ')';
+        result = eval(line);
 
-            callback(false, result_fun(result));
-        }else{
-            var arr = fun.split('.');
-            result = web3[arr[0]][arr[1]];
-            callback(false, result_fun(result));
-        }
-    } catch (err) {
-        callback(true, err);
+        callback(false, result_fun(result));
+    }else{
+        var arr = fun.split('.');
+        result = web3[arr[0]][arr[1]];
+        callback(false, result_fun(result));
     }
 };
 
@@ -679,8 +669,8 @@ webs.prototype.set_log = function (stat) {
         s_timeout = now + 1000*60*5;
         for (var key of webs.prototype.logs.keys()) {
             var stat = webs.prototype.logs[key];
-            stat.costTime = stat.start + stat.costTime;
-            if(costTime + 1000*60*10 > now){
+            var lasttime = stat.start + stat.costTime;
+            if(lasttime + 1000*60*10 > now){
                 delete webs.prototype.logs[id];
             }
         }

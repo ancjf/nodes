@@ -19,12 +19,13 @@ function trans_trans(args, res) {
         //logs.logvar(args);
         //logs.logvar(JSON.stringify(trans));
         webs.trans(trans, function (error, result) {
-            //var out = JSON.stringify(result);
-            //logs.logvar(error, out);
+            var out = JSON.stringify(result);
+            logs.logvar(error, out);
             res.send({"err":false, "result":result});
         });
     }catch(err){
-        res.send({"err":true, "result":err});
+        //logs.logvar(typeof(err.stack), err.stack);
+        res.send({"err":true, "result":err.stack});
     }
 };
 
@@ -48,14 +49,13 @@ function test(args, res) {
             id = webs.test_con(count, perCount, cons[conname]);
         }else{
             id = webs.test_fun(count, perCount, fun, conname, address);
-            logs.logvar(id);
         }
 
         logs.logvar(id);
         res.send({"err":false, "result":id});
     }catch(err){
-        logs.logvar(err);
-        res.send({"err":true, "result":err});
+        //logs.logvar(err);
+        res.send({"err":true, "result":err.stack});
     }
 };
 
@@ -84,8 +84,8 @@ function query(args, res) {
             return query_cons(args, res);
         }
     }catch(err){
-        logs.logvar(err);
-        res.send({"err":true, "result":err});
+        //logs.logvar(err);
+        res.send({"err":true, "result":err.stack});
     }
 };
 
@@ -97,7 +97,8 @@ function trans_call(args, res) {
             res.send({"err":false, "result":result});
         });
     }catch(err){
-        res.send({"err":true, "result":err});
+        //logs.logvar(err);
+        res.send({"err":true, "result":err.stack});
     }
 };
 

@@ -5,35 +5,12 @@ var logs = require('./logs.js');
 var Web3 = require('web3');
 var Webs = require('./webs.js');
 var fs = require('fs');
-/*
-var httpProvider = "http://" + truffle.networks.development.host + ":" +  truffle.networks.development.port;
-logs.log(httpProvider);
-var web3 = new Web3(new Web3.providers.HttpProvider(httpProvider));
-
-
-
-var provider = new Web3.providers.HttpProvider(httpProvider);
-
-
-var defaultAccount = web3.eth.defaultAccount;
-if(defaultAccount === undefined){
-    defaultAccount = web3.eth.accounts[0];
-}
-logs.log(defaultAccount);
-*/
 
 const json_path = './jsons/';
-
-//logs.log(files);
 
 var utils = {};
 utils.jsons = {};
 utils.connames = {};
-
-/*
-utils.accounts = web3.eth.accounts;
-logs.log("utils.accounts=", utils.accounts);
-*/
 
 logs.logvar('name', /*files, */typeof(files), typeof('name'));
 
@@ -115,17 +92,27 @@ utils.add = function(file, name){
     return true;
 }
 
+utils.network = function(rpc){
+    //logs.logvar(rpc);
+    if(rpc.substring(0, 7) != 'http://' && rpc.substring(0, 8) != 'https://')
+        return rpc;
+
+    var web3 = new Web3(new Web3.providers.HttpProvider(rpc));
+    //logs.logvar(web3.version.network);
+    return web3.version.network;
+}
+
 utils.names = function(rpc){
     if(utils.connames[rpc] != undefined)
         return utils.connames[rpc];
 
-    var web3 = new Web3(new Web3.providers.HttpProvider(rpc));
+    var network = utils.network(rpc);
     var ret = new Array();
 
-    logs.logvar(rpc);
+    logs.logvar(network);
     for (var f in utils.jsons){
         //logs.logvar(f);
-        var network = utils.jsons[f].networks[web3.version.network];
+        var network = utils.jsons[f].networks[network];
 
         //logs.logvar(network);
         if(network !== undefined){
@@ -141,26 +128,8 @@ utils.names = function(rpc){
     return ret;
 }
 
-utils.funs = function(con, rpc){
-    if(typeof(con) == "string")
-        con = utils.contract(con, rpc);
-
-    var ret = [];
-
-    //logs.logvar(con.abi);
-    for (var f in con.abi){
-        if(con.abi[f].type == "function"){
-            ret.push(con.abi[f]);
-        }
-
-    }
-
-    return ret;
-}
-
 utils.cons = function(rpc){
-    var web3 = new Web3(new Web3.providers.HttpProvider(rpc));
-    var network = web3.version.network;
+    var network = utils.network(rpc);
     var ret = {};
 
     logs.logvar(network);
@@ -178,10 +147,11 @@ utils.cons = function(rpc){
         //ret[f].networks = utils.jsons[f].networks;
         ret[f].address = utils.jsons[f].networks[network].address;
         ret[f].events = utils.jsons[f].networks[network].events;
-        logs.logvar(ret[f].events);
+        //logs.logvar(ret[f].events);
         ret[f].contract_name = utils.jsons[f].contract_name;
-        ret[f].abi = utils.funs(utils.jsons[f]);
-
+        ret[f].abi = utils.jsons[f].abi.filter(function(item){
+            return item.type=='function';
+        });
     }
 
     return ret;
