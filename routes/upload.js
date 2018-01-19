@@ -48,6 +48,14 @@ router.get('/delete', function(req, res, next) {
     res.send(files);
 });
 
+router.post('/delete', function(req, res, next) {
+    logs.logvar(req.body);
+    utils.delete(req.body.name);
+
+    var files = utils.files();
+    res.send(files);
+});
+
 router.get('/query', function(req, res, next) {
     var files = utils.files();
 
