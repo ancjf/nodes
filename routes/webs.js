@@ -262,7 +262,7 @@ webs.prototype.unpackOutput = function (outputs, output) {
         var result = coder.decodeParams(outputTypes, output);
     }catch(err) {
         //logs.logvar(err);
-        return [err];
+        return [err.stack];
     }
 
     return result.length === 1 ? result[0] : result;
@@ -289,7 +289,7 @@ webs.prototype.unpack_logs = function(outputs, output) {
         var result = coder.decodeParams(outputTypes, output);
     }catch(err) {
         //logs.logvar(err);
-        return [err];
+        return [err.stack];
     }
 
     return result.length === 1 ? result[0] : result;

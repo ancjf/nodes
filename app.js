@@ -55,15 +55,27 @@ app.use(function(err, req, res, next) {
 });
 
 var srcfile = './routes/webs.js';
-var destfile = './public/javascripts/webs.js';
+var destfile = './public/javascripts/webs.min.js';
 if(!fs.existsSync(destfile) || fs.statSync(srcfile).mtime > fs.statSync(destfile).mtime)
 {
     const webpack = require('webpack');
+
+    logs.logvar("begin");
     webpack({
         entry:  __dirname + "/routes/webs.js",//已多次提及的唯一入口文件
         output: {
             path: __dirname + "/public/javascripts",//打包后的文件存放的地方
-            filename: "webs.js"//打包后输出文件的文件名
+            filename: "webs.min.js"//打包后输出文件的文件名
+        },
+        plugins:[new webpack.optimize.UglifyJsPlugin({
+            compress: {warnings: false}
+        })],
+        module: {
+            loaders: [{
+                test: /\.js$/,
+                exclude: /node_modules/,
+                loader: 'babel-loader'
+            }]
         }
     }, function(err, stats){
         if (err || stats.hasErrors()) {
