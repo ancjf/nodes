@@ -128,6 +128,41 @@ utils.names = function(rpc){
     return ret;
 }
 
+utils.events = function(json, network) {
+    var events;
+
+    if (json.networks[network] == null) {
+        events = {};
+    } else {
+        events = this.network.events || {};
+    }
+
+    // Merge abi events with whatever's returned.
+    var abi = json.abi;
+
+    abi.forEach(function(item) {
+        if (item.type != "event") return;
+
+        var signature = item.name + "(";
+
+        item.inputs.forEach(function(input, index) {
+            signature += input.type;
+
+            if (index < item.inputs.length - 1) {
+                signature += ",";
+            }
+        });
+
+        signature += ")";
+
+        var topic = Web3.prototype.sha3(signature);
+
+        events[topic] = item;
+    });
+
+    return events;
+}
+
 utils.cons = function(rpc){
     var network = utils.network(rpc);
     var ret = {};
@@ -146,7 +181,8 @@ utils.cons = function(rpc){
         ret[f] = {};
         //ret[f].networks = utils.jsons[f].networks;
         ret[f].address = utils.jsons[f].networks[network].address;
-        ret[f].events = utils.jsons[f].networks[network].events;
+        //ret[f].events = utils.jsons[f].networks[network].events;
+        ret[f].events = utils.events(utils.jsons[f], network);
         //logs.logvar(ret[f].events);
         ret[f].contract_name = utils.jsons[f].contract_name || utils.jsons[f].contractName;
         ret[f].abi = utils.jsons[f].abi.filter(function(item){
