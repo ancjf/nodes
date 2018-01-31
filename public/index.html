@@ -305,8 +305,9 @@ function ajax(url, data, callback){
                     xmlhttp.abort();
                 }
 
-                console.log('textStatus=', textStatus);
-                callback(true, textStatus);
+                var err = {'textStatus':textStatus,'readyState':XMLHttpRequest.readyState,'status':XMLHttpRequest.status};
+                console.log('textStatus=', textStatus, 'XMLHttpRequest.readyState=', XMLHttpRequest.readyState);
+                callback(true, JSON.stringify(err, null, 4));
                 return;
             }
 
@@ -330,12 +331,15 @@ function query_log(id, remote, callback){
     ajax('/web3/query',
         {"type":"log","id":id,"remove":"true"},
         function(err, result){
-            console.log('result=', result);
+            console.log('err=', err, 'result=', result);
+
             try{
-                callback(false, JSON.parse(result));
-            }catch(err){
-                console.log('err=', err, 'result=', result);
-                callback(true, err);
+                if(!err)
+                    result = JSON.parse(result);
+                callback(err, result);
+            }catch(error){
+                console.log('error=', error, 'result=', result);
+                callback(true, error);
             }
         }
     );
@@ -345,16 +349,20 @@ function time_get_log(id, remote){
     query_log(id, remote,
         function(err, result){
             console.log('err=', err, 'typeof(result)=', typeof(result), 'result=', result);
-            console.log("*******************err=", err, "result.count=", result.count, "result.req_count=", result.req_count, ",str=", str);
-            window.logback(err, result);
-            if(!err && result.count < result.req_count){
+            console.log("err=", err, "result.count=", result.count, "result.req_count=", result.req_count);
+            try{
+                window.logback(err, result);
+            }catch (error){
+                console.log('error=', error);
+            }
 
-                var str = "time_get_log(" + id + ", false)";
-                if(remote)
-                    str = "time_get_log(" + id + ", true)";
+            if(err || result.count >= result.req_count){
+                if(typeof(window.logTimer) != 'undefined'){
+                    console.log('window.logTimer=', window.logTimer);
+                    window.clearInterval(window.logTimer);
+                    window.logTimer = undefined;
+                }
 
-                window.setTimeout(str, 1000);
-            }else{
                 if(typeof(window.webs.prototype.logs[id]) != 'undefined')
                     delete window.webs.prototype.logs[id];
             }
@@ -363,6 +371,10 @@ function time_get_log(id, remote){
 }
 
 function time_log(id, remote, callback){
+    if(typeof(window.logTimer) != 'undefined'){
+        window.clearInterval(window.logTimer);
+        window.logTimer = undefined;
+    }
     window.logback = callback;
 
     query_log(id, remote,
@@ -371,13 +383,14 @@ function time_log(id, remote, callback){
             console.log("*******************err=", err, "result.count=", result.count, "result.req_count=", result.req_count, ",str=", str);
             window.logback(err, result);
             if(!err && result.count < result.req_count){
-
                 var str = "time_get_log(" + id + ", false)";
                 if(remote)
                     str = "time_get_log(" + id + ", true)";
 
-                window.setTimeout(str, 1000);
+                window.logTimer = window.setInterval(str, 1000);
+                console.log('window.logTimer=', window.logTimer, 'window.logTimer=', window.logTimer);
             }
+
         }
     );
 }

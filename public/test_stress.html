@@ -50,8 +50,15 @@ function on_submit(obj)
         var id = result;
         var remote = window.parent.remote();
         window.parent.time_log(id, remote, function (err, result) {
+            if(err){
+                var value = $("#result_text").val();
+                console.log('value=', value);
+                $("#result_text").text(result + '\r\n' + value);
+                return;
+            }
+
             if(typeof(result) == 'object')
-                var result = JSON.stringify(result, null, 4);
+                result = JSON.stringify(result, null, 4);
 
             if(result.length)
                 $("#result_text").text(result);

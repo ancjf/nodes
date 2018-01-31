@@ -67,7 +67,7 @@ function on_submit(obj)
     var events = g_cons.events;
     var paramsdata = window.parent.webs.prototype.random_data(abi, value);
 
-    console.log('paramsdata=', paramsdata);
+    console.log('paramsdata=', paramsdata, 'events=', events);
     var trans = [{"to":g_cons.address,/*"abi":{'constant':abi.constant}"events":g_cons.events,*/"params":[paramsdata]}];
     if(abi.constant == true){
         console.log('abi.constant=', abi.constant);

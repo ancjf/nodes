@@ -148,7 +148,7 @@ utils.cons = function(rpc){
         ret[f].address = utils.jsons[f].networks[network].address;
         ret[f].events = utils.jsons[f].networks[network].events;
         //logs.logvar(ret[f].events);
-        ret[f].contract_name = utils.jsons[f].contract_name;
+        ret[f].contract_name = utils.jsons[f].contract_name || utils.jsons[f].contractName;
         ret[f].abi = utils.jsons[f].abi.filter(function(item){
             return item.type=='function';
         });
