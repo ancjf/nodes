@@ -25,8 +25,12 @@ router.use(mutipart({//设置文件上传到的位置
 
 var mutipartMiddeware = mutipart();
 
+function get_account(req) {
+    var cook = JSON.parse(req.cookies.account);
+    return cook.account;
+}
 router.post('/upload', mutipartMiddeware, function(req, res, next) {
-    var account = req.cookies.account.account;
+    var account = get_account(req);
     logs.logvar(account, req.cookies, req.files);
 
     for(var value in req.files) {
@@ -43,7 +47,7 @@ router.post('/upload', mutipartMiddeware, function(req, res, next) {
 });
 
 router.get('/delete', function(req, res, next) {
-    var account = req.cookies.account.account;
+    var account = get_account(req);
     logs.logvar(account, req.query.name);
     utils.delete(account, req.query.name);
 
@@ -52,7 +56,7 @@ router.get('/delete', function(req, res, next) {
 });
 
 router.post('/delete', function(req, res, next) {
-    var account = req.cookies.account.account;
+    var account = get_account(req);
     var dest = account + '/' + req.body.name;
     logs.logvar(account, req.body);
     utils.delete(account, req.body.name);
@@ -62,7 +66,7 @@ router.post('/delete', function(req, res, next) {
 });
 
 router.get('/query', function(req, res, next) {
-    var account = req.cookies.account.account;
+    var account = get_account(req);
     var files = utils.files(account);
 
     logs.logvar(account, files);
@@ -70,7 +74,7 @@ router.get('/query', function(req, res, next) {
 });
 
 router.post('/query', function(req, res, next) {
-    var account = req.cookies.account.account;
+    var account = get_account(req);
     var files = utils.files(account);
 
     logs.logvar(account, files);

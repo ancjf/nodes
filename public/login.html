@@ -15,7 +15,7 @@ function on_submit(obj)
     var account = $(obj).find("#account")[0].value;
     var password = $(obj).find("#password")[0].value;
 
-    var data = {"account":account,"password":password};
+    var data = {"account":account,"password":window.parent.webs.prototype.sha3(password)};
     console.log('data=', data);
     window.parent.ajax('/users/login', data, function(error, result){
         result = JSON.parse(result);
@@ -24,6 +24,7 @@ function on_submit(obj)
         if(cookie != undefined){
             console.log('cookid=', cookie);
             window.parent.login(cookie);
+            $("#back").show();
             //$.cookie('account', JSON.stringify(cookid.account), cookid.attr);
         }
 
@@ -38,6 +39,7 @@ function on_back(obj)
     var url = QueryString('back');
 
     console.log("url=", url);
+    window.parent.jump_page(url);
 }
 </script>
 
@@ -68,7 +70,7 @@ function on_back(obj)
         </table>
     </form>
 
-    <button name="back" onClick="on_back(this)">back</button>
+    <button id="back" onClick="on_back(this)" style="display:none;">返回登录前界面</button>
     <div id="result">
     </div>
 </div>

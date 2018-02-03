@@ -440,6 +440,8 @@ function on_logout(obj){
     if(value != 'login'){
         $.removeCookie('account');
         $("#username").text("login");
+    }else{
+        jump_page('/login.html');
     }
 }
 
@@ -512,6 +514,10 @@ function on_change(obj)
     console.log("obj=", obj, "id=", id, "text=", text);
 }
 
+function jump_page(url){
+    document.getElementById("main_frame").src = url;
+}
+
 function jump_url(obj){
     var type = $(obj).attr("class");
     var log = logined();
@@ -521,7 +527,7 @@ function jump_url(obj){
         //return;
     }
 
-    document.getElementById("main_frame").src = obj.name;
+    jump_page(obj.name);
 }
 
 </script>

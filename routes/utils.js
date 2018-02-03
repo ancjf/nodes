@@ -187,6 +187,4 @@ utils.cons = function(rpc, account, callback){
     });
 }
 
-utils.load();
-
 module.exports = utils;

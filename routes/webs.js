@@ -691,6 +691,8 @@ webs.prototype.log = function (id, keep) {
     return log;
 }
 
+webs.prototype.sha3 = Web3.prototype.sha3;
+
 if(typeof window!=="undefined")
     window.webs = webs
 else

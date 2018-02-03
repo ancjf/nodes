@@ -27,7 +27,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.all('*', users.requireAuthentication);
+app.all('*', users.requireAuth);
 /*
 //设置跨域访问
 app.all('*', function(req, res, next) {
