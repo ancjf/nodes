@@ -68,22 +68,22 @@ function query_log(args, res) {
     res.send(log);
 }
 
-function query_cons(args, res, cookies) {
+function query_cons(args, res, account) {
     //logs.logvar('start', cons);
-    var cons = utils.cons(args[".rpc"], cookies.account.account, function (cons) {
+    var cons = utils.cons(args[".rpc"], account, function (cons) {
         logs.logvar(cons);
         res.send(cons);
     });
 }
 
-function query(args, res, cookies) {
+function query(args, res, account) {
     try{
-        logs.logvar(cookies);
+        logs.logvar(account);
         var type = args["type"];
         if(type == 'log'){
             return query_log(args, res);
         }else if(type == 'cons'){
-            return query_cons(args, res, cookies);
+            return query_cons(args, res, account);
         }
     }catch(err){
         //logs.logvar(err);
@@ -129,11 +129,11 @@ router.get('/test', function(req, res, next) {
 });
 
 router.post('/query', function(req, res, next) {
-    query(req.body, res, req.cookies);
+    query(req.body, res, utils.get_account(req));
 });
 
 router.get('/query', function(req, res, next) {
-    query(req.query, res, req.cookies);
+    query(req.query, res, utils.get_account(req));
 });
 
 

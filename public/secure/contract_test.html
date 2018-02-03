@@ -1,0 +1,162 @@
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+	<script type="text/javascript" src="../javascripts/jquery-3.2.1.min.js"></script>
+<script>
+
+function QueryString(item){
+	var svalue = location.search.match(new RegExp("[\?\&]" + item + "=([^\&]*)(\&?)","i"));
+	return svalue ? svalue[1] : "";
+}
+
+var g_cons;
+
+function set_table(abi, index){
+	var ret = '<form action="/contract_test/transaction" method="get" id = "' + index.toString() + '" onsubmit="return on_submit(this);"> <table border="0" cellspacing="5" cellpadding="5" style="border:1px #666666 solid;">'
+	
+	for(var i=0; i<abi.inputs.length; i++){
+		var name = abi.inputs[i].name;
+		var text = name + '.' + abi.inputs[i].type + ':';
+		
+		ret += '<tr> <td>' + text + '</td>  <td> <input class="input" name="' + name + '" type="text"></td></tr>';
+	}
+	
+	var type = abi.constant ? 'call' : 'transaction';
+	var funname = QueryString("name") + '.' + abi.name + '.' + type;
+	ret += '<tr> <td> <input type="submit" id="submit" value="'  + funname + '">  </td></tr></table></form>';
+	return ret;
+}
+
+function set_contracts(abis){
+	g_cons = abis;
+	console.log('abis=', abis);
+
+	var html = '';
+	for(var i=0; i<g_cons.abi.length; i++){
+		html += set_table(g_cons.abi[i], i);
+	}
+	
+	//console.log('html=', html);
+	$("#left_list").html(html);
+}
+
+function onDeviceReady() {
+	console.log('list:window.parent=', window.parent);
+
+    window.parent.query_cons(function () {
+        set_contracts(window.parent.get_con(QueryString("name")));
+    });
+}
+
+function on_submit(obj)
+{
+    var id = parseInt($(obj)[0].id);
+    var ret = {".contract":QueryString("name"),".function":g_cons.abi[id]};
+
+    var value = [];
+    var arr = $(obj).find(".input");
+    var type = $(obj).find("#submit")[0].value;
+    type = type.split('.')[2];
+    for(var i=0; i<arr.length; i++){
+        ret[arr[i].name] = arr[i].value;
+        value[i] = arr[i].value;
+    }
+
+    var abi = g_cons.abi[id];
+    var events = g_cons.events;
+    var paramsdata = window.parent.webs.prototype.random_data(abi, value);
+
+    console.log('paramsdata=', paramsdata, 'events=', events);
+    var trans = [{"to":g_cons.address,/*"abi":{'constant':abi.constant}"events":g_cons.events,*/"params":[paramsdata]}];
+    if(abi.constant == true){
+        console.log('abi.constant=', abi.constant);
+        trans[0].abi = {'constant':abi.constant};
+    }
+
+    console.log('trans=', trans);
+    var data = window.parent.trans(trans, function (err, result) {
+        console.log('err=', err, 'result=', result);
+        if(!err){
+            console.log('err=', err, ',typeof(result[0][0].result)=', typeof(result[0][0].result), 'result[0][0].result=', result[0][0].result);
+            //result = JSON.stringify(result[0][0].result, null, 4);
+            result = result[0][0];
+            if(result.err){
+                console.log('err=', err, ',result=', typeof(result), 'result=', result);
+                $("#result_text").text(result.result);
+            }else{
+                if(abi.constant == true || abi.constant == 'true'){
+                    console.log('result.result=', result.result);
+                    result.result = window.parent.webs.prototype.unpackOutput(abi.outputs, result.result);
+                }else{
+                    if(typeof(result.result) == 'object'){
+                        if(typeof(result.result.logs) == 'object') {
+                            result.result.logs = window.parent.webs.prototype.decode_logs(events, result.result);
+                        }
+                        result.result = JSON.stringify(result.result, null, 4);
+                    }
+                }
+
+                $("#result_text").text(result.result);
+            }
+        }else
+            $("#result_text").text(result);
+    });
+
+    return false;
+}
+
+</script>
+
+<style type="text/css">
+	html
+	{
+	 height:100%;
+	 margin:0;
+	}
+	body
+	{
+		height:99%;
+		margin:0; 
+	}
+	
+	hr{ border-top:1px solid #987cb9;}
+	
+	.left{ width:38%; float:left;border:1px solid green;height:100%;}
+	.right{ width:60%; margin-left:38%;border:1px solid orange;height:100%;}
+	
+	#result_text {  
+    width: 100%; /*自动适应父布局宽度*/  
+	height: 100%;
+    overflow: auto;  
+    word-break: break-all;  
+    /*在ie中解决断行问题(防止自动变为在一行显示，主要解决ie兼容问题，ie8中当设宽度为100%时，文本域类容超过一行时，当我们双击文本内容就会自动变为一行显示，所以只能用ie的专有断行属性“word-break或word-wrap”控制其断行)*/  
+	} 
+</style>
+
+</head>
+
+<body>
+<div align="center">
+
+<div class="w">
+	<div class="left"><div align="left">
+    
+    <div align="middle", id="left_list"></div>
+                               
+    </div></div>
+    <div class="right"><textarea id="result_text"></textarea></div>
+    
+</div>
+
+</div>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	onDeviceReady();
+});
+
+</script>
+</body>
+
+</html>

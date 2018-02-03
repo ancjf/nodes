@@ -187,4 +187,9 @@ utils.cons = function(rpc, account, callback){
     });
 }
 
+utils.get_account = function(req) {
+    var cook = JSON.parse(req.cookies.account);
+    return cook.account;
+}
+
 module.exports = utils;

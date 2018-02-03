@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src="../javascripts/jquery-3.2.1.min.js"></script>
+<title>无标题文档</title>
+
+<script>
+
+function set_files(files){
+	
+	console.log('files=', files);
+	
+	var html = '';
+	for(var i=0;i<files.length;i++){
+		html += '<form action="/upload/delete" method="post" onsubmit="return on_submit(this);"> <input type="text" name="name"  readonly="readonly" value="' + files[i] + '"/> <input type="submit" value="delete"/></form>';
+	}
+	
+	$("#files").html(html);
+}
+
+function on_submit(obj)
+{
+	var arr = $(obj).children("input");
+	var name = arr[0].value;
+	var rpc = window.parent.rpc();
+	console.log('obj=', obj, ",name=", name);
+	
+	window.parent.ajax('/upload/delete', 
+		{"name":name},
+        function(err, result){
+            if(!err){
+                window.parent.delete_cons(rpc);
+                set_files(JSON.parse(result));
+            }
+        }
+	);
+
+	return false;
+}
+
+function on_upload(obj)
+{
+	var fd = new FormData();
+	var files = $("#upload")[0].files;
+    var rpc = window.parent.rpc();
+	
+	console.log('files', files);
+	
+	for(var i=0;i<files.length;i++){
+		fd.append("file"+i.toString(), files[i]);
+	}
+ 
+	// 创建xhr对象
+	var xhr = new XMLHttpRequest();
+	// 监听状态，实时响应
+	// xhr 和 xhr.upload 都有progress事件，xhr.progress是下载进度，xhr.upload.progress是上传进度
+	xhr.upload.onprogress = function(event) {
+		return;
+		if (event.lengthComputable) {
+			var percent = Math.round(event.loaded * 100/ event.total);
+			console.log('%d%', percent);
+			$("#upprog").text(percent);
+		}
+	};
+	
+	// 传输开始事件
+	xhr.onloadstart = function(event) {
+		console.log('load start');
+	};
+	
+	// ajax过程成功完成事件
+	xhr.onload = function(event) {
+		console.log(xhr.responseText);
+		set_files(JSON.parse(xhr.responseText));
+        window.parent.delete_cons(rpc);
+	};
+	
+	// ajax过程发生错误事件
+	xhr.onerror = function(event) {
+		console.log('error');
+	};
+	
+	// ajax被取消
+	xhr.onabort = function(event) {
+		console.log('abort');
+	};
+	
+	// loadend传输结束，不管成功失败都会被触发
+	xhr.onloadend = function (event) {
+		console.log('load end');
+	};
+	
+	// 发起ajax请求传送数据
+	xhr.open('POST', '/upload/upload', true);
+	xhr.send(fd);
+
+	return false;
+}
+
+function on_onchange(obj)
+{
+	var files = $(obj)[0].files;
+	
+	var html = '';
+	for(var i=0;i<files.length;i++){
+		html += '<tr> <td>' + files[i].name + '</td> </tr>';
+	}
+	
+	$("#files_list").html(html);
+	
+	console.log('files', files);
+}
+
+function onDeviceReady() {
+	console.log('list:window.parent=', window.parent);
+	
+	window.parent.ajax('/upload/query', 
+		{},
+		function(err, result){
+	        if(!err)
+                set_files(JSON.parse(result));
+        }
+	);	
+}
+
+</script>
+
+</head>
+
+<body>
+
+<div align="center">
+    <form action="/upload/upload" enctype="multipart/form-data" method="post" onsubmit="return on_upload(this);">
+        <p>附件：<input type="file" id="upload" multiple="multiple" accept="application/json" style="" onchange="on_onchange(this);"></p>
+        <table id="files_list" border="0" cellspacing="5" cellpadding="5" style="border:1px #666666 solid;">
+        </table>
+        <p><input type="submit"></p>
+    </form>
+    
+    <div id="files">
+    </div>
+        
+</div>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	onDeviceReady();
+});
+
+</script>
+</body>
+</html>
