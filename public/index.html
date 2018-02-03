@@ -5,6 +5,7 @@
     <meta http-equiv="Access-Control-Allow-Origin" content="192.168.153.128">
     <meta http-equiv="Access-Control-Allow-Methods" content="POST,GET">
     <script type="text/javascript" src="javascripts/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="javascripts/jquery.cookie.js"></script>
     <script type="text/javascript" src="javascripts/webs.min.js"></script>
 <script>
 
@@ -395,11 +396,59 @@ function time_log(id, remote, callback){
     );
 }
 
+function getCookie(){
+    var cookieString = decodeURIComponent(document.cookie);
+    console.log('cookieString=', cookieString);
+    var cookieArray = cookieString.split(";");
+    console.log(cookieArray.length);
+    var cookie = {};
+    for(var i = 0; i < cookieArray.length; i++){
+        var cookieNum = cookieArray[i].split("=");
+        cookie[cookieNum[0]] = cookieNum[1];
+    }
+    return cookie;
+}
+
+function logined(){
+    var value = $("#username").text();
+    return value != 'login';
+}
+
+function login(cookie){
+    if(cookie){
+        console.log('cookie=', cookie);
+        $.cookie('account', JSON.stringify(cookie.account), cookie.attr);
+        var account = cookie.account.account;
+        console.log('account=', account, 'cookie=', cookie);
+        $("#username").text("logout:" + account);
+    }else {
+        var strCookie = $.cookie('account');
+        //var cook = '';
+        console.log('strCookie=', strCookie);
+        if(typeof(strCookie) == 'string' && strCookie.length > 2){
+            var cook = JSON.parse(strCookie);
+            var account = cook.account;
+            $("#username").text("logout:" + account);
+        }
+    }
+}
+
+function on_logout(obj){
+    var value = $("#username").text();
+    console.log("obj.name=", obj.name, "value=", value);
+
+    if(value != 'login'){
+        $.removeCookie('account');
+        $("#username").text("login");
+    }
+}
+
 function onDeviceReady() {
     var strKey = url_key();
     var storage = window.localStorage;
     var value = storage.getItem(strKey);
 
+    login();
     console.log('value=', value, '$("#text_host")=', $("#text_host"));
     if(value==null)
         return;
@@ -464,7 +513,14 @@ function on_change(obj)
 }
 
 function jump_url(obj){
-    console.log("obj.name=", obj.name);
+    var type = $(obj).attr("class");
+    var log = logined();
+    console.log("obj.name=", obj.name, "type=", type, "log=", log);
+    if(type == 'login' && !logined()){
+        //window.location.href='/login.html';
+        //return;
+    }
+
     document.getElementById("main_frame").src = obj.name;
 }
 
@@ -500,10 +556,11 @@ function jump_url(obj){
         remote:<input class="input" id="remote" type="checkbox">
 
         <button name="web3.html" onClick="jump_url(this)">web3</button>
-        <button name="contract.html" onClick="jump_url(this)">contract</button>
-        <button name="contract_list.html" onClick="jump_url(this)">contract_test</button>
-        <button name="test_stress.html" onClick="jump_url(this)">test stress</button>
+        <button name="secure/contract.html" class="login" onClick="jump_url(this)">contract</button>
+        <button name="secure/contract_list.html" class="login" onClick="jump_url(this)">contract_test</button>
+        <button name="secure/test_stress.html" class="login" onClick="jump_url(this)">test stress</button>
         <a href="Mailto:ancjf@163.com">Contact me!</a>
+        <button id="username" name="username" onClick="on_logout(this)">login</button>
     </p>
 
     <iframe id="main_frame" width="98%" height="95%" src="/web3.html"></iframe>

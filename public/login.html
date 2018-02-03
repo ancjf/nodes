@@ -1,0 +1,82 @@
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+    <script type="text/javascript" src="javascripts/jquery-3.2.1.min.js"></script>
+<script>
+
+function QueryString(item){
+    var svalue = location.search.match(new RegExp("[\?\&]" + item + "=([^\&]*)(\&?)","i"));
+    return svalue ? svalue[1] : "";
+}
+
+function on_submit(obj)
+{
+    var account = $(obj).find("#account")[0].value;
+    var password = $(obj).find("#password")[0].value;
+
+    var data = {"account":account,"password":password};
+    console.log('data=', data);
+    window.parent.ajax('/users/login', data, function(error, result){
+        result = JSON.parse(result);
+        var cookie = result.cookie;
+        console.log('error=', error, ",cookie=", cookie, ",result=", result);
+        if(cookie != undefined){
+            console.log('cookid=', cookie);
+            window.parent.login(cookie);
+            //$.cookie('account', JSON.stringify(cookid.account), cookid.attr);
+        }
+
+        $("#result").text(result.msg);
+    });
+
+    return false;
+}
+
+function on_back(obj)
+{
+    var url = QueryString('back');
+
+    console.log("url=", url);
+}
+</script>
+
+<style type="text/css">
+    html
+    {
+        height:100%;
+        margin:0;
+    }
+    body
+    {
+        height:100%;
+        margin:0;
+    }
+</style>
+
+</head>
+
+<body>
+
+<div align="center">
+
+    <form action="/pressure_test/test" class="" method="get" onsubmit="return on_submit(this);">
+        <table border="0" cellspacing="5" cellpadding="5" style="border:1px #666666 solid;">
+            <tr> <td>account:</td>  <td> <input id="account" type="text"></td></tr>
+            <tr> <td>password:</td>  <td> <input id="password" type="password"></td></tr>
+            <tr> <td> <input type="submit" value="login" >  </td> </tr>
+        </table>
+    </form>
+
+    <button name="back" onClick="on_back(this)">back</button>
+    <div id="result">
+    </div>
+</div>
+
+<script type="text/javascript">
+
+</script>
+
+</body>
+
+</html>

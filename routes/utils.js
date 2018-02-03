@@ -9,8 +9,7 @@ var fs = require('fs');
 const json_path = './jsons/';
 
 var utils = {};
-utils.jsons = {};
-utils.connames = {};
+utils.jsons = new Map();
 
 logs.logvar('name', /*files, */typeof(files), typeof('name'));
 
@@ -26,23 +25,39 @@ utils.path = function(){
     return json_path;
 }
 
-utils.files = function(){
-    return fs.readdirSync(json_path);
+utils.filepath = function(account, name){
+    return account + '/' + name;
 }
 
-utils.load = function(){
-    var files = utils.files();
+utils.files = function(account){
+    var path = json_path + (account ? account + '/' : '');
+    return fs.readdirSync(path).filter(function (key) {
+        logs.logvar(path + key);
+        var stat = fs.lstatSync(path + key);
+        return !stat.isDirectory();
+    });
+}
+
+utils.load = function(account){
+    var files = utils.files(account);
     //logs.logvar(files);
 
+    var jsons = {};
     for (var f in files){
-        var file = json_path + files[f];
+        var file = json_path + account + '/' + files[f];
         var name = cname(files[f]);
+
+        /*
+        var stat = fs.lstatSync(file);
+        if(stat.isDirectory())
+            continue;
+*/
         /*
          var workid = web3.version.network;
          */
         //var json = require(file);
         var json = JSON.parse(fs.readFileSync(file, "utf-8"));
-        utils.jsons[name] = json;
+        jsons[name] = json;
         //logs.log("name=", name);
         logs.logvar(name);
         /*
@@ -61,20 +76,17 @@ utils.load = function(){
          }
          */
     }
+
+    //utils.jsons[account] = jsons;
+    return jsons;
 }
 
-utils.delete = function(name){
-    var conname = cname(name);
-    if(typeof(utils.jsons[conname]) != 'undefined')
-        delete utils.jsons[conname];
-
-    utils.connames = {};
-    return fs.unlinkSync(utils.path() + name);
+utils.delete = function(account, name){
+    return fs.unlinkSync(utils.path() + utils.filepath(account, name));
 }
 
-utils.add = function(file, name){
-    var conname = cname(name);
-    name = json_path + name;
+utils.add = function(file, account, name){
+    name = json_path + utils.filepath(account, name);
 
     if(fs.existsSync(name)){
         logs.logvar("exists:", file);
@@ -82,50 +94,27 @@ utils.add = function(file, name){
         return false;
     }
 
+    if(!fs.existsSync(account)){
+        fs.mkdirSync(account);
+    }
+
     fs.renameSync(file, name);
-
-    logs.logvar(conname, name);
-    var json = JSON.parse(fs.readFileSync(name, "utf-8"));
-    utils.jsons[conname] = json;
-
-    utils.connames = {};
     return true;
 }
 
-utils.network = function(rpc){
+utils.network = function(rpc, callback){
     //logs.logvar(rpc);
-    if(rpc.substring(0, 7) != 'http://' && rpc.substring(0, 8) != 'https://')
-        return rpc;
-
-    var web3 = new Web3(new Web3.providers.HttpProvider(rpc));
-    //logs.logvar(web3.version.network);
-    return web3.version.network;
-}
-
-utils.names = function(rpc){
-    if(utils.connames[rpc] != undefined)
-        return utils.connames[rpc];
-
-    var network = utils.network(rpc);
-    var ret = new Array();
-
-    logs.logvar(network);
-    for (var f in utils.jsons){
-        //logs.logvar(f);
-        var network = utils.jsons[f].networks[network];
-
-        //logs.logvar(network);
-        if(network !== undefined){
-            var address = network["address"];
-            if(address !== undefined) {
-                logs.logvar(f);
-                ret.push(f);
-            }
-        }
+    if(rpc.substring(0, 7) != 'http://' && rpc.substring(0, 8) != 'https://'){
+        callback(false, rpc);
+        return;
     }
 
-    utils.connames[rpc] = ret;
-    return ret;
+    var web3 = new Web3(new Web3.providers.HttpProvider(rpc));
+    logs.logvar('');
+    web3.version.getNetwork(function(error, result){
+        //logs.logvar(error, result);
+        callback(error, result);
+    });
 }
 
 utils.events = function(json, network) {
@@ -163,34 +152,39 @@ utils.events = function(json, network) {
     return events;
 }
 
-utils.cons = function(rpc){
-    var network = utils.network(rpc);
-    var ret = {};
+utils.cons = function(rpc, account, callback){
+    utils.network(rpc, function (error, network) {
+        var ret = {};
+        if(error)
+            return ret;
 
-    logs.logvar(network);
-    for (var f in utils.jsons){
-        //logs.logvar(f);
-        var net = utils.jsons[f].networks[network];
+        var jsons = utils.load(account);
+        for (var f in jsons){
 
-        //logs.logvar(network);
-        if(net == undefined){
-            logs.logvar(net);
-            continue;
+            //logs.logvar(f);
+            var net = jsons[f].networks[network];
+
+            //logs.logvar(network);
+            if(net == undefined){
+                logs.logvar(net);
+                continue;
+            }
+
+            ret[f] = {};
+            //ret[f].networks = jsons[f].networks;
+            ret[f].address = jsons[f].networks[network].address;
+            //ret[f].events = jsons[f].networks[network].events;
+            ret[f].events = utils.events(jsons[f], network);
+            //logs.logvar(ret[f].events);
+            ret[f].contract_name = jsons[f].contract_name || jsons[f].contractName;
+            ret[f].abi = jsons[f].abi.filter(function(item){
+                return item.type=='function';
+            });
         }
 
-        ret[f] = {};
-        //ret[f].networks = utils.jsons[f].networks;
-        ret[f].address = utils.jsons[f].networks[network].address;
-        //ret[f].events = utils.jsons[f].networks[network].events;
-        ret[f].events = utils.events(utils.jsons[f], network);
-        //logs.logvar(ret[f].events);
-        ret[f].contract_name = utils.jsons[f].contract_name || utils.jsons[f].contractName;
-        ret[f].abi = utils.jsons[f].abi.filter(function(item){
-            return item.type=='function';
-        });
-    }
-
-    return ret;
+        //logs.logvar(ret);
+        callback(ret);
+    });
 }
 
 utils.load();
