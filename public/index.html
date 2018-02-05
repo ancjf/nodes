@@ -167,6 +167,7 @@ function call(data, callback) {
         console.log('window.webs.prototype=', window.webs.prototype);
         console.log('data=', data, ",window.webs.call=", window.webs.call);
 
+        console.log('data=', data);
         window.webs.prototype.call(data, function (err, result) {
             console.log('err=', err, ",result=", result);
             if(typeof(result) === 'object')

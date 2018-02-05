@@ -88,8 +88,9 @@ class HandleDB {
         return new Promise((resolve, reject) => {
             _self.db[mode](sql, param,
                 function (err, data) {    // data: Array, Object
+                    //logs.logvar(sql, param, err, data);
                     if (err) {
-                        reject(new Error(err));
+                        reject(new Error(err.code));
                     } else {
                         if (data) {
                             resolve(data);    // 返回数据查询成功的结果
@@ -113,19 +114,18 @@ db.connectDataBase().then((result)=>{
     console.log(result);
     // 创建表(如果不存在的话,则创建,存在的话, 不会创建的,但是还是会执行回调)
     let sentence = `
-       create table if not exists ${db.tableName}(
+       create table ${db.tableName}(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            account varchar(255),
+            account varchar(255) UNIQUE,
             password varchar(300),
             last_time varchar(255)
         );`;
     return db.createTable(sentence);
 }).then((result)=>{
-    logs.logvar(result);
-    if(result != 'exist')
-        doLogic();
+    //logs.logvar(result);
+    doLogic();
 }).catch((err)=>{
-    logs.logvar(err);
+    //logs.logvar(err);
 });
 
 let doLogic = function() {
@@ -137,7 +137,7 @@ let doLogic = function() {
     }).catch((err)=>{
         logs.logvar(err);
     });
-
+/*
     // 一次性插入多个数据
     var data = {
         "Body": [
@@ -186,14 +186,21 @@ let doLogic = function() {
     }).catch((err)=>{
         logs.logvar(err);
     });
+    */
 };
 
-function create_account(account, password) {
+function create_account(account, password, ballback) {
+    logs.logvar(account, password);
     db.sql(`insert into ${db.tableName} (account, password, last_time) values(?, ?, ?)`,
         [account, password, Date().toString()]).then((res)=>{
-        logs.logvar(res);
+        //logs.logvar(res);
+        ballback(false, res);
     }).catch((err)=>{
-        logs.logvar(err);
+        //logs.logvar(err.name, typeof(err.message), err.message, err);
+        var msg = err.message;
+        if(msg == 'SQLITE_CONSTRAINT')
+            msg = '账号已经存在!';
+        ballback(true, msg);
     });
 }
 
@@ -207,7 +214,7 @@ function updateLastLoginTime(account){
 
 function auth_login(account, password, callback){
     db.sql(`select * from ${db.tableName} where account = ?`, account, 'get').then((res)=>{
-        //logs.logvar(typeof (res), res);
+        logs.logvar(typeof (res), res);
         if(typeof (res) == "object"){
             if(res.password == password){
                 callback(0, res);
@@ -254,7 +261,7 @@ router.requireAuth = function(req, res, next){
 function login(args, res, next){
     var account = args.account;
     var password = args.password;
-    //logs.logvar(account, password);
+    logs.logvar(account, password);
 
     auth_login(account, password, function (result, row) {
         switch(result){
@@ -280,6 +287,29 @@ router.post('/login', function(req, res, next){
 
 router.get('/login', function(req, res, next){
     login(req.query, res, next);
+});
+
+function register(args, res, next){
+    var account = args.account;
+    var password = args.password;
+    logs.logvar(account, password);
+
+    create_account(account, password, function (err, result) {
+        logs.logvar(err, result);
+        if (!err) {
+            res.send({msg: "注册成功"});
+        } else {
+            res.send({msg: result});
+        }
+    });
+};
+
+router.post('/register', function(req, res, next){
+    register(req.body, res, next);
+});
+
+router.get('/register', function(req, res, next){
+    register(req.query, res, next);
 });
 
 module.exports = router;

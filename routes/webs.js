@@ -10,6 +10,7 @@ var coder = require('../node_modules/web3/lib/solidity/coder');
 //var Personal = require('../node_modules/web3/lib/web3/methods/Personal');
 var utils = require('../node_modules/web3/lib/utils/utils');
 //var SolidityFunction = require('../node_modules/web3/lib/web3/function');
+var Method = require('../node_modules/web3/lib/web3/method');
 
 var Jsonrpc = {
     messageId: 0
@@ -446,34 +447,40 @@ function result_fun(result) {
     return result;
 }
 
+function call_extend() {
+    var methods = [
+        new Method({
+            name: 'extend.getPeers',
+            call: 'admin_peers',
+            params: 0
+        }),
+        new Method({
+            name: 'extend.version',
+            call: 'net_version',
+            params: 0
+        })
+    ];
+
+    return {'methods':methods};
+}
+
 webs.prototype.call = function(args, callback) {
     var fun = args.fun;
     var params = args.params;
-    var type = args.type;
     var rpc = args[".rpc"];
 
-    if(params !== undefined){
+    if(params !== undefined && params.length > 0){
         params = JSON.stringify(params);
-        params = params.substring(1, params.length-1);
-    }
-
-    var line;
-    var result;
-    var web3 = new Web3(new Web3.providers.HttpProvider(rpc));
-
-    if(type == 'fun.sync') {
-        line = 'web3.' + fun + '(' + params + ', callback)';
-        eval(line);
-    }else if(type == 'fun'){
-        line = 'web3.' + fun + '(' + params + ')';
-        result = eval(line);
-
-        callback(false, result_fun(result));
+        params = '(' + params.substring(1, params.length-1) + ', callback)';
     }else{
-        var arr = fun.split('.');
-        result = web3[arr[0]][arr[1]];
-        callback(false, result_fun(result));
+        params = '(callback)';
     }
+
+    var web3 = new Web3(new Web3.providers.HttpProvider(rpc));
+    web3._extend(call_extend());
+    var line = "web3." + fun + params;
+    //logs.logvar(line);
+    eval(line);
 };
 
 webs.prototype.stat_init = function (req_count) {
@@ -694,7 +701,7 @@ webs.prototype.log = function (id, keep) {
 webs.prototype.sha3 = Web3.prototype.sha3;
 
 if(typeof window!=="undefined")
-    window.webs = webs
+    window.webs = webs;
 else
     module.exports = webs;
 

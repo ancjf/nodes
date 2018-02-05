@@ -136,7 +136,6 @@ router.get('/query', function(req, res, next) {
     query(req.query, res, utils.get_account(req));
 });
 
-
 function test_1(args) {
     try{
         logs.logvar('*******************************************************************************');
@@ -162,7 +161,7 @@ function test_1(args) {
 
         logs.logvar(id);
     }catch(err){
-        logs.logvar(err);
+        logs.logvar(err.message);
         res.send({"err":true, "result":err});
     }
 }
@@ -174,5 +173,7 @@ var con = cons['TestInt'];
 var address = con.networks['5678'].address;
 //test_1({".rpc":"http://192.168.153.128:8545","count":5,"perCount":2,"conname":"TestInt",".function":con.abi[1],"address":address});
 */
+
+
 
 module.exports = router;
