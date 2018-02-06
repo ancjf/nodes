@@ -14,7 +14,7 @@ function onDeviceReady() {
 function on_submit(obj)
 {
     try{
-        var arr = $(obj).children("input");
+        var arr = $(obj).find("input");
         var params = [];
         var fun = $(obj)[0].name;
 
@@ -27,6 +27,7 @@ function on_submit(obj)
         }
 
         var data = {"fun":fun,"params":params};
+        console.log('data=', data);
         window.parent.call(data, function(error, result){
             if(typeof(result) == 'object')
                 result = JSON.stringify(result, null, 4);
@@ -58,7 +59,7 @@ function on_submit(obj)
 	.left{ width:38%; float:left;border:1px solid green;height:100%;}
 	.right{ width:60%; margin-left:38%;border:1px solid orange;height:100%;}
 
-    table.funs {border:1px solid #666666}
+    table.fun {border:1px solid #666666}
     input[name="string"] {width:400px;}
 
     #result_text {
@@ -86,60 +87,60 @@ function on_submit(obj)
 <div class="w">
 	<div class="left"><div align="left">
 
-        <form name="eth.getBlock"  onsubmit="return on_submit(this);"> <table class="funs">
-            <input type="text" name="fname" size="66" value="0" /> <input type="submit" name="submit" value="getBlock"/> <hr class="division">
+        <form name="eth.getBlock"  onsubmit="return on_submit(this);"> <table class="fun">
+                <tr> <td><input type="text" name="fname" size="66" value="0" /> <input type="submit" name="submit" value="getBlock"/></td></tr>
         </table></form>
 
         <form name="eth.getBlockNumber"  onsubmit="return on_submit(this);"> <table class="fun">
-            <input type="submit" name="submit" value="blockNumber"/> <hr>
+            <tr> <td><input type="submit" name="submit" value="blockNumber"/> </td></tr>
         </table></form>
 
         <form name="eth.getTransaction"  onsubmit="return on_submit(this);"> <table class="fun">
-            <input type="text" name="fname" size="66"/> <input type="submit" name="submit" value="getTransaction"/> <hr>
+            <tr> <td><input type="text" name="fname" size="66"/> <input type="submit" name="submit" value="getTransaction"/> </td></tr>
         </table></form>
 
         <form name="eth.getTransactionFromBlock"  onsubmit="return on_submit(this);"> <table class="fun">
-            <input type="text" name="fname" size="66" value="0" /> <input type="text" name="fname" value="0" /> <input type="submit" name="submit" value="getTransactionFromBlock"/> <hr>
+            <tr> <td><input type="text" name="fname" size="66" value="0" /> <input type="text" name="fname" value="0" /> <input type="submit" name="submit" value="getTransactionFromBlock"/> </td></tr>
         </table></form>
 
         <form name="eth.getTransactionReceipt"  onsubmit="return on_submit(this);"> <table class="fun">
-            <input type="text" name="fname" size="66"/> <input type="submit" name="submit" value="getTransactionReceipt"/> <hr>
+            <tr> <td><input type="text" name="fname" size="66"/> <input type="submit" name="submit" value="getTransactionReceipt"/> </td></tr>
         </table></form>
 
         <form name="eth.getBalance"  onsubmit="return on_submit(this);"> <table class="fun">
-            <input type="text" name="fname" size="44"/> <input type="submit" name="submit" value="getBalance"/> <hr>
+            <tr> <td><input type="text" name="fname" size="44"/> <input type="submit" name="submit" value="getBalance"/> </td></tr>
         </table></form>
 
         <form name="eth.getGasPrice"  onsubmit="return on_submit(this);"> <table class="fun">
-            <input type="submit" name="submit" value="gasPrice"/>
+            <tr> <td><input type="submit" name="submit" value="gasPrice"/> </td></tr>
         </table></form>
 
         <form name="eth.getCode"  onsubmit="return on_submit(this);"> <table class="fun">
-            <input type="text" name="fname" size="66"/> <input type="submit" name="submit" value="getCode"/>
+            <tr> <td><input type="text" name="fname" size="66"/> <input type="submit" name="submit" value="getCode"/> </td></tr>
         </table></form>
 
         <form name="eth.getStorageAt"  onsubmit="return on_submit(this);"> <table class="fun">
-            <input type="text" name="fname" size="66"/> <input type="text" name="fname" value="0"/> <input type="submit" name="submit" value="getStorageAt"/>
+            <tr> <td><input type="text" name="fname" size="66"/> <input type="text" name="fname" value="0"/> <input type="submit" name="submit" value="getStorageAt"/> </td></tr>
         </table></form>
 
         <form name="personal.getListAccounts"  onsubmit="return on_submit(this);"> <table class="fun">
-            <input type="submit" name="submit" value="getListAccounts"/>
+            <tr> <td><input type="submit" name="submit" value="getListAccounts"/> </td></tr>
         </table></form>
 
         <form name="extend.getPeers"  onsubmit="return on_submit(this);"> <table class="fun">
-            <input type="submit" name="submit" value="getPeers"/>
+            <tr> <td><input type="submit" name="submit" value="getPeers"/> </td></tr>
         </table></form>
 
         <form name="eth.getStorageAt"  onsubmit="return on_submit(this);"> <table class="fun">
-            <input type="text" name="fname" size="66"/> <input type="text" name="fname" value="0"/> <input type="submit" name="submit" value="getStorageAt"/>
+            <tr> <td><input type="text" name="fname" size="66"/> <input type="text" name="fname" value="0"/> <input type="submit" name="submit" value="getStorageAt"/> </td></tr>
         </table></form>
 
         <form name="personal.newAccount"  onsubmit="return on_submit(this);"> <table class="fun">
-            <input type="text" name="fname"/> <input type="submit" name="submit" value="newAccount"/>
+            <tr> <td><input type="text" name="fname"/> <input type="submit" name="submit" value="newAccount"/> </td></tr>
         </table></form>
 
         <form name="extend.version"  onsubmit="return on_submit(this);"> <table class="fun">
-            <input type="submit" name="submit" value="network"/>
+            <tr> <td><input type="submit" name="submit" value="network"/> </td></tr>
         </table></form>
 
         <div id="funs"></div>
