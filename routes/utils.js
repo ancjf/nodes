@@ -95,7 +95,7 @@ utils.add = function(file, account, name){
     }
 
     if(!fs.existsSync(account)){
-        fs.mkdirSync(account);
+        fs.mkdirSync(json_path + '/' + account);
     }
 
     fs.renameSync(file, name);
