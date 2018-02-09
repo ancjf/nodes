@@ -99,7 +99,7 @@ function trans_call(args, res) {
             res.send({"err":false, "result":result});
         });
     }catch(err){
-        //logs.logvar(err);
+        logs.logvar(err);
         res.send({"err":true, "result":err.stack});
     }
 };

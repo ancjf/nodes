@@ -216,7 +216,9 @@ function getReceipt(eth, txHash, callback){
             //console.log("receipt=",receipt)
             //logs.logvar(txHash, err, receipt);
             if (err) {
-                callback(err);
+                //logs.logvar(typeof(err.message), err.message, err);
+                callback(true, err.stack);
+                return;
             }
 
             if (receipt == null) {
@@ -298,7 +300,7 @@ webs.prototype.unpack_logs = function(outputs, output) {
 
 webs.prototype.decode_logs = function(events, receipt) {
     if (events === undefined) {
-        //logs.logvar(tran, receipt.logs);
+        //logs.logvar(events, receipt);
         return receipt.logs;
     }
 
@@ -324,11 +326,20 @@ webs.prototype.trans_params = function(eth, tran, params, i, fun){
         fun(i, {"err":false,"result":result});
     }else{
         eth.sendTransaction(payload, function(err, result){
-            //logs.logvar(err, result);
+            if(err){
+                fun(i, {"err":true,"result":err.stack});
+                return;
+            }
+
             getReceipt(eth, result, function(err, receipt){
                 //logs.logvar(indes, trans.length, err, receipt);
-                receipt.logs = webs.prototype.decode_logs(tran.events, receipt);
-                fun(i, {"err":false,"result":receipt});
+                if(err){
+                    fun(i, {"err":true,"result":receipt});
+                }else{
+                    receipt.logs = webs.prototype.decode_logs(tran.events, receipt);
+                    fun(i, {"err":false,"result":receipt});
+                }
+
             });
         });
     }

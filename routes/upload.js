@@ -28,18 +28,18 @@ var mutipartMiddeware = mutipart();
 
 router.post('/upload', mutipartMiddeware, function(req, res, next) {
     var account = utils.get_account(req);
-    logs.logvar(account, req.cookies, req.files);
+    //logs.logvar(account, req.cookies, req.files);
 
+    //logs.logvar(req.files.keys());
     for(var value in req.files) {
         //logs.logvar(value, req.files[value]);
         var dest = req.files[value].name;
-        logs.logvar(dest);
+        //logs.logvar(dest);
         
         utils.add(req.files[value].path, account, dest);
     }
 
     var files = utils.files(account);
-    logs.logvar(files);
     res.send(files);
 });
 

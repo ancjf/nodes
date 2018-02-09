@@ -94,7 +94,7 @@ utils.add = function(file, account, name){
         return false;
     }
 
-    if(!fs.existsSync(account)){
+    if(!fs.existsSync(json_path + '/' + account)){
         fs.mkdirSync(json_path + '/' + account);
     }
 
