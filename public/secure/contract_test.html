@@ -88,6 +88,7 @@ function on_submit(obj)
                 if(abi.constant == true || abi.constant == 'true'){
                     console.log('result.result=', result.result);
                     result.result = window.parent.webs.prototype.unpackOutput(abi.outputs, result.result);
+                    console.log('result.result=', result.result);
                 }else{
                     if(typeof(result.result) == 'object'){
                         if(typeof(result.result.logs) == 'object') {
