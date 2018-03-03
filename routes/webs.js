@@ -5,7 +5,7 @@
 var Web3 = require('web3');
 //var logs = require('./logs.js');
 var coder = require('../node_modules/web3/lib/solidity/coder');
-//var RequestManager = require('../node_modules/web3/lib/web3/requestmanager');
+var formatters = require('../node_modules/web3/lib/web3/formatters');
 //var Eth = require('../node_modules/web3/lib/web3/methods/eth');
 //var Personal = require('../node_modules/web3/lib/web3/methods/Personal');
 var utils = require('../node_modules/web3/lib/utils/utils');
@@ -469,6 +469,18 @@ function call_extend() {
             name: 'extend.version',
             call: 'net_version',
             params: 0
+        }),
+        new Method({
+            name: 'extend.listTransactions',
+            call: 'eth_listTransactions',
+            params: 3,
+            inputFormatter: [formatters.inputAddressFormatter, formatters.inputBlockNumberFormatter, formatters.inputBlockNumberFormatter]
+        }),
+        new Method({
+            name: 'extend.listTransactionReceipts',
+            call: 'eth_listTransactionReceipts',
+            params: 3,
+            inputFormatter: [formatters.inputAddressFormatter, formatters.inputBlockNumberFormatter, formatters.inputBlockNumberFormatter]
         })
     ];
 

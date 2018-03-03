@@ -99,6 +99,14 @@ function on_submit(obj)
             <tr> <td><input type="text" name="fname" size="66"/> <input type="submit" name="submit" value="getTransaction"/> </td></tr>
         </table></form>
 
+        <form name="extend.listTransactions"  onsubmit="return on_submit(this);"> <table class="fun">
+            <tr> <td><input type="text" name="fname" size="66"/> <input type="text" name="fname" value="0"/> <input type="text" name="fname" value="1"/> <input type="submit" name="submit" value="listTransactions"/> </td></tr>
+        </table></form>
+
+        <form name="extend.listTransactionReceipts"  onsubmit="return on_submit(this);"> <table class="fun">
+            <tr> <td><input type="text" name="fname" size="66"/> <input type="text" name="fname" value="0"/> <input type="text" name="fname" value="1"/> <input type="submit" name="submit" value="listTransactionReceipts"/> </td></tr>
+        </table></form>
+
         <form name="eth.getTransactionFromBlock"  onsubmit="return on_submit(this);"> <table class="fun">
             <tr> <td><input type="text" name="fname" size="66" value="0" /> <input type="text" name="fname" value="0" /> <input type="submit" name="submit" value="getTransactionFromBlock"/> </td></tr>
         </table></form>
