@@ -67,7 +67,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-/*
+
 var srcfile = './routes/webs.js';
 var destfile = './public/javascripts/webs.min.js';
 if(!fs.existsSync(destfile) || fs.statSync(srcfile).mtime > fs.statSync(destfile).mtime)
@@ -100,6 +100,5 @@ if(!fs.existsSync(destfile) || fs.statSync(srcfile).mtime > fs.statSync(destfile
         }
     });
 }
-*/
 
 module.exports = app;
