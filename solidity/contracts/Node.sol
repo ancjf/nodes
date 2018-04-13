@@ -21,6 +21,10 @@ contract Node{
     mapping(string =>NodeInfo) m_nodedata;
     string[] m_nodeids;
 
+	function Node(){
+		registerNode("%", "*", 0, 1);
+	}
+	
     //登记节点信息
     event registerNodeEvent(bool ret);
     function registerNode (string _id, string _ip, uint _port, uint8 _category)  returns(bool) {
