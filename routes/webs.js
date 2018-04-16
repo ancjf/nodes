@@ -481,7 +481,12 @@ function call_extend() {
             call: 'eth_listTransactionReceipts',
             params: 3,
             inputFormatter: [formatters.inputAddressFormatter, formatters.inputBlockNumberFormatter, formatters.inputBlockNumberFormatter]
-        })
+        }),
+        new Method({
+            name: 'extend.getNodeInfo',
+            call: 'admin_nodeInfo',
+            params: 0
+        }),
     ];
 
     return {'methods':methods};
