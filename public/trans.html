@@ -1,0 +1,293 @@
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="Access-Control-Allow-Origin" content="192.168.153.128">
+    <meta http-equiv="Access-Control-Allow-Methods" content="POST,GET">
+    <script type="text/javascript" src="javascripts/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="javascripts/webs.min.js"></script>
+    <script>
+
+        var web3;
+        var nodeabi = {
+            "registerNode":{
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "_id",
+                        "type": "string"
+                    },
+                    {
+                        "name": "_property",
+                        "type": "string"
+                    }
+                ],
+                "name": "registerNode",
+                "outputs": [],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            "unregisterNode":{
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "_id",
+                        "type": "string"
+                    }
+                ],
+                "name": "unregisterNode",
+                "outputs": [],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            "transferOwnership":{
+            "constant": false,
+            "inputs": [
+            {
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+            "name": "transferOwnership",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }
+
+        };
+
+        function onDeviceReady() {
+            console.log('list:window.parent=', window.parent, ",window.parent.url_key()=", window.parent.url_key());
+            web3 = window.parent.getWeb3();
+
+            $("#gasPrice")[0].value = "0x0";
+        }
+
+        function on_register(obj){
+            var params = [];
+            params.push($("#node_id")[0].value);
+            params.push($("#node_property")[0].value);
+
+            var data = window.parent.webs.prototype.random_data(nodeabi.registerNode, params);
+            console.log("params=", params, "data=", data);
+
+            $("#data")[0].value = data;
+            web3.extend.getNodeAddress(function (error, result) {
+                console.log('error=', error, ',result=', result);
+                if(!error)
+                    $("#to")[0].value = result;
+            });
+
+            on_estimate(obj);
+            return false;
+        }
+
+        function on_unregister(obj){
+            var params = [];
+            params.push($("#node_id")[0].value);
+
+            var data = window.parent.webs.prototype.random_data(nodeabi.unregisterNode, params);
+            console.log("params=", params, "data=", data);
+
+            $("#data")[0].value = data;
+            web3.extend.getNodeAddress(function (error, result) {
+                console.log('error=', error, ',result=', result);
+                if(!error)
+                    $("#to")[0].value = result;
+            });
+
+            on_estimate(obj);
+            return false;
+        }
+
+        function on_transferOwnership(obj){
+            var params = [];
+            params.push($("#owner")[0].value);
+
+            var data = window.parent.webs.prototype.random_data(nodeabi.transferOwnership, params);
+            console.log("params=", params, "data=", data);
+
+            $("#data")[0].value = data;
+            web3.extend.getNodeAddress(function (error, result) {
+                console.log('error=', error, ',result=', result);
+                if(!error)
+                    $("#to")[0].value = result;
+            });
+
+            on_estimate(obj);
+            return false;
+        }
+
+
+        function on_estimate(obj){
+            console.log("web3=", web3);
+            if(typeof(web3) == 'undefined'){
+                $("#result_text").text("web3 can't connect");
+                return false;
+            }
+            var privateKey = $("#secure")[0].value;
+            if(privateKey.length != 64){
+                $("#result_text").text("privateKey length err, must be 64");
+                return false;
+            }
+            var to = $("#to")[0].value;
+            if(to.length != 42){
+                $("#result_text").text("To address length err, must be 64");
+                return false;
+            }
+
+            var address = window.parent.webs.prototype.toAddress(privateKey);
+            var obj = $(obj).parent();
+            var trans = {};
+            trans['data'] = $("#data")[0].value;
+            trans['to'] = to;
+
+            $("#gasPrice")[0].value = '0x' + web3.eth.gasPrice;
+            $("#nonce")[0].value = '0x' + web3.eth.getTransactionCount(address);
+            $("#gasLimit")[0].value = '0x' + web3.eth.estimateGas(trans);
+
+            return false;
+        }
+
+        function on_send(obj)
+        {
+            try{
+                var arr = $(obj).parent().find(".input");
+
+                if(typeof(web3) == 'undefined'){
+                    $("#result_text").text("web3 can't connect");
+                    return false;
+                }
+                var privateKey = $("#secure")[0].value;
+                if(privateKey.length != 64){
+                    $("#result_text").text("privateKey length err, must be 64");
+                    return false;
+                }
+                var to = $("#to")[0].value;
+                if(to.length != 42){
+                    $("#result_text").text("To address length err, must be 64");
+                    return false;
+                }
+
+                var address = window.parent.webs.prototype.toAddress(privateKey);
+                var trans = {};
+
+                trans['nonce'] = $("#nonce")[0].value;
+                trans['gasPrice'] = $("#gasPrice")[0].value;
+                trans['gasLimit'] = $("#gasLimit")[0].value;
+                trans['to'] = to;
+                if($("#value")[0].value.length > 0)
+                    trans['value'] = $("#value")[0].value;
+                else
+                    trans['value'] = '0x0';
+                if($("#data")[0].value.length > 0)
+                    trans['data'] = $("#data")[0].value;
+
+                var tx = window.parent.webs.prototype.sign(trans, privateKey);
+                console.log('privateKey=', privateKey, 'trans=', trans, ",tx=", tx);
+
+                web3.eth.sendRawTransaction('0x' + tx.toString('hex'), function(err, hash) {
+                    console.log("err=", err, ",hash=", hash); // "0x7f9fade1c0d57a7af66ab4ead79fade1c0d57a7af66ab4ead7c2c2eb7b11a91385"
+                });
+            }catch (err){
+                $("#result_text").text(err.stack);
+            }
+
+            return false;
+        }
+
+    </script>
+
+    <style type="text/css">
+        html
+        {
+            height:100%;
+            margin:0;
+        }
+        body
+        {
+            height:99%;
+            margin:0;
+        }
+
+        hr{ border-top:1px solid #987cb9;}
+
+        .left{ width:38%; float:left;border:1px solid green;height:100%;}
+        .right{ width:60%; margin-left:38%;border:1px solid orange;height:100%;}
+
+        table.fun {border:1px solid #666666}
+        input[name="string"] {width:400px;}
+
+        #result_text {
+            width: 100%; /*自动适应父布局宽度*/
+            height: 100%;
+            overflow: auto;
+            word-break: break-all;
+            /*在ie中解决断行问题(防止自动变为在一行显示，主要解决ie兼容问题，ie8中当设宽度为100%时，文本域类容超过一行时，当我们双击文本内容就会自动变为一行显示，所以只能用ie的专有断行属性“word-break或word-wrap”控制其断行)*/
+        }
+
+        #trans {
+            width: 100%; /*自动适应父布局宽度*/
+            height: 30%;
+            overflow: auto;
+            word-break: break-all;
+            /*在ie中解决断行问题(防止自动变为在一行显示，主要解决ie兼容问题，ie8中当设宽度为100%时，文本域类容超过一行时，当我们双击文本内容就会自动变为一行显示，所以只能用ie的专有断行属性“word-break或word-wrap”控制其断行)*/
+        }
+    </style>
+
+</head>
+
+<body>
+<div align="center">
+
+    <div class="w">
+        <div class="left"><div align="left">
+
+            <form name="eth.getBlock"> <table class="fun">
+                <tr> <td> <label>secure:</label> <textarea id="secure" rows="1" cols="60">3543543859403538457283475478352843752734623746253464504567575467</textarea> </td></tr>
+                <tr> <td> <label>data:</label> <textarea id="data" class="input" rows="12" cols="60"></textarea> </td></tr>
+                <tr> <td> <label>to:</label> <input type="text" class="input" id="to" size="66" value="0x2f60fab330dd23197e1160743dfd1cb09c465097" /> </td></tr>
+                <tr> <td> <label>value:</label> <input type="text" class="input" id="value" size="66" value="" /> </td></tr>
+                <tr> <td> <label>nonce:</label> <input type="text" class="input" id="nonce" size="66" value="" /> </td></tr>
+                <tr> <td> <label>gasLimit:</label> <input type="text" class="input" id="gasLimit" size="66" value="" /> </td></tr>
+                <tr> <td> <label>gasPrice:</label> <input type="text" class="input" id="gasPrice" size="66" value="" /> </td></tr>
+                <tr> <td> <input type="submit" name="estimate" value="estimate" onclick="return on_estimate(this)"/> <input type="submit" name="submit" value="send" onclick="return on_send(this)"/> </td></tr>
+            </table></form>
+
+            <form name="eth.getBlock"> <table class="fun" >
+                <tr> <td> <label>id:</label> <textarea id="node_id" rows="2" cols="60">5e8493bfe7faadfd68ef30ca2382409060e7966271ed9ec4b09960aefacb79279d00bba4bb67a6be2caff7bc996020697e7a4380c24a7adc95af6696449e44d1</textarea> </td></tr>
+                <tr> <td> <label>property:</label> <textarea id="node_property" rows="5" cols="60"></textarea>  </td></tr>
+                <tr> <td> <input type="submit" name="register" value="register" onclick="return on_register(this)"/> <input type="submit" name="register" value="unregister" onclick="return on_unregister(this)"/></td></tr>
+            </table></form>
+
+            <form name="eth.getBlock"> <table class="fun" >
+                <tr> <td> <label>owner:</label> <input type="text" id="owner" size="66" value="" /> </td></tr>
+                <tr> <td> <input type="submit" name="transferOwnership" value="transferOwnership" onclick="return on_transferOwnership(this)"/> </td></tr>
+            </table></form>
+
+            <div id="funs"></div>
+            <!--
+                <form action="/web3/" class="fun" method="get" name="getPeers"  onsubmit="return on_submit(this);">
+                    <input type="submit" name="submit" value="getPeers"/>
+                </form>
+            -->
+        </div></div>
+        <div class="right"><textarea id="result_text"></textarea></div>
+
+    </div>
+
+
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        onDeviceReady();
+    });
+
+</script>
+</body>
+
+</html>

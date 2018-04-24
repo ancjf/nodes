@@ -11,6 +11,8 @@ var formatters = require('../node_modules/web3/lib/web3/formatters');
 var utils = require('../node_modules/web3/lib/utils/utils');
 //var SolidityFunction = require('../node_modules/web3/lib/web3/function');
 var Method = require('../node_modules/web3/lib/web3/method');
+var Tx = require('ethereumjs-tx');
+var ethUtils = require('ethereumjs-util');
 
 var Jsonrpc = {
     messageId: 0
@@ -487,6 +489,21 @@ function call_extend() {
             call: 'admin_nodeInfo',
             params: 0
         }),
+        new Method({
+            name: 'extend.getNodes',
+            call: 'eth_getNodes',
+            params: 1
+        }),
+        new Method({
+            name: 'extend.getNodeAddress',
+            call: 'eth_getNodeAddress',
+            params: 0
+        }),
+        new Method({
+            name: 'extend.getOwner',
+            call: 'eth_getOwner',
+            params: 0
+        })
     ];
 
     return {'methods':methods};
@@ -724,6 +741,32 @@ webs.prototype.log = function (id, keep) {
     if(log.count >= log.req_count)
         delete webs.prototype.logs[id];
     return log;
+}
+
+webs.prototype.sign = function (rawTx, privateKey) {
+    if(typeof(privateKey) == "string")
+        privateKey = new Buffer(privateKey, 'hex');
+
+    var tx = new Tx(rawTx);
+    tx.sign(privateKey);
+
+    var serializedTx = tx.serialize();
+    console.log("serializedTx=", serializedTx);
+    return serializedTx;
+}
+
+webs.prototype.toAddress = function (privateKey) {
+    if(typeof(privateKey) == "string")
+        privateKey = new Buffer(privateKey, 'hex');
+
+    return ethUtils.privateToAddress(privateKey).toString('hex');
+}
+
+webs.prototype.getWeb3 = function (rpc) {
+    var web3 = new Web3(new Web3.providers.HttpProvider(rpc));
+    web3._extend(call_extend());
+
+    return web3;
 }
 
 webs.prototype.sha3 = Web3.prototype.sha3;
