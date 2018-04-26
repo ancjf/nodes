@@ -482,7 +482,7 @@ function onDeviceReady() {
 
 function save_url_array(url)
 {
-    if(url.indexOf('//')){
+    if(url.indexOf('//') >= 0){
         console.log('url=', url);
         url = url.substring(url.indexOf('//')+2);
     }
@@ -520,6 +520,7 @@ function on_change(obj)
 
     //this.options[this.options.selectedIndex].value
     set_url(text);
+    save_url_array(text);
     console.log("obj=", obj, "id=", id, "text=", text);
 }
 

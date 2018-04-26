@@ -175,5 +175,25 @@ var address = con.networks['5678'].address;
 */
 
 
+function estimate(){
+    var web3 = new Web3(new Web3.providers.HttpProvider('http://192.168.8.15:8545/'));
+
+    web3.eth.getGasPrice(function(error, result) {
+        console.log("getGasPrice:error=", error, "result=", web3.toDecimal(result));
+    });
+
+    web3.eth.getTransactionCount("0x0000000000000000000000000000000000000110", "pending", function(error, result) {
+        console.log("getTransactionCount:error=", error, "result=", result);
+    });
+
+    web3.eth.estimateGas({
+        to: "0x0000000000000000000000000000000000000110",
+        data: "0xf2fde38b0000000000000000000000000000000000000000000000000000000000000000"
+    }, function(error, result) {
+        console.log("error=", error, "result=", result);
+    });
+}
+
+estimate();
 
 module.exports = router;

@@ -495,8 +495,8 @@ function call_extend() {
             params: 1
         }),
         new Method({
-            name: 'extend.getNodeAddress',
-            call: 'eth_getNodeAddress',
+            name: 'extend.getNodeAbi',
+            call: 'eth_getNodeAbi',
             params: 0
         }),
         new Method({

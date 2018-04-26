@@ -66,6 +66,20 @@
             $("#gasPrice")[0].value = "0x0";
         }
 
+        function fill_data(data){
+            $("#data")[0].value = data;
+            web3.extend.getNodeAbi(function (error, result) {
+                console.log('error=', error, ',result=', result);
+                if(!error){
+                    result = JSON.parse(result);
+                    $("#to")[0].value = result.address;
+                }
+
+            });
+
+            on_estimate();
+        }
+
         function on_register(obj){
             var params = [];
             params.push($("#node_id")[0].value);
@@ -74,32 +88,24 @@
             var data = window.parent.webs.prototype.random_data(nodeabi.registerNode, params);
             console.log("params=", params, "data=", data);
 
-            $("#data")[0].value = data;
-            web3.extend.getNodeAddress(function (error, result) {
-                console.log('error=', error, ',result=', result);
-                if(!error)
-                    $("#to")[0].value = result;
-            });
-
-            on_estimate(obj);
+            fill_data(data);
             return false;
         }
 
         function on_unregister(obj){
+            var address = $("#node_id")[0].value;
+            if(to.length != 42){
+                $("#result_text").text("To address length err, must be 42");
+                return false;
+            }
+
             var params = [];
-            params.push($("#node_id")[0].value);
+            params.push(address);
 
             var data = window.parent.webs.prototype.random_data(nodeabi.unregisterNode, params);
             console.log("params=", params, "data=", data);
 
-            $("#data")[0].value = data;
-            web3.extend.getNodeAddress(function (error, result) {
-                console.log('error=', error, ',result=', result);
-                if(!error)
-                    $("#to")[0].value = result;
-            });
-
-            on_estimate(obj);
+            fill_data(data);
             return false;
         }
 
@@ -110,21 +116,13 @@
             var data = window.parent.webs.prototype.random_data(nodeabi.transferOwnership, params);
             console.log("params=", params, "data=", data);
 
-            $("#data")[0].value = data;
-            web3.extend.getNodeAddress(function (error, result) {
-                console.log('error=', error, ',result=', result);
-                if(!error)
-                    $("#to")[0].value = result;
-            });
-
-            on_estimate(obj);
+            fill_data(data);
             return false;
         }
 
-
-        function on_estimate(obj){
-            console.log("web3=", web3);
-            if(typeof(web3) == 'undefined'){
+        function on_estimate(){
+            console.log("web3=", web3, ",typeof(web3)=", typeof(web3));
+            if(typeof(web3) !== 'object'){
                 $("#result_text").text("web3 can't connect");
                 return false;
             }
@@ -140,14 +138,40 @@
             }
 
             var address = window.parent.webs.prototype.toAddress(privateKey);
-            var obj = $(obj).parent();
             var trans = {};
             trans['data'] = $("#data")[0].value;
             trans['to'] = to;
 
+            web3.eth.getGasPrice(function(error, result) {
+                console.log("getGasPrice:error=", error, "result=", web3.toDecimal(result));
+                if(!error)
+                    $("#gasPrice")[0].value = web3.toDecimal(result);
+            });
+
+            web3.eth.getTransactionCount(address, "pending", function(error, result) {
+                console.log("getTransactionCount:error=", error, "result=", result);
+                if(!error)
+                    $("#nonce")[0].value = result;
+            });
+
+            web3.eth.estimateGas(trans, function(error, result) {
+                console.log("error=", error, "result=", result);
+                if(!error)
+                    $("#gasLimit")[0].value = result;
+            });
+
+            /*
             $("#gasPrice")[0].value = '0x' + web3.eth.gasPrice;
+
+            web3.eth.gasPrice.call(function (error, result) {
+                console.log('error=', error, ',result=', result);
+                if(!error)
+                    $("#gasPrice")[0].value = '0x' + result;
+            });
+
             $("#nonce")[0].value = '0x' + web3.eth.getTransactionCount(address);
             $("#gasLimit")[0].value = '0x' + web3.eth.estimateGas(trans);
+             */
 
             return false;
         }
@@ -175,12 +199,12 @@
                 var address = window.parent.webs.prototype.toAddress(privateKey);
                 var trans = {};
 
-                trans['nonce'] = $("#nonce")[0].value;
-                trans['gasPrice'] = $("#gasPrice")[0].value;
-                trans['gasLimit'] = $("#gasLimit")[0].value;
+                trans['nonce'] = web3.toHex($("#nonce")[0].value);
+                trans['gasPrice'] = web3.toHex($("#gasPrice")[0].value);
+                trans['gasLimit'] = web3.toHex($("#gasLimit")[0].value);
                 trans['to'] = to;
                 if($("#value")[0].value.length > 0)
-                    trans['value'] = $("#value")[0].value;
+                    trans['value'] = web3.toHex($("#value")[0].value);
                 else
                     trans['value'] = '0x0';
                 if($("#data")[0].value.length > 0)
@@ -254,7 +278,7 @@
                 <tr> <td> <label>nonce:</label> <input type="text" class="input" id="nonce" size="66" value="" /> </td></tr>
                 <tr> <td> <label>gasLimit:</label> <input type="text" class="input" id="gasLimit" size="66" value="" /> </td></tr>
                 <tr> <td> <label>gasPrice:</label> <input type="text" class="input" id="gasPrice" size="66" value="" /> </td></tr>
-                <tr> <td> <input type="submit" name="estimate" value="estimate" onclick="return on_estimate(this)"/> <input type="submit" name="submit" value="send" onclick="return on_send(this)"/> </td></tr>
+                <tr> <td> <input type="submit" name="estimate" value="estimate" onclick="return on_estimate()"/> <input type="submit" name="submit" value="send" onclick="return on_send(this)"/> </td></tr>
             </table></form>
 
             <form name="eth.getBlock"> <table class="fun" >
