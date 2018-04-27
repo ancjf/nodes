@@ -495,6 +495,11 @@ function call_extend() {
             params: 1
         }),
         new Method({
+            name: 'extend.addPeer',
+            call: 'admin_addPeer',
+            params: 1
+        }),
+        new Method({
             name: 'extend.getNodeAbi',
             call: 'eth_getNodeAbi',
             params: 0
@@ -525,6 +530,7 @@ webs.prototype.call = function(args, callback) {
     web3._extend(call_extend());
     var line = "web3." + fun + params;
     //logs.logvar(line);
+    console.log("line=", line);
     eval(line);
 };
 

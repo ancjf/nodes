@@ -172,7 +172,7 @@ var cons = utils.cons('http://192.168.153.128:8545/');
 var con = cons['TestInt'];
 var address = con.networks['5678'].address;
 //test_1({".rpc":"http://192.168.153.128:8545","count":5,"perCount":2,"conname":"TestInt",".function":con.abi[1],"address":address});
-*/
+
 
 
 function estimate(){
@@ -192,8 +192,12 @@ function estimate(){
     }, function(error, result) {
         console.log("error=", error, "result=", result);
     });
+
+    web3.admin.addPeer("enode://37aeb7ff48a5b649647828fcd692c0d350d66d5e6b94a7fdd179f9e7ecb3942f066501058302bae3be7470c3903618346bd98a6e84caff506694915fe69c935a@127.0.0.1:30304", function(error, result) {
+        console.log("error=", error, "result=", result);
+    })
 }
 
 estimate();
-
+ */
 module.exports = router;

@@ -63,7 +63,7 @@
             console.log('list:window.parent=', window.parent, ",window.parent.url_key()=", window.parent.url_key());
             web3 = window.parent.getWeb3();
 
-            $("#gasPrice")[0].value = "0x0";
+            //$("#gasPrice")[0].value = "0x0";
         }
 
         function fill_data(data){
@@ -73,11 +73,9 @@
                 if(!error){
                     result = JSON.parse(result);
                     $("#to")[0].value = result.address;
+                    on_estimate();
                 }
-
             });
-
-            on_estimate();
         }
 
         function on_register(obj){
@@ -93,14 +91,8 @@
         }
 
         function on_unregister(obj){
-            var address = $("#node_id")[0].value;
-            if(to.length != 42){
-                $("#result_text").text("To address length err, must be 42");
-                return false;
-            }
-
             var params = [];
-            params.push(address);
+            params.push($("#node_id")[0].value);
 
             var data = window.parent.webs.prototype.random_data(nodeabi.unregisterNode, params);
             console.log("params=", params, "data=", data);
@@ -110,8 +102,23 @@
         }
 
         function on_transferOwnership(obj){
+            var owner = $("#owner")[0].value;
+            console.log("owner=", owner, ",web3.isAddress(owner)=", web3.isAddress(owner), ",typeof (web3.isAddress(owner))=", typeof (web3.isAddress(owner)));
+            if(!web3.isAddress(owner)){
+                console.log("owner=", owner);
+                $("#result_text").text("owner format error");
+                console.log("owner=", owner);
+                return false;
+            }
+
+            var privateKey = $("#secure")[0].value;
+            if(privateKey.length != 64){
+                $("#result_text").text("privateKey length err, must be 64");
+                return false;
+            }
+
             var params = [];
-            params.push($("#owner")[0].value);
+            params.push(owner);
 
             var data = window.parent.webs.prototype.random_data(nodeabi.transferOwnership, params);
             console.log("params=", params, "data=", data);
@@ -121,7 +128,7 @@
         }
 
         function on_estimate(){
-            console.log("web3=", web3, ",typeof(web3)=", typeof(web3));
+            console.log(",typeof(web3)=", typeof(web3));
             if(typeof(web3) !== 'object'){
                 $("#result_text").text("web3 can't connect");
                 return false;
@@ -132,8 +139,10 @@
                 return false;
             }
             var to = $("#to")[0].value;
-            if(to.length != 42){
-                $("#result_text").text("To address length err, must be 64");
+            console.log("to=", to);
+            if(!web3.isAddress(to)){
+                console.log("to=", to);
+                $("#result_text").text("Address format error");
                 return false;
             }
 
@@ -172,7 +181,7 @@
             $("#nonce")[0].value = '0x' + web3.eth.getTransactionCount(address);
             $("#gasLimit")[0].value = '0x' + web3.eth.estimateGas(trans);
              */
-
+            console.log(",typeof(web3)=", typeof(web3));
             return false;
         }
 
@@ -191,8 +200,8 @@
                     return false;
                 }
                 var to = $("#to")[0].value;
-                if(to.length != 42){
-                    $("#result_text").text("To address length err, must be 64");
+                if(!web3.isAddress(to)){
+                    $("#result_text").text("Address format error");
                     return false;
                 }
 
@@ -215,6 +224,11 @@
 
                 web3.eth.sendRawTransaction('0x' + tx.toString('hex'), function(err, hash) {
                     console.log("err=", err, ",hash=", hash); // "0x7f9fade1c0d57a7af66ab4ead79fade1c0d57a7af66ab4ead7c2c2eb7b11a91385"
+                    if(err){
+                        $("#result_text").text(err);
+                    }else{
+                        $("#result_text").text(hash);
+                    }
                 });
             }catch (err){
                 $("#result_text").text(err.stack);
@@ -271,9 +285,9 @@
         <div class="left"><div align="left">
 
             <form name="eth.getBlock"> <table class="fun">
-                <tr> <td> <label>secure:</label> <textarea id="secure" rows="1" cols="60">3543543859403538457283475478352843752734623746253464504567575467</textarea> </td></tr>
+                <tr> <td> <label>secure:</label> <textarea id="secure" rows="2" cols="60"></textarea> </td></tr>
                 <tr> <td> <label>data:</label> <textarea id="data" class="input" rows="12" cols="60"></textarea> </td></tr>
-                <tr> <td> <label>to:</label> <input type="text" class="input" id="to" size="66" value="0x2f60fab330dd23197e1160743dfd1cb09c465097" /> </td></tr>
+                <tr> <td> <label>to:</label> <input type="text" class="input" id="to" size="66" value="" /> </td></tr>
                 <tr> <td> <label>value:</label> <input type="text" class="input" id="value" size="66" value="" /> </td></tr>
                 <tr> <td> <label>nonce:</label> <input type="text" class="input" id="nonce" size="66" value="" /> </td></tr>
                 <tr> <td> <label>gasLimit:</label> <input type="text" class="input" id="gasLimit" size="66" value="" /> </td></tr>
@@ -282,7 +296,7 @@
             </table></form>
 
             <form name="eth.getBlock"> <table class="fun" >
-                <tr> <td> <label>id:</label> <textarea id="node_id" rows="2" cols="60">5e8493bfe7faadfd68ef30ca2382409060e7966271ed9ec4b09960aefacb79279d00bba4bb67a6be2caff7bc996020697e7a4380c24a7adc95af6696449e44d1</textarea> </td></tr>
+                <tr> <td> <label>id:</label> <textarea id="node_id" rows="3" cols="60"></textarea> </td></tr>
                 <tr> <td> <label>property:</label> <textarea id="node_property" rows="5" cols="60"></textarea>  </td></tr>
                 <tr> <td> <input type="submit" name="register" value="register" onclick="return on_register(this)"/> <input type="submit" name="register" value="unregister" onclick="return on_unregister(this)"/></td></tr>
             </table></form>
