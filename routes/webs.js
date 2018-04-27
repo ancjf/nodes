@@ -530,7 +530,7 @@ webs.prototype.call = function(args, callback) {
     web3._extend(call_extend());
     var line = "web3." + fun + params;
     //logs.logvar(line);
-    console.log("line=", line);
+    //console.log("line=", line);
     eval(line);
 };
 
