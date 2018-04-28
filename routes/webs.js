@@ -775,7 +775,15 @@ webs.prototype.getWeb3 = function (rpc) {
     return web3;
 }
 
+webs.prototype.isPrivKey = function (priv) {
+    if(priv.length != 64)
+        return false;
+
+    return ethUtils.isHexString(ethUtils.addHexPrefix(priv));
+}
+
 webs.prototype.sha3 = Web3.prototype.sha3;
+webs.prototype.isAddress = Web3.prototype.isAddress;
 
 if(typeof window!=="undefined")
     window.webs = webs;
