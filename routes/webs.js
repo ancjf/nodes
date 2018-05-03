@@ -13,6 +13,7 @@ var utils = require('../node_modules/web3/lib/utils/utils');
 var Method = require('../node_modules/web3/lib/web3/method');
 var Tx = require('ethereumjs-tx');
 var ethUtils = require('ethereumjs-util');
+var async = require('async');
 
 var Jsonrpc = {
     messageId: 0
@@ -321,11 +322,17 @@ webs.prototype.decode_logs = function(events, receipt) {
 webs.prototype.trans_params = function(eth, tran, params, i, fun){
     var payload = toPayload(tran, params);
     if(typeof(tran.abi) !== 'undefined' && (tran.abi.constant == true || tran.abi.constant == 'true')){
-        var result = eth.call(payload);
-        if (result && typeof(tran.abi.outputs) !== 'undefined') {
-            result = webs.prototype.unpackOutput(tran.abi.outputs, result);
-        }
-        fun(i, {"err":false,"result":result});
+        eth.call(payload, "latest",  function(err, result) {
+            if(err){
+                fun(i, {"err":true,"result":err.stack});
+                return;
+            }
+
+            if (result && typeof(tran.abi.outputs) !== 'undefined') {
+                result = webs.prototype.unpackOutput(tran.abi.outputs, result);
+            }
+            fun(i, {"err":false,"result":result});
+        });
     }else{
         eth.sendTransaction(payload, function(err, result){
             if(err){
@@ -435,9 +442,16 @@ webs.prototype.trans = function(trans, fun) {
     {
         if(trans[i].options == undefined)
             trans[i].options = {};
-        if(trans[i].options.from == undefined)
-            trans[i].options.from = this.random_item(accounts);
+        if(trans[i].options.from == undefined){
+            if(webs.prototype.isAddress(trans[i].from)){
+                trans[i].options.from = trans[i].from;
+            }else {
+                trans[i].options.from = this.random_item(accounts);
+            }
+            console.log('undefined:trans[i]=', trans[i]);
+        }
 
+        console.log('trans[i]=', trans[i]);
         webs.prototype.trans_one(eth, trans[i], i, function (index, result) {
             ret[index] = result;
             count++;
@@ -513,6 +527,47 @@ function call_extend() {
 
     return {'methods':methods};
 }
+
+webs.prototype.fillTrans = function(web3, trans, fun) {
+    async.series([
+        function(callback){
+            web3.eth.getGasPrice(function(error, result) {
+                if(!error)
+                    trans.gasPrice = web3.toDecimal(result);
+                callback(error, trans);
+            })
+        },
+        function(callback){
+            web3.eth.getTransactionCount(trans.from, "pending", function(error, result) {
+                if(!error)
+                    trans.nonce = result;
+                callback(error, trans);
+            })
+        },
+        function(callback){
+            web3.eth.estimateGas(trans, function(error, result) {
+                if(!error)
+                    trans.gas = result;
+                fun(error, trans);
+            })
+        }
+    ], function(error, result) {
+        //fun(error, result);
+    });
+};
+
+webs.prototype.sendRawTrans = function(web3, tx, events, fun) {
+    web3.eth.sendRawTransaction(tx, function(err, hash) {
+        if(err){
+            fun(err, hash);
+        }else{
+            getReceipt(web3.eth, hash, function(error, receipt){
+                receipt.logs = webs.prototype.decode_logs(events, receipt);
+                fun(error, receipt);
+            });
+        }
+    });
+};
 
 webs.prototype.call = function(args, callback) {
     var fun = args.fun;
@@ -776,10 +831,21 @@ webs.prototype.getWeb3 = function (rpc) {
 }
 
 webs.prototype.isPrivKey = function (priv) {
+    if(typeof (priv) !== 'string')
+        return false;
     if(priv.length != 64)
         return false;
 
     return ethUtils.isHexString(ethUtils.addHexPrefix(priv));
+}
+
+webs.prototype.isNodeId = function (_id) {
+    if(typeof (_id) !== 'string')
+        return false;
+    if(_id.length != 128)
+        return false;
+
+    return ethUtils.isHexString(ethUtils.addHexPrefix(_id));
 }
 
 webs.prototype.sha3 = Web3.prototype.sha3;

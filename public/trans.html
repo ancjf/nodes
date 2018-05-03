@@ -47,7 +47,7 @@
             });
 
             web3.eth.estimateGas(trans, function(error, result) {
-                console.log("error=", error, "result=", result);
+                console.log("error=", error, "result=", result, "trans=", trans);
                 if(!error)
                     $("#gasLimit")[0].value = result;
             });
@@ -91,8 +91,35 @@
 
         function on_register(obj){
             var params = [];
-            params.push($("#node_id")[0].value);
-            params.push($("#node_property")[0].value);
+            var address = $("#node_address")[0].value;
+            if(!window.parent.webs.prototype.isAddress(address)){
+                $("#result_text").text("Address format error");
+                console.log("address=", address);
+                return false;
+            }
+            var value = $("#node_value")[0].value;
+            var id = $("#node_id")[0].value;
+            if(!window.parent.webs.prototype.isNodeId(id)){
+                $("#result_text").text("Nodeis format error");
+                console.log("id=", id);
+                return false;
+            }
+            var property = $("#node_property")[0].value;
+            if(property.length == 0){
+                property = '{}';
+            }
+            try{
+                JSON.parse(property);
+            }catch (e){
+                $("#result_text").text("Property format error");
+                console.log("property=", property);
+                return false;
+            }
+
+            params.push(address);
+            params.push(web3.toHex(value));
+            params.push(id);
+            params.push(property);
 
             $("#result_text").text("");
             console.log("params=", params, "data=", data);
@@ -102,7 +129,14 @@
 
         function on_unregister(obj){
             var params = [];
-            params.push($("#node_id")[0].value);
+            var id = $("#node_id")[0].value;
+            if(!window.parent.webs.prototype.isNodeId(id)){
+                $("#result_text").text("Nodeis format error");
+                console.log("id=", id);
+                return false;
+            }
+
+            params.push(id);
 
             $("#result_text").text("");
             console.log("params=", params, "data=", data);
@@ -259,6 +293,8 @@
             </table></form>
 
             <form name="eth.getBlock"> <table class="fun" >
+                <tr> <td> <label>address:</label> <input type="text" class="input" id="node_address" size="46" value="" /> </td></tr>
+                <tr> <td> <label>value:</label> <input type="text" class="input" id="node_value" size="46" value="" />  </td></tr>
                 <tr> <td> <label>id:</label> <textarea id="node_id" rows="3" cols="60"></textarea> </td></tr>
                 <tr> <td> <label>property:</label> <textarea id="node_property" rows="5" cols="60"></textarea>  </td></tr>
                 <tr> <td> <input type="submit" name="register" value="register" onclick="return on_register(this)"/> <input type="submit" name="register" value="unregister" onclick="return on_unregister(this)"/></td></tr>

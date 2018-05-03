@@ -32,7 +32,10 @@ function set_contracts(abis){
 	g_cons = abis;
 	console.log('abis=', abis);
 
-	var html = '<p><label>Address:</label> <input class="input" id="address" type="text"  size="40" value="' + g_cons.address + '"></p>';
+	var html = '<p><label>Address:</label> <input class="input" id="address" type="text"  size="42" value="' + g_cons.address + '"></p>';
+
+    html = html + '<p><label>from:</label> <input class="input" id="from" type="text"  size="42" value=""></p>';
+
 	for(var i=0; i<g_cons.abi.length; i++){
 		html += set_table(g_cons.abi[i], i);
 	}
@@ -67,9 +70,14 @@ function on_submit(obj)
     var events = g_cons.events;
     var paramsdata = window.parent.webs.prototype.random_data(abi, value);
     var address = $("#address")[0].value;
+    var from = $("#from")[0].value;
 
     console.log('address=', address, ',paramsdata=', paramsdata, 'events=', events);
     var trans = [{"to":address,/*"abi":{'constant':abi.constant}"events":g_cons.events,*/"params":[paramsdata]}];
+    console.log('trans=', trans);
+    if(window.parent.webs.prototype.isAddress(from))
+        trans[0].from = from;
+
     if(abi.constant == true){
         console.log('abi.constant=', abi.constant);
         trans[0].abi = {'constant':abi.constant};

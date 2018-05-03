@@ -199,5 +199,14 @@ function estimate(){
 }
 
 estimate();
+
+
+var web3 = new Web3(new Web3.providers.HttpProvider('http://192.168.8.15:8545/'));
+Webs.prototype.fillTrans(web3, {
+    from: "0x0c5b587Ca140De48d5eaDaF0e2ED051Fa31AF749",
+    to: "0x0000000000000000000000000000000000000110",
+    data: "0xf2fde38b0000000000000000000000000000000000000000000000000000000000000000"
+}, function(error, result) {console.log("web3:error=", error, "result=", result);});
  */
+
 module.exports = router;
