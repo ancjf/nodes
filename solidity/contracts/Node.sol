@@ -3,13 +3,12 @@ pragma solidity ^0.4.14;
 contract Ownable {
     address public owner;
 
-    event OwnershipTransferred(address previousOwner, address newOwner);
-
     modifier onlyOwner(address _addr) {
         require((_addr == owner) || (address(0) == owner));
         _;
     }
 
+    event OwnershipTransferred(address previousOwner, address newOwner);
     function transferOwnership(address newOwner) public payable onlyOwner(msg.sender) {
         OwnershipTransferred(owner, newOwner);
         owner = newOwner;
@@ -46,12 +45,11 @@ contract BasicToken  is Ownable{
 
     uint256 totalSupply_;
 
-    event Transfer(address indexed from, address indexed to, uint256 value);
-
     function totalSupply() public view returns (uint256) {
         return totalSupply_;
     }
 
+    event Transfer(address from, address to, uint256 value);
     function transfer(address _to, uint256 _value) public returns (bool) {
         require(_to != address(0));
         require(locked[msg.sender].add(_value) <= balances[msg.sender]);

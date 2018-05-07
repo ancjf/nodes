@@ -557,16 +557,21 @@ webs.prototype.fillTrans = function(web3, trans, fun) {
 };
 
 webs.prototype.sendRawTrans = function(web3, tx, events, fun) {
-    web3.eth.sendRawTransaction(tx, function(err, hash) {
-        if(err){
-            fun(err, hash);
-        }else{
-            getReceipt(web3.eth, hash, function(error, receipt){
-                receipt.logs = webs.prototype.decode_logs(events, receipt);
-                fun(error, receipt);
-            });
-        }
-    });
+    try{
+        web3.eth.sendRawTransaction(tx, function(err, hash) {
+            if(err){
+                fun(err, hash);
+            }else{
+                getReceipt(web3.eth, hash, function(error, receipt){
+                    receipt.logs = webs.prototype.decode_logs(events, receipt);
+                    fun(error, receipt);
+                });
+            }
+        });
+    }catch(err){
+        //logs.logvar(typeof(err.stack), err.stack);
+        fun(true, err.stack);
+    }
 };
 
 webs.prototype.call = function(args, callback) {
@@ -848,6 +853,11 @@ webs.prototype.isNodeId = function (_id) {
     return ethUtils.isHexString(ethUtils.addHexPrefix(_id));
 }
 
+webs.prototype.toWeiHx = function (_d) {
+    return Web3.prototype.toHex(Web3.prototype.toWei(_d, 'ether'));
+}
+
+webs.prototype.sha3 = Web3.prototype.sha3;
 webs.prototype.sha3 = Web3.prototype.sha3;
 webs.prototype.isAddress = Web3.prototype.isAddress;
 

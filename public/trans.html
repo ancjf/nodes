@@ -33,26 +33,16 @@
             var trans = {};
             trans['data'] = $("#data")[0].value;
             trans['to'] = to;
+            trans['from'] = address;
 
-            web3.eth.getGasPrice(function(error, result) {
-                console.log("getGasPrice:error=", error, "result=", web3.toDecimal(result));
-                if(!error)
-                    $("#gasPrice")[0].value = web3.toDecimal(result);
+            window.parent.webs.prototype.fillTrans(web3, trans, function (error, result) {
+                console.log("web3:error=", error, "result=", result);
+
+                $("#gasPrice")[0].value = web3.toDecimal(result.gasPrice);
+                $("#nonce")[0].value = web3.toDecimal(result.nonce);
+                $("#gasLimit")[0].value = result.gas;
             });
 
-            web3.eth.getTransactionCount(address, "pending", function(error, result) {
-                console.log("getTransactionCount:error=", error, "result=", result);
-                if(!error)
-                    $("#nonce")[0].value = result;
-            });
-
-            web3.eth.estimateGas(trans, function(error, result) {
-                console.log("error=", error, "result=", result, "trans=", trans);
-                if(!error)
-                    $("#gasLimit")[0].value = result;
-            });
-
-            console.log(",typeof(web3)=", typeof(web3));
             return false;
         }
 
@@ -216,14 +206,15 @@
                     trans['data'] = $("#data")[0].value;
 
                 var tx = window.parent.webs.prototype.sign(trans, privateKey);
+                tx = '0x' + tx.toString('hex');
                 console.log('privateKey=', privateKey, 'trans=', trans, ",tx=", tx);
 
-                web3.eth.sendRawTransaction('0x' + tx.toString('hex'), function(err, hash) {
-                    console.log("err=", err, ",hash=", hash); // "0x7f9fade1c0d57a7af66ab4ead79fade1c0d57a7af66ab4ead7c2c2eb7b11a91385"
+                window.parent.webs.prototype.sendRawTrans(web3, tx, {}, function(err, receipt) {
+                    console.log("err=", err, ",receipt=", receipt); // "0x7f9fade1c0d57a7af66ab4ead79fade1c0d57a7af66ab4ead7c2c2eb7b11a91385"
                     if(err){
                         $("#result_text").text(err);
                     }else{
-                        $("#result_text").text(hash);
+                        $("#result_text").text(JSON.stringify(receipt, null, 4));
                     }
                 });
             }catch (err){
