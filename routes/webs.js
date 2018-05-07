@@ -531,6 +531,13 @@ function call_extend() {
 webs.prototype.fillTrans = function(web3, trans, fun) {
     async.series([
         function(callback){
+            web3.extend.version(function(error, result) {
+                if(!error)
+                    trans.chainId = result;
+                callback(error, trans);
+            });
+        },
+        function(callback){
             web3.eth.getGasPrice(function(error, result) {
                 if(!error)
                     trans.gasPrice = web3.toDecimal(result);
