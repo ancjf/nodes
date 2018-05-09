@@ -257,12 +257,14 @@ function on_balance(obj)
     //return false;
 
     try{
-        var priKey = checkPriKey();
-        if(priKey == false){
+        var from = $("#from")[0].value;
+        if(!window.parent.webs.prototype.isAddress(from)){
+            $("#result_text").text("From format error");
             return false;
         }
 
-        var from = window.parent.webs.prototype.toAddress(priKey);
+        if(from.length != 42)
+            from = '0x' + from;
         var data = {"fun":"eth.getBalance","params":[from]};
         console.log('data=', data);
         window.parent.call(data, function(error, result){
@@ -275,6 +277,18 @@ function on_balance(obj)
         $("#result_text").text(err.stack);
     }
     //on_sendRawTransaction(to, abi, value);
+    return false;
+}
+
+function on_change(){
+    var privateKey = $("#secure")[0].value;
+
+    if(window.parent.webs.prototype.isPrivKey(privateKey)){
+        $("#from")[0].value = "0x" + window.parent.webs.prototype.toAddress(privateKey);
+    }else{
+        $("#from")[0].value = "";
+    }
+
     return false;
 }
 
@@ -314,7 +328,7 @@ function on_balance(obj)
 <div class="w">
 	<div class="left"><div align="left">
 
-        <p><label>secure:</label> <input class="input" id="secure" type="text"  size="66" value=""></p>
+        <p><label>Private Key:</label> <input type="text" class="input" id="secure" size="6" value="" oninput="on_change(event)" autocomplete="off"/></p>
         <p><label>from:</label> <input class="input" id="from" type="text"  size="42" value=""></p>
 
         <form name="eth.getBlock"> <table class="fun" >

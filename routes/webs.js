@@ -529,7 +529,20 @@ function call_extend() {
 }
 
 webs.prototype.fillTrans = function(web3, trans, fun) {
-    async.series([
+    var tx = trans;
+
+    async.parallel([
+        function(callback){
+            if(tx.to != undefined){
+                web3.eth.estimateGas(tx, function(error, result) {
+                    if(!error)
+                        trans.gasLimit = result;
+                    callback(error, trans);
+                })
+            }else{
+                callback(null, trans);
+            }
+        },
         function(callback){
             web3.extend.version(function(error, result) {
                 if(!error)
@@ -550,16 +563,9 @@ webs.prototype.fillTrans = function(web3, trans, fun) {
                     trans.nonce = result;
                 callback(error, trans);
             })
-        },
-        function(callback){
-            web3.eth.estimateGas(trans, function(error, result) {
-                if(!error)
-                    trans.gas = result;
-                fun(error, trans);
-            })
         }
     ], function(error, result) {
-        //fun(error, result);
+        fun(error, trans);
     });
 };
 

@@ -67,30 +67,37 @@ function estimate(web3){
         return false;
     }
 
-    var from = window.parent.webs.prototype.toAddress(privateKey);
-    $("#from")[0].value = "0x" + from;
+    var from = "0x" + window.parent.webs.prototype.toAddress(privateKey);
+    $("#from")[0].value = from;
+
+    var trans = {};
+    trans['from'] = from;
 
     var to = $("#to")[0].value;
     console.log("to=", to);
-    if(!window.parent.webs.prototype.isAddress(to)){
+    if(window.parent.webs.prototype.isAddress(to)){
         console.log("to=", to);
-        $("#result_text").text("To address format error");
-        return false;
+        trans['to'] = to;
+        if(trans['data'] = $("#data")[0].value.length > 0)
+            trans['data'] = $("#data")[0].value.length;
+        else
+            trans['data'] = '0x';
     }
 
-    var address = window.parent.webs.prototype.toAddress(privateKey);
-    var trans = {};
-    trans['data'] = $("#data")[0].value;
-    trans['to'] = to;
-    trans['from'] = address;
-
+    var aa = trans;
+    console.log('aa=', aa, ",trans=", trans);
     window.parent.webs.prototype.fillTrans(web3, trans, function (error, result) {
         console.log("web3:error=", error, "result=", result);
+        if(error){
+            $("#result_text").text(error);
+            return;
+        }
 
         $("#gasPrice")[0].value = web3.toDecimal(result.gasPrice);
         $("#nonce")[0].value = web3.toDecimal(result.nonce);
-        $("#gasLimit")[0].value = result.gas;
         $("#chainId")[0].value = result.chainId;
+        if(result.gasLimit != undefined)
+            $("#gasLimit")[0].value = result.gasLimit;
     });
 
     return false;
@@ -126,16 +133,30 @@ function on_send(obj)
         tx = '0x' + tx.toString('hex');
         console.log('privateKey=', privateKey, 'trans=', trans, ",tx=", tx);
 
+        $("#result_text").text(JSON.stringify({rawTx:tx,transaction:trans}, null, 4));
+
         window.parent.webs.prototype.sendRawTrans(web3, tx, {}, function(err, receipt) {
             console.log("err=", err, ",receipt=", receipt); // "0x7f9fade1c0d57a7af66ab4ead79fade1c0d57a7af66ab4ead7c2c2eb7b11a91385"
             if(err){
-                $("#result_text").text(err);
+                $("#result_text").text($("#result_text").val() + '\r\n\r\n' + err);
             }else{
-                $("#result_text").text(JSON.stringify(receipt, null, 4));
+                $("#result_text").text($("#result_text").val() + '\r\n\r\n' + JSON.stringify(receipt, null, 4));
             }
         });
     }catch (err){
         $("#result_text").text(err.stack);
+    }
+
+    return false;
+}
+
+function on_change(){
+    var privateKey = $("#secure")[0].value;
+
+    if(window.parent.webs.prototype.isPrivKey(privateKey)){
+        $("#from")[0].value = "0x" + window.parent.webs.prototype.toAddress(privateKey);
+    }else{
+        $("#from")[0].value = "";
     }
 
     return false;
@@ -214,7 +235,7 @@ function on_generate(obj)
         <div class="left"><div align="left">
 
             <form name="eth.getBlock"> <table class="fun">
-                <tr> <td> <label>Private Key:</label> <textarea id="secure" rows="2" cols="60"></textarea> </td></tr>
+                <tr> <td> <label>Private Key:</label> <input type="text" class="input" id="secure" size="6" value="" oninput="on_change(event)" autocomplete="off"/></td></tr>
                 <tr> <td> <label>from:</label> <input type="text" class="input" id="from" size="66" value="" readonly="true"/> </td></tr>
                 <tr> <td> <label>to:</label> <input type="text" class="input" id="to" size="66" value="" /> </td></tr>
                 <tr> <td> <label>value:</label> <input type="text" class="input" id="value" size="66" value="" /> </td></tr>

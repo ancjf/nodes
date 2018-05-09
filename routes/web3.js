@@ -208,10 +208,17 @@ Webs.prototype.fillTrans(web3, {
     to: "0x0000000000000000000000000000000000000110",
     data: "0xf2fde38b0000000000000000000000000000000000000000000000000000000000000000"
 }, function(error, result) {console.log("web3:error=", error, "result=", result);});
- */
+
 
 var web3 = Webs.prototype.getWeb3('http://192.168.8.15:8545/');
 web3.extend.version(function(error, result) {console.log("error=", error, "result=", result);});
 
+
+var web3 = new Web3();
+
+var web3 = new webs.getWeb3('http://192.168.8.15:8545/');
+web3.setProvider(new web3.providers.HttpProvider('https://api.myetherapi.com/eth'));
+console.log(web3.eth.getBalance("0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8").toString());
+ */
 
 module.exports = router;

@@ -9,8 +9,6 @@
     <script type="text/javascript" src="javascripts/webs.min.js"></script>
 <script>
 
-var url_array = new Array();
-
 function getRequest() {
     var xmlHttpRequest = null;
     if(window.XMLHttpRequest) {
@@ -29,46 +27,8 @@ function getRequest() {
     return xmlHttpRequest;
 }
 
-function removeByValue(arr, val) {
-    for(var i=0; i<arr.length; i++) {
-        if(arr[i] == val) {
-            arr.splice(i, 1);
-            break;
-        }
-    }
-}
-
-function set_url(url)
-{
-    var hosts = url.split(":");
-    $("#text_host").attr("value", hosts[0]);
-    $("#text_port").attr("value", hosts[1]);
-
-    console.log("url=", url, "hosts[0]=", hosts[0], "hosts[1]=", hosts[1]);
-}
-
-function set_select()
-{
-    $("#url_list").empty();
-    var select = document.getElementById("url_list");
-    url_array.forEach(function (element, index, array) {
-        // element: 指向当前元素的值
-        // index: 指向当前索引
-        // array: 指向Array对象本身
-        select.add(new Option(element,""));
-    });
-}
-
-function url_key(){
-    return "url_array." + window.location.href;
-}
-
 function host() {
     return $("#text_host").val();
-}
-
-function port() {
-    return $("#text_port").val();
 }
 
 function remote() {
@@ -76,7 +36,7 @@ function remote() {
 }
 
 function rpc(){
-    return "http://" + $("#text_host").val() + ":" + $("#text_port").val();
+    return $("#text_host").val().trim();
 }
 
 var g_eth = {};
@@ -162,8 +122,9 @@ function call(data, callback) {
             }
         );
     }else{
+        var url = rpc();
         if(data[".rpc"] == undefined)
-            data[".rpc"] = rpc();
+            data[".rpc"] = url;
         console.log('window.webs.prototype=', window.webs.prototype);
         console.log('data=', data, ",window.webs.call=", window.webs.call);
 
@@ -172,6 +133,9 @@ function call(data, callback) {
             console.log('err=', err, ",result=", result);
             if(typeof(result) === 'object')
                 result = JSON.stringify(result, null, 4);
+
+            if(!err)
+                alter_url_array(url);
             callback(err, result);
         });
     }
@@ -209,9 +173,11 @@ function query(trans, callback) {
     }
 }
 
-function getWeb3(){
-    console.log("window.webs.prototype.Web3=", window.webs.prototype.Web3);
-    var web3 = new window.webs.prototype.getWeb3(rpc());
+function getWeb3(url){
+    if(url == undefined)
+        url = rpc();
+    console.log("url=", url);
+    var web3 = new window.webs.prototype.getWeb3(url);
 
     console.log("web3=", web3);
     return web3;
@@ -323,7 +289,7 @@ function ajax(url, data, callback){
 
             try{
                 callback(false, XMLHttpRequest.responseText);
-                save_url_array(rpcurl);
+                alter_url_array(rpcurl);
             }catch(err){
                 console.log('err=', err);
             }
@@ -454,74 +420,109 @@ function on_logout(obj){
     }
 }
 
+function set_url(url) {
+    $("#text_host").attr("value", url);
+}
+
+function get_url_array(){
+    var value = window.localStorage.getItem(url_key());
+
+    var url_array = new Array();
+    var strs= value.split(",");
+    strs.forEach(function (element, index, array) {
+        if(element.length > 0){
+            url_array.push(element);
+        }
+    });
+
+    console.log('url_array=', url_array);
+    return url_array;
+}
+
+function save_url_array(url_array){
+    var strValue = '';
+
+    console.log('url_array=', url_array);
+    url_array.forEach(function (element, index, array) {
+        if(typeof (element) == 'string'){
+            if(strValue.length > 0){
+                strValue = strValue + ',' + element;
+            }else{
+                strValue = element;
+            }
+        }
+    });
+
+    var storage = window.localStorage;
+    storage.setItem(url_key(), strValue);
+}
+
+function set_url_array(url_array){
+    $("#url_list").empty();
+
+    var select = document.getElementById("url_list");
+    console.log('url_array=', url_array);
+    url_array.forEach(function (element, index, array) {
+        select.add(new Option(element,""));
+    });
+
+    $('#url_list')[0].selectedIndex = 0;
+    var id = select.options.selectedIndex;
+
+}
+
+function alter_url_array(url, del){
+    var  url_array = get_url_array();
+    console.log('url_array=', url_array);
+
+    if(url_array[0] == url && del != true)
+        return url_array;
+
+    url_array = url_array.filter(function(item,index,array){
+        return item != url;
+    });
+
+    if(typeof(url) == 'string' && del != true)
+        url_array.unshift(url);
+
+    if(url_array.length == 0){
+        url_array.push('http://192.168.0.1:8545');
+        url_array.push('https://api.myetherapi.com/eth');
+    }
+
+    console.log('url_array=', url_array);
+    set_url_array(url_array);
+    save_url_array(url_array);
+}
+
+function url_key(){
+    return "url_array." + window.location.href;
+}
+
+function on_del_url(obj){
+    var text = rpc();
+
+    alter_url_array(text, true);
+    console.log("text=", text);
+}
+
+function on_change()
+{
+    var text = $("#url_list").find("option:selected").text();
+
+    console.log('text=', text);
+    set_url(text);
+    alter_url_array(text);
+}
+
 function onDeviceReady() {
     var strKey = url_key();
     var storage = window.localStorage;
     var value = storage.getItem(strKey);
 
     login();
-    console.log('value=', value, '$("#text_host")=', $("#text_host"));
-    if(value==null)
-        return;
-
-    var strs= value.split(",");
-    var select = document.getElementById("url_list");
-    for(var i=0;i<strs.length ;i++ ){
-        if(strs[i].length > 0){
-            if(i == 0){
-                set_url(strs[i]);
-                inserted = true;
-            }
-            url_array.push(strs[i]);
-            select.add(new Option(strs[i],""));
-        }
-    }
-
-    //query_cons();
-}
-
-function save_url_array(url)
-{
-    if(url.indexOf('//') >= 0){
-        console.log('url=', url);
-        url = url.substring(url.indexOf('//')+2);
-    }
-
-    var strKey = url_key();
-    console.log('url=', url, ",window.location.host=", window.location.host, ",window.location.port=", window.location.port);
-    if(url_array[0] == url)
-        return;
-
-    removeByValue(url_array, url);
-    url_array.unshift(url);
-    var strValue = '';
-
-    url_array.forEach(function (element, index, array) {
-        // element: 指向当前元素的值
-        // index: 指向当前索引
-        // array: 指向Array对象本身
-        if(strValue.length > 0){
-            strValue = strValue + ',' + element;
-        }else{
-            strValue = element;
-        }
-    });
-
-    console.log('url=', url, 'strValue=', strValue);
-    var storage = window.localStorage;
-    storage.setItem(strKey, strValue);
-    set_select();
-}
-
-function on_change(obj)
-{
-    var id = obj.options.selectedIndex;
-    var text = obj.options[id].text;
-
-    //this.options[this.options.selectedIndex].value
-    set_url(text);
-    save_url_array(text);
-    console.log("obj=", obj, "id=", id, "text=", text);
+    alter_url_array();
+    set_url($("#url_list").find("option:selected").text());
 }
 
 function jump_page(url){
@@ -565,9 +566,9 @@ function jump_url(obj){
 <body>
 <div align="center">
     <p>
-        <input type="text" id="text_host" value="192.168.1.1"> </input>
-        <input type="number" id="text_port" min="1" max="65535" value="8545"> </input>
-        <select id="url_list" onChange="on_change(this)"></select>
+        <input type="text" id="text_host" value="http://192.168.0.1:8545"> </input>
+        <select id="url_list" onChange="on_change()"></select>
+        <button name="web3.html" onClick="on_del_url(this)"> <script type='text/javascript'> var a='\u2718'; document.write(a); </script> </button>
 
         remote:<input class="input" id="remote" type="checkbox">
 
