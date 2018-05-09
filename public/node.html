@@ -134,6 +134,9 @@ function checkParams(abi, params){
                 return undefined;
             }
         }else if(abi.inputs[i].name == '_property'){
+            if(params[i].length == 0)
+                params[i] = '{}';
+
             try{
                 var json = JSON.parse(params[i]);
             }catch(e){
@@ -196,6 +199,9 @@ function on_sendRawTransaction(to, abi, value){
     console.log("trans=", trans);
     window.parent.webs.prototype.fillTrans(web3, trans, function (error, result) {
         console.log("web3:error=", error, "result=", result);
+        //if(result.gasLimit)
+            //result.gasLimit =  window.parent.webs.prototype.toHex(parseInt(result.gasLimit) * 2);
+
         if(error){
             set_result_text(error);
             return;
