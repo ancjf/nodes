@@ -214,9 +214,6 @@ function getReceipt(eth, txHash, callback){
 
     var getTransactionReceipt_UntilNotNull = function(txHash) {
         eth.getTransactionReceipt(txHash, function (err, receipt) {
-            //console.log("txHash=",txHash)
-            //console.log("err=",err)
-            //console.log("receipt=",receipt)
             //logs.logvar(txHash, err, receipt);
             if (err) {
                 //logs.logvar(typeof(err.message), err.message, err);
@@ -414,12 +411,11 @@ webs.prototype.random_item = function (addr)
         var rand = Math.floor(Math.random() * keys.length);
         return addr[keys[rand]];
     }
-    //console.log('addr.length=', addr.length);
+
     if(0 == addr.length)
         return undefined;
 
     var rand = Math.floor(Math.random() * (addr.length));
-    //console.log('rand=', rand, ",addr=", addr);
     return addr[rand];
 }
 
@@ -448,10 +444,8 @@ webs.prototype.trans = function(trans, fun) {
             }else {
                 trans[i].options.from = this.random_item(accounts);
             }
-            console.log('undefined:trans[i]=', trans[i]);
         }
 
-        console.log('trans[i]=', trans[i]);
         webs.prototype.trans_one(eth, trans[i], i, function (index, result) {
             ret[index] = result;
             count++;
@@ -572,12 +566,10 @@ webs.prototype.fillTrans = function(web3, trans, fun) {
 webs.prototype.sendRawTrans = function(web3, tx, events, fun) {
     try{
         web3.eth.sendRawTransaction(tx, function(err, hash) {
-            console.log('err=', err, ',hash=', hash);
             if(err){
                 fun(err, hash);
             }else{
                 getReceipt(web3.eth, hash, function(error, receipt){
-                    console.log('events=', events, ',receipt=', receipt);
                     receipt.logs = webs.prototype.decode_logs(events, receipt);
                     fun(error, receipt);
                 });
@@ -605,7 +597,6 @@ webs.prototype.call = function(args, callback) {
     web3._extend(call_extend());
     var line = "web3." + fun + params;
     //logs.logvar(line);
-    //console.log("line=", line);
     eval(line);
 };
 
@@ -832,7 +823,6 @@ webs.prototype.sign = function (rawTx, privateKey) {
     tx.sign(privateKey);
 
     var serializedTx = tx.serialize();
-    console.log("serializedTx=", serializedTx);
     return serializedTx;
 }
 
@@ -872,7 +862,7 @@ webs.prototype.toWeiHx = function (_d) {
     return Web3.prototype.toHex(Web3.prototype.toWei(_d, 'ether'));
 }
 
-webs.prototype.sha3 = Web3.prototype.sha3;
+webs.prototype.toHex = Web3.prototype.toHex;
 webs.prototype.sha3 = Web3.prototype.sha3;
 webs.prototype.isAddress = Web3.prototype.isAddress;
 

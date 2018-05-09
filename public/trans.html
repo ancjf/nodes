@@ -36,17 +36,17 @@ function getTrans(){
         set_result_text("Nonce format error");
         return undefined;
     }
-    trans['nonce'] = web3.toHex($("#nonce")[0].value);
+    trans['nonce'] = window.parent.webs.prototype.toHex($("#nonce")[0].value);
     if($("#gasPrice")[0].value.length == 0){
         set_result_text("gasPrice format error");
         return undefined;
     }
-    trans['gasPrice'] = web3.toHex($("#gasPrice")[0].value);
+    trans['gasPrice'] = window.parent.webs.prototype.toHex($("#gasPrice")[0].value);
     if($("#gasLimit")[0].value.length == 0){
         set_result_text("gasLimit format error");
         return undefined;
     }
-    trans['gasLimit'] = web3.toHex($("#gasLimit")[0].value);
+    trans['gasLimit'] = window.parent.webs.prototype.toHex($("#gasLimit")[0].value);
     trans['to'] = to;
     if($("#value")[0].value.length > 0)
         trans['value'] = window.parent.webs.prototype.toWeiHx($("#value")[0].value);
