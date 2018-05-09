@@ -7,6 +7,10 @@
 	<script type="text/javascript" src="javascripts/jquery-3.2.1.min.js"></script>
 <script>
 
+function set_result_text(text){
+    $("#result_text")[0].value = text;
+}
+
 function onDeviceReady() {
 	console.log('list:window.parent=', window.parent, ",window.parent.url_key()=", window.parent.url_key());
 }
@@ -31,10 +35,10 @@ function on_submit(obj)
         window.parent.call(data, function(error, result){
             if(typeof(result) == 'object')
                 result = JSON.stringify(result, null, 4);
-            $("#result_text").text(result);
+            set_result_text(result);
         });
     }catch (err){
-        $("#result_text").text(err.stack);
+        set_result_text(err.stack);
     }
 
     return false;

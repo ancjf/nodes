@@ -42,43 +42,48 @@ utils.load = function(account){
     var files = utils.files(account);
     //logs.logvar(files);
 
-    var jsons = {};
-    for (var f in files){
-        var file = json_path + account + '/' + files[f];
-        var name = cname(files[f]);
+    try{
+        var jsons = {};
+        for (var f in files){
+            var file = json_path + account + '/' + files[f];
+            var name = cname(files[f]);
 
-        /*
-        var stat = fs.lstatSync(file);
-        if(stat.isDirectory())
-            continue;
-*/
-        /*
-         var workid = web3.version.network;
-         */
-        //var json = require(file);
-        var json = JSON.parse(fs.readFileSync(file, "utf-8"));
-        jsons[name] = json;
-        //logs.log("name=", name);
-        logs.logvar(name);
-        /*
-         var network = json.networks[web3.version.network];
+            /*
+             var stat = fs.lstatSync(file);
+             if(stat.isDirectory())
+             continue;
+             */
+            /*
+             var workid = web3.version.network;
+             */
+            //var json = require(file);
+            var json = JSON.parse(fs.readFileSync(file, "utf-8"));
+            jsons[name] = json;
+            //logs.log("name=", name);
+            logs.logvar(name);
+            /*
+             var network = json.networks[web3.version.network];
 
-         //logs.log("typeof json.networks", typeof json.networks,  "network=", network);
-         if(network !== undefined){
-         var address = network["address"];
+             //logs.log("typeof json.networks", typeof json.networks,  "network=", network);
+             if(network !== undefined){
+             var address = network["address"];
 
-         if(address !== undefined) {
-         logs.log("name=", name);
-         //if(json.networks)
+             if(address !== undefined) {
+             logs.log("name=", name);
+             //if(json.networks)
 
-         utils.jsons[name] = json;
-         }
-         }
-         */
+             utils.jsons[name] = json;
+             }
+             }
+             */
+        }
+
+        //utils.jsons[account] = jsons;
+        return jsons;
+    }catch(err){
+        logs.logvar(err.message);
+        return {};
     }
-
-    //utils.jsons[account] = jsons;
-    return jsons;
 }
 
 utils.delete = function(account, name){

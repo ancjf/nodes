@@ -9,6 +9,10 @@
     <script type="text/javascript" src="javascripts/webs.min.js"></script>
 <script>
 
+function set_result_text(text){
+    $("#result_text")[0].value = text;
+}
+
 function getRequest() {
     var xmlHttpRequest = null;
     if(window.XMLHttpRequest) {
@@ -427,34 +431,21 @@ function set_url(url) {
 function get_url_array(){
     var value = window.localStorage.getItem(url_key());
 
-    var url_array = new Array();
-    var strs= value.split(",");
-    strs.forEach(function (element, index, array) {
-        if(element.length > 0){
-            url_array.push(element);
-        }
-    });
+    var url_array;
+    try{
+        url_array = JSON.parse(window.localStorage.getItem(url_key()));
+    }catch(e){
+        url_array = [];
+    }
 
-    console.log('url_array=', url_array);
+    if(url_array == undefined)
+        url_array = [];
+
     return url_array;
 }
 
 function save_url_array(url_array){
-    var strValue = '';
-
-    console.log('url_array=', url_array);
-    url_array.forEach(function (element, index, array) {
-        if(typeof (element) == 'string'){
-            if(strValue.length > 0){
-                strValue = strValue + ',' + element;
-            }else{
-                strValue = element;
-            }
-        }
-    });
-
-    var storage = window.localStorage;
-    storage.setItem(url_key(), strValue);
+    window.localStorage.setItem(url_key(), JSON.stringify(url_array));
 }
 
 function set_url_array(url_array){
@@ -473,9 +464,9 @@ function set_url_array(url_array){
 
 function alter_url_array(url, del){
     var  url_array = get_url_array();
-    console.log('url_array=', url_array);
+    console.log('url_array=', url_array, url, del);
 
-    if(url_array[0] == url && del != true)
+    if(url_array.length > 0 && url_array[0] == url && del != true)
         return url_array;
 
     url_array = url_array.filter(function(item,index,array){

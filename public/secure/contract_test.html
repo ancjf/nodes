@@ -5,6 +5,10 @@
 	<script type="text/javascript" src="../javascripts/jquery-3.2.1.min.js"></script>
 <script>
 
+function set_result_text(text){
+    $("#result_text")[0].value = text;
+}
+
 function QueryString(item){
 	var svalue = location.search.match(new RegExp("[\?\&]" + item + "=([^\&]*)(\&?)","i"));
 	return svalue ? svalue[1] : "";
@@ -92,7 +96,7 @@ function on_submit(obj)
             result = result[0][0];
             if(result.err){
                 console.log('err=', err, ',result=', typeof(result), 'result=', result);
-                $("#result_text").text(result.result);
+                set_result_text(result.result);
             }else{
                 if(abi.constant == true || abi.constant == 'true'){
                     console.log('result.result=', result.result);
@@ -107,10 +111,10 @@ function on_submit(obj)
                     }
                 }
 
-                $("#result_text").text(result.result);
+                set_result_text(result.result);
             }
         }else
-            $("#result_text").text(result);
+            set_result_text(result);
     });
 
     return false;

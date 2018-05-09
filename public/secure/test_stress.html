@@ -5,6 +5,10 @@
 	<script type="text/javascript" src="../javascripts/jquery-3.2.1.min.js"></script>
 <script>
 
+function set_result_text(text){
+    $("#result_text")[0].value = text;
+}
+
 function set_contracts(con){
 	console.log('con=', con);
 	
@@ -43,7 +47,7 @@ function on_submit(obj)
 	var args = {"count":count,"perCount":perCount};
     window.parent.test(args, function (err, result) {
         if(err){
-            $("#result_text").text(result);
+            set_result_text(result);
             return;
         }
 
@@ -53,7 +57,7 @@ function on_submit(obj)
             if(err){
                 var value = $("#result_text").val();
                 console.log('value=', value);
-                $("#result_text").text(result + '\r\n' + value);
+                set_result_text(result + '\r\n' + value);
                 return;
             }
 
@@ -61,7 +65,7 @@ function on_submit(obj)
                 result = JSON.stringify(result, null, 4);
 
             if(result.length)
-                $("#result_text").text(result);
+                set_result_text(result);
         });
     });
 

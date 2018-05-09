@@ -536,7 +536,7 @@ webs.prototype.fillTrans = function(web3, trans, fun) {
             if(tx.to != undefined){
                 web3.eth.estimateGas(tx, function(error, result) {
                     if(!error)
-                        trans.gasLimit = result;
+                        trans.gasLimit = Web3.prototype.toHex(result);
                     callback(error, trans);
                 })
             }else{
@@ -546,21 +546,21 @@ webs.prototype.fillTrans = function(web3, trans, fun) {
         function(callback){
             web3.extend.version(function(error, result) {
                 if(!error)
-                    trans.chainId = result;
+                    trans.chainId = parseInt(result);
                 callback(error, trans);
             });
         },
         function(callback){
             web3.eth.getGasPrice(function(error, result) {
                 if(!error)
-                    trans.gasPrice = web3.toDecimal(result);
+                    trans.gasPrice = Web3.prototype.toHex(result);
                 callback(error, trans);
             })
         },
         function(callback){
             web3.eth.getTransactionCount(trans.from, "pending", function(error, result) {
                 if(!error)
-                    trans.nonce = result;
+                    trans.nonce = Web3.prototype.toHex(result);
                 callback(error, trans);
             })
         }
@@ -572,10 +572,12 @@ webs.prototype.fillTrans = function(web3, trans, fun) {
 webs.prototype.sendRawTrans = function(web3, tx, events, fun) {
     try{
         web3.eth.sendRawTransaction(tx, function(err, hash) {
+            console.log('err=', err, ',hash=', hash);
             if(err){
                 fun(err, hash);
             }else{
                 getReceipt(web3.eth, hash, function(error, receipt){
+                    console.log('events=', events, ',receipt=', receipt);
                     receipt.logs = webs.prototype.decode_logs(events, receipt);
                     fun(error, receipt);
                 });

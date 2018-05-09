@@ -5,6 +5,10 @@
 	<script type="text/javascript" src="../javascripts/jquery-3.2.1.min.js"></script>
 <script>
 
+function set_result_text(text){
+    $("#result_text")[0].value = text;
+}
+
 function QueryString(item){
 	var svalue = location.search.match(new RegExp("[\?\&]" + item + "=([^\&]*)(\&?)","i"));
 
@@ -78,7 +82,7 @@ function onDeviceReady() {
     var web3 = window.parent.getWeb3();
     console.log(",typeof(web3)=", typeof(web3));
     if(typeof(web3) !== 'object'){
-        $("#result_text").text("web3 can't connect");
+        set_result_text("web3 can't connect");
         return;
     }
 
@@ -96,7 +100,7 @@ function checkPriKey()
 {
     var priKey = $("#secure")[0].value;
     if(!window.parent.webs.prototype.isPrivKey(priKey)){
-        $("#result_text").text("privateKey format err");
+        set_result_text("privateKey format err");
         return false;
     }
 
@@ -111,14 +115,14 @@ function checkParams(abi, params){
         return params;
 
     if(abi.inputs.length != params.length){
-        $("#result_text").text("Parameter quantity error!");
+        set_result_text("Parameter quantity error!");
         return undefined;
     }
 
     for(let i = 0; i < params.length; i++){
         if(abi.inputs[i].type == 'address'){
             if(!window.parent.webs.prototype.isAddress(params[i])){
-                $("#result_text").text(abi.inputs[i].name + " format error");
+                set_result_text(abi.inputs[i].name + " format error");
                 return undefined;
             }
 
@@ -126,14 +130,14 @@ function checkParams(abi, params){
                 params[i] = '0x' + params[i];
         }else if(abi.inputs[i].name == '_id'){
             if(!window.parent.webs.prototype.isNodeId(params[i])){
-                $("#result_text").text(abi.inputs[i].name + " format error");
+                set_result_text(abi.inputs[i].name + " format error");
                 return undefined;
             }
         }else if(abi.inputs[i].name == '_property'){
             try{
                 var json = JSON.parse(params[i]);
             }catch(e){
-                $("#result_text").text(abi.inputs[i].name + " format error");
+                set_result_text(abi.inputs[i].name + " format error");
                 return undefined;
             }
         }
@@ -150,7 +154,7 @@ function on_sendRawTransaction(to, abi, value){
     var web3 = window.parent.getWeb3();
     console.log(",typeof(web3)=", typeof(web3));
     if(typeof(web3) !== 'object'){
-        $("#result_text").text("web3 can't connect");
+        set_result_text("web3 can't connect");
         return false;
     }
 
@@ -163,12 +167,12 @@ function on_sendRawTransaction(to, abi, value){
         web3.eth.call(tx, "latest",  function(err, receipt) {
             console.log("err=", err, ",receipt=", receipt); // "0x7f9fade1c0d57a7af66ab4ead79fade1c0d57a7af66ab4ead7c2c2eb7b11a91385"
             if(err){
-                $("#result_text").text(err);
+                set_result_text(err);
             }else{
                 if(abi != undefined)
                     receipt = window.parent.webs.prototype.unpackOutput(abi.outputs, receipt);
 
-                $("#result_text").text(receipt);
+                set_result_text(receipt);
             }
         });
 
@@ -192,17 +196,21 @@ function on_sendRawTransaction(to, abi, value){
     console.log("trans=", trans);
     window.parent.webs.prototype.fillTrans(web3, trans, function (error, result) {
         console.log("web3:error=", error, "result=", result);
+        if(error){
+            set_result_text(error);
+            return;
+        }
 
-        var tx = window.parent.webs.prototype.sign(trans, priKey);
+        var tx = window.parent.webs.prototype.sign(result, priKey);
         tx = '0x' + tx.toString('hex');
-        console.log('priKey=', priKey, 'trans=', trans, ",tx=", tx);
+        console.log('priKey=', priKey, 'result=', result, ",tx=", tx);
 
         window.parent.webs.prototype.sendRawTrans(web3, tx, g_cons.events, function(err, receipt) {
             console.log("err=", err, ",g_cons.events=", g_cons.events, ",receipt=", receipt); // "0x7f9fade1c0d57a7af66ab4ead79fade1c0d57a7af66ab4ead7c2c2eb7b11a91385"
             if(err){
-                $("#result_text").text(receipt);
+                set_result_text(receipt);
             }else{
-                $("#result_text").text(JSON.stringify(receipt, null, 4));
+                set_result_text(JSON.stringify(receipt, null, 4));
             }
         });
     });
@@ -235,7 +243,7 @@ function on_submit(obj)
 
 function on_recharge(obj)
 {
-    $("#result_text").text('');
+    set_result_text('');
     var priKey = checkPriKey();
     if(priKey == false){
         return false;
@@ -253,13 +261,13 @@ function on_recharge(obj)
 function on_balance(obj)
 {
     console.log('data==========================');
-    $("#result_text").text('');
+    set_result_text('');
     //return false;
 
     try{
         var from = $("#from")[0].value;
         if(!window.parent.webs.prototype.isAddress(from)){
-            $("#result_text").text("From format error");
+            set_result_text("From format error");
             return false;
         }
 
@@ -271,10 +279,10 @@ function on_balance(obj)
             if(typeof(result) == 'object')
                 result = JSON.stringify(result, null, 4);
             result =
-                $("#result_text").text(result);
+                set_result_text(result);
         });
     }catch (err){
-        $("#result_text").text(err.stack);
+        set_result_text(err.stack);
     }
     //on_sendRawTransaction(to, abi, value);
     return false;
