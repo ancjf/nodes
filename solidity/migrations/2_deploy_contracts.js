@@ -4,6 +4,7 @@ var TestInt = artifacts.require("./TestInt.sol");
 var Users = artifacts.require("./Users.sol");
 var User = artifacts.require("./User.sol");
 var Node = artifacts.require("./Node.sol");
+var File = artifacts.require("./File.sol");
 //var TokenContractFragment = artifacts.require("./TokenContractFragment.sol");
 //var TokenERC20 = artifacts.require("./TokenERC20.sol");
 //var Crowdsale = artifacts.require("./Crowdsale.sol");
@@ -28,4 +29,5 @@ module.exports = function(deployer) {
   deployer.deploy(Users, option);
   deployer.deploy(User, option);
   deployer.deploy(Node, option);
+    deployer.deploy(File, option);
 };
