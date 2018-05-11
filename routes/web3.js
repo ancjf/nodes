@@ -221,4 +221,20 @@ web3.setProvider(new web3.providers.HttpProvider('https://api.myetherapi.com/eth
 console.log(web3.eth.getBalance("0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8").toString());
  */
 
+var arr = [
+    "0x0c5b587ca140de48d5eadaf0e2ed051fa31af749",
+    "1000000000000000000"
+];
+
+var str = '';
+arr.forEach(function(item,index){
+    if(typeof (item) == 'string')
+        str = str + item + ',';
+    else
+        str = str + JSON.stringify(item) +  ',';
+});
+
+logs.logvar(str.slice(0, -1));
+console.log('JSON.stringify(arr).slice(1, -1)=', JSON.stringify(arr).slice(1, -1));
+
 module.exports = router;

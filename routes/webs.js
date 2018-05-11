@@ -271,7 +271,8 @@ webs.prototype.unpackOutput = function (outputs, output) {
     return result.length === 1 ? result[0] : result;
 };
 
-webs.prototype.unpack_logs = function(outputs, output) {
+webs.prototype.unpack_logs = function(event, output) {
+    var outputs = event.inputs;
     if (!output) {
         return;
     }
@@ -295,7 +296,21 @@ webs.prototype.unpack_logs = function(outputs, output) {
         return [err.stack];
     }
 
-    return result.length === 1 ? result[0] : result;
+    var str = '';
+    result.forEach(function(item,index){
+        if(typeof (item) != 'string'){
+            str = str + item + ',';
+        }else{
+            var itstr = JSON.stringify(item);
+            if(itstr.indexOf('"') == 0)
+                itstr = itstr.slice(1, -1);
+
+            str = str + itstr +  ',';
+        }
+    });
+
+    var ret = event.name + "(" + str.slice(0, -1) + ")";
+    return ret;
 };
 
 webs.prototype.decode_logs = function(events, receipt) {
@@ -310,7 +325,7 @@ webs.prototype.decode_logs = function(events, receipt) {
         ret[i] = receipt.logs[i];
         var topics = receipt.logs[i].topics[0];
         if(events[topics] != undefined)
-            ret[i].result = webs.prototype.unpack_logs(events[topics].inputs, receipt.logs[i].data);
+            ret[i].result = webs.prototype.unpack_logs(events[topics], receipt.logs[i].data);
     }
 
     return ret;
