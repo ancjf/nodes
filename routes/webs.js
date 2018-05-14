@@ -271,6 +271,41 @@ webs.prototype.unpackOutput = function (outputs, output) {
     return result.length === 1 ? result[0] : result;
 };
 
+function JsonToStr(json) {
+    if(utils.isBigNumber(json)){
+        return utils.toDecimal(json);
+    }else if(utils.isObject(json)){
+        var tmp = '';
+
+        Object.keys(json).forEach(function(item,index){
+            if(tmp.length > 0)
+                tmp = tmp + ',' + item + ':'+ JsonToStr(json[item]);
+            else
+                tmp = item + ':'+ JsonToStr(json[item]);
+        });
+
+        return '{' + tmp + '}';
+    }else if(utils.isArray(json)){
+        var tmp = '';
+        json.forEach(function(item,index){
+            if(tmp.length > 0)
+                tmp =  tmp + ',' + JsonToStr(item);
+            else
+                tmp = JsonToStr(item);
+        });
+
+        return '[' + tmp + ']';
+    }else if(utils.isString(json)){
+        return json;
+    } else{
+        var itstr = json.toString();
+        if(itstr.indexOf('"') == 0)
+            itstr = itstr.slice(1, -1);
+
+        return itstr;
+    }
+}
+
 webs.prototype.unpack_logs = function(event, output) {
     var outputs = event.inputs;
     if (!output) {
@@ -309,9 +344,24 @@ webs.prototype.unpack_logs = function(event, output) {
         }
     });
 
-    var ret = event.name + "(" + str.slice(0, -1) + ")";
+    var ret = event.name + "(" + JsonToStr(result).slice(1, -1) + ")";
     return ret;
 };
+
+webs.prototype.unpack_logs({
+    "anonymous": false,
+    "inputs": [{
+        "indexed": false,
+        "name": "sender",
+        "type": "address"
+    }, {
+        "indexed": false,
+        "name": "value",
+        "type": "uint256"
+    }],
+    "name": "Recharge",
+    "type": "event"
+}, '0x0000000000000000000000000c5b587ca140de48d5eadaf0e2ed051fa31af7490000000000000000000000000000000000000000000000000de0b6b3a7640000');
 
 webs.prototype.decode_logs = function(events, receipt) {
     if (events === undefined) {

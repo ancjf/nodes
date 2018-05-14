@@ -219,22 +219,70 @@ var web3 = new Web3();
 var web3 = new webs.getWeb3('http://192.168.8.15:8545/');
 web3.setProvider(new web3.providers.HttpProvider('https://api.myetherapi.com/eth'));
 console.log(web3.eth.getBalance("0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8").toString());
- */
+
 
 var arr = [
     "0x0c5b587ca140de48d5eadaf0e2ed051fa31af749",
-    "1000000000000000000"
+    "1000000000000000000",
+    {"ip":"192.168.8.15","port":"30304"},
+    {s:1,e:18,c:[10000]}
 ];
 
 var str = '';
 arr.forEach(function(item,index){
-    if(typeof (item) == 'string')
+    if(typeof (item) == 'object'){
         str = str + item + ',';
-    else
-        str = str + JSON.stringify(item) +  ',';
+    }else{
+        var itstr = JSON.stringify(item);
+        if(itstr.indexOf('"') == 0)
+            itstr = itstr.slice(1, -1);
+
+        str = str + itstr +  ',';
+    }
 });
 
+var utils = require('../node_modules/web3/lib/utils/utils');
+
+function JsonToStr(json) {
+    if(utils.isBigNumber(json)){
+        logs.logvar(json);
+        return utils.toHex(json);
+    }else if(utils.isObject(json)){
+        logs.logvar(json);
+        var tmp = '';
+
+        Object.keys(json).forEach(function(item,index){
+            if(tmp.length > 0)
+                tmp = tmp + ',' + item + ':'+ JsonToStr(json[item]);
+            else
+                tmp = item + ':'+ JsonToStr(json[item]);
+        });
+
+        return '{' + tmp + '}';
+    }else if(utils.isArray(json)){
+        var tmp = '';
+        json.forEach(function(item,index){
+            if(tmp.length > 0)
+                tmp =  tmp + ',' + JsonToStr(item);
+            else
+                tmp = JsonToStr(item);
+        });
+
+        return '[' + tmp + ']';
+    }else{
+        logs.logvar(json);
+        var itstr = JSON.stringify(json);
+        if(itstr.indexOf('"') == 0)
+            itstr = itstr.slice(1, -1);
+
+        return itstr;
+    }
+}
+
+
+logs.logvar(JsonToStr(arr));
 logs.logvar(str.slice(0, -1));
 console.log('JSON.stringify(arr).slice(1, -1)=', JSON.stringify(arr).slice(1, -1));
+ */
 
 module.exports = router;
