@@ -39,10 +39,8 @@ utils.files = function(account){
 }
 
 utils.load = function(account){
-    var files = utils.files(account);
-    //logs.logvar(files);
-
     try{
+        var files = utils.files(account);
         var jsons = {};
         for (var f in files){
             var file = json_path + account + '/' + files[f];
