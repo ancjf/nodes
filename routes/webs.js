@@ -384,7 +384,7 @@ webs.prototype.decode_logs = function(events, receipt) {
 webs.prototype.trans_params = function(eth, tran, params, i, fun){
     var payload = toPayload(tran, params);
     if(typeof(tran.abi) !== 'undefined' && (tran.abi.constant == true || tran.abi.constant == 'true')){
-        eth.call(payload, "latest",  function(err, result) {
+        eth.call(payload, "pending",  function(err, result) {
             if(err){
                 fun(i, {"err":true,"result":err.stack});
                 return;

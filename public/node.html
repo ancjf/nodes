@@ -167,7 +167,7 @@ function on_sendRawTransaction(to, abi, value){
         var tx  = {to: to, data: data};
         console.log('tx=', tx);
 
-        web3.eth.call(tx, "latest",  function(err, receipt) {
+        web3.eth.call(tx, "pending",  function(err, receipt) {
             console.log("err=", err, ",receipt=", receipt); // "0x7f9fade1c0d57a7af66ab4ead79fade1c0d57a7af66ab4ead7c2c2eb7b11a91385"
             if(err){
                 set_result_text(err);
