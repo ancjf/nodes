@@ -76,12 +76,6 @@ function query_cons(args, res, account) {
     });
 }
 
-function eth_get_block(web3, i, callback){
-  web3.eth.getBlock(i, function (err, result) {
-    callback(err, i, result)
-  });
-}
-
 function query_blocks(args, res) {
     try{
         var web3 = new Web3(new Web3.providers.HttpProvider(args[".rpc"]));
@@ -89,27 +83,31 @@ function query_blocks(args, res) {
         var num = 0;
         var arr = [];
         var start = parseInt(args["start"]);
-        var end = start + parseInt(args["count"]);
+        var count = parseInt(args["count"]);
+        //if(0 >= count)
+          //res.send({error:null,result:arr});
+        var end = start + count;
       web3.eth.getBlockNumber(function (err, ret) {
         logs.logvar(ret, typeof(ret), end);
         if(err){
           res.send({error:err.stack,result:null});
           return;
         }
-        if(end > ret)
-          end = ret;
-        if(start >= ret){
+        if(end > ret+1)
+          end = ret+1;
+        if(start >= end){
           res.send({error:null,result:arr});
           return;
         }
 
-        for(i = start; i <= end; i++){
-          eth_get_block(web3, i, function (err, number, result) {
+        logs.logvar(start, end);
+        for(i = start; i < end; i++){
+          web3.eth.getBlock(i, function (err, result) {
             if(!err)
               arr[result.number-start] = result;
 
             num++;
-            if(num > end - start){
+            if(num >= end - start){
               res.send({error:null,result:arr});
             }
           })
