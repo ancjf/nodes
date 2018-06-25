@@ -191,6 +191,9 @@ utils.cons = function(rpc, account, callback){
 }
 
 utils.get_account = function(req) {
+    if(typeof(req.cookies.account) == "undefined")
+        return undefined;
+
     var cook = JSON.parse(req.cookies.account);
     return cook.account;
 }

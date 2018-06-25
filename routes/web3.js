@@ -38,7 +38,7 @@ function test(args, res) {
         var address = args["address"];
         var rpc = args[".rpc"];
 
-        var webs = new Webs(rpc);
+        var web3 = new Web3(new Web3.providers.HttpProvider(rpc));
         logs.logvar(conname);
 
         if(conname === undefined){
@@ -76,6 +76,53 @@ function query_cons(args, res, account) {
     });
 }
 
+function query_blocks(args, res) {
+    try{
+        var web3 = new Web3(new Web3.providers.HttpProvider(args[".rpc"]));
+
+        var num = 0;
+        var arr = [];
+        var start = parseInt(args["start"]);
+        var count = parseInt(args["count"]);
+        for(i = start; i < start + count; i++){
+            web3.eth.getBlock(i, function (err, result) {
+                if(!err)
+                    arr[result.number-start] = result;
+
+                num++;
+                if(num >= count)
+                    res.send({error:null,result:arr});
+            })
+        }
+    }catch (err){
+        res.send({error:null,result:err.stack});
+    }
+}
+
+function query_trans(args, res) {
+  try{
+    var web3 = new Web3(new Web3.providers.HttpProvider(args[".rpc"]));
+
+    var num = 0;
+    var arr = {};
+    var ts = args["trans"];
+    if(typeof(ts) == 'string')
+        ts = JSON.parse(ts);
+    for(i = 0; i < ts.length; i++){
+      web3.eth.getTransaction(ts[i], function (err, result) {
+        if(result != null)
+          arr[result.hash] = result;
+
+        num++;
+        if(num >= ts.length)
+          res.send({error:null,result:arr});
+      })
+    }
+  }catch (err){
+    res.send({error:null,result:err.stack});
+  }
+}
+
 function query(args, res, account) {
     try{
         logs.logvar(account);
@@ -84,6 +131,10 @@ function query(args, res, account) {
             return query_log(args, res);
         }else if(type == 'cons'){
             return query_cons(args, res, account);
+        }else if(type == 'blocks'){
+          return query_blocks(args, res, account);
+        }else if(type == 'trans'){
+          return query_trans(args, res, account);
         }
     }catch(err){
         //logs.logvar(err);
