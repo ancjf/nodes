@@ -552,6 +552,12 @@ function call_extend() {
             inputFormatter: [formatters.inputAddressFormatter, formatters.inputBlockNumberFormatter, formatters.inputBlockNumberFormatter]
         }),
         new Method({
+          name: 'extend.listReceiveTransactions',
+          call: 'eth_listReceiveTransactions',
+          params: 3,
+          inputFormatter: [formatters.inputAddressFormatter, formatters.inputBlockNumberFormatter, formatters.inputBlockNumberFormatter]
+        }),
+        new Method({
             name: 'extend.listTransactionReceipts',
             call: 'eth_listTransactionReceipts',
             params: 3,
