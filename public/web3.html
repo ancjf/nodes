@@ -2,7 +2,7 @@
 
 <head>
     <meta charset="utf-8"/>
-    <meta http-equiv="Access-Control-Allow-Origin" content="192.168.153.128">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
     <meta http-equiv="Access-Control-Allow-Methods" content="POST,GET">
 	<script type="text/javascript" src="javascripts/jquery-3.2.1.min.js"></script>
 <script>
@@ -27,6 +27,12 @@ function on_submit(obj)
                 continue;
 
             var value = arr[i].value;
+            var type = arr[i].id;
+            if(type == 'input_number'){
+				value = Number(value);
+            }
+
+			console.log('arr[i]=', arr[i], ',type:', type, ',value:', value, ',typeof(value):', typeof(value));
             params.push(value);
         }
 
@@ -35,7 +41,11 @@ function on_submit(obj)
         window.parent.call(data, function(error, result){
             if(typeof(result) == 'object')
                 result = JSON.stringify(result, null, 4);
-            set_result_text(result);
+            if(error){
+				set_result_text(error.stack);
+            }else{
+				set_result_text(result);
+            }
         });
     }catch (err){
         set_result_text(err.stack);
@@ -175,12 +185,20 @@ function on_submit(obj)
             <tr> <td><input type="text" name="fname" size="66"/> <input type="text" name="fname" value="0"/> <input type="submit" name="submit" value="getStorageAt"/> </td></tr>
         </table></form>
 
+        <form name="personal.unlockAccount"  onsubmit="return on_submit(this);"> <table class="fun">
+            <tr> <td><input type="text" name="address" size="66"/> <input type="text" name="password" value=""/> <input type="text" name="fname" id="input_number" value="10000000"/> <input type="submit" name="submit" value="unlockAccount"/> </td></tr>
+        </table></form>
+
         <form name="personal.newAccount"  onsubmit="return on_submit(this);"> <table class="fun">
             <tr> <td><input type="text" name="fname"/> <input type="submit" name="submit" value="newAccount"/> </td></tr>
         </table></form>
 
         <form name="extend.version"  onsubmit="return on_submit(this);"> <table class="fun">
             <tr> <td><input type="submit" name="submit" value="network"/> </td></tr>
+        </table></form>
+
+        <form name="extend.chainId"  onsubmit="return on_submit(this);"> <table class="fun">
+            <tr> <td><input type="submit" name="submit" value="chainId"/> </td></tr>
         </table></form>
 
         <div id="funs"></div>

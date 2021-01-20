@@ -545,6 +545,11 @@ function call_extend() {
             call: 'net_version',
             params: 0
         }),
+		new Method({
+			name: 'extend.chainId',
+			call: 'eth_chainId',
+			params: 0
+		}),
         new Method({
             name: 'extend.listTransactions',
             call: 'eth_listTransactions',

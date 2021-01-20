@@ -134,6 +134,7 @@ function on_send(obj)
             return false;
         }
         var privateKey = $("#secure")[0].value;
+        console.log('trans:', trans, ',privateKey:', privateKey);
         var tx = window.parent.webs.prototype.sign(trans, privateKey);
         tx = '0x' + tx.toString('hex');
         console.log('privateKey=', privateKey, 'trans=', trans, ",tx=", tx);
