@@ -117,7 +117,7 @@ function on_submit(obj)
             <tr> <td><input type="submit" name="submit" value="blockNumber"/> </td></tr>
         </table></form>
 
-        <form name="eth.getTransaction"  onsubmit="return on_submit(this);"> <table class="fun">
+        <form name="eth.getTransaction"  onsubmit="return on_submit(this);"> <table class="fun" style="width:100%;">
             <tr> <td><input type="text" name="fname" size="66"/> <input type="submit" name="submit" value="getTransaction"/> </td></tr>
         </table></form>
 
@@ -129,7 +129,7 @@ function on_submit(obj)
             <tr> <td><input type="text" name="fname" size="66"/> <input type="text" name="fname" value="99999999"/> <input type="text" name="fname" value="2"/> <input type="submit" name="submit" value="listTransactions"/> </td></tr>
         </table></form>
 
-        <form name="extend.listTransactionReceipts"  onsubmit="return on_submit(this);"> <table class="fun">
+        <form name="extend.listTransactionReceipts"  onsubmit="return on_submit(this);"> <table class="fun" style="width:100%;">
             <tr> <td><input type="text" name="fname" size="66"/> <input type="text" name="fname" value="99999999"/> <input type="text" name="fname" value="2"/> <input type="submit" name="submit" value="listTransactionReceipts"/> </td></tr>
         </table></form>
 
@@ -137,7 +137,7 @@ function on_submit(obj)
             <tr> <td><input type="text" name="fname" size="66" value="0" /> <input type="text" name="fname" value="0" /> <input type="submit" name="submit" value="getTransactionFromBlock"/> </td></tr>
         </table></form>
 
-        <form name="eth.getTransactionReceipt"  onsubmit="return on_submit(this);"> <table class="fun">
+        <form name="eth.getTransactionReceipt"  onsubmit="return on_submit(this);"> <table class="fun" style="width:100%;">
             <tr> <td><input type="text" name="fname" size="66"/> <input type="submit" name="submit" value="getTransactionReceipt"/> </td></tr>
         </table></form>
 
@@ -149,8 +149,12 @@ function on_submit(obj)
             <tr> <td><input type="text" name="fname" size="44"/> <input type="submit" name="submit" value="getTransactionCount"/> </td></tr>
         </table></form>
 
+        <form name="eth.sendRawTransaction"  onsubmit="return on_submit(this);"> <table class="fun" style="width:100%;">
+            <tr> <td><textarea type="text" name="params" rows="4"></textarea> <input type="submit" name="submit" value="sendRawTransaction"/> </td></tr>
+        </table></form>
+
         <form name="extend.getLogs"  onsubmit="return on_submit(this);"> <table class="fun" style="width:100%;">
-            <tr> <td><textarea type="text" name="params" rows="4" id="input_object">{"address": "0xfa4534e691Ff72D73Ff7770C561Bc9dB99389DFa","fromBlock": "0xa17f", "toBlock": "0xa17f","topics":["0xc86d749aea17406fcebdce120656c922c4a16966e26ab4c6b633f042f0b14e03"]}</textarea> <input type="submit" name="submit" value="getLogs"/> </td></tr>
+            <tr> <td><textarea type="text" name="params" rows="4" id="input_object">{"address": "0x43C12c563cD7f9d844fec73418e8282C1B456e18","fromBlock": "0xC02F", "toBlock": "0xC02F0","topics":["0x0d3648bd0f6ba80134a33ba9275ac585d9d315f0ad8355cddefde31afa28d0e9"]}</textarea> <input type="submit" name="submit" value="getLogs"/> </td></tr>
         </table></form>
 
         <form name="eth.getGasPrice"  onsubmit="return on_submit(this);"> <table class="fun">

@@ -8,10 +8,6 @@
     <script type="text/javascript" src="javascripts/webs.min.js"></script>
 <script>
 
-function onDeviceReady() {
-    console.log('list:window.parent=', window.parent, ",window.parent.url_key()=", window.parent.url_key());
-}
-
 function set_result_text(text){
     $("#result_text")[0].value = text;
 }
@@ -52,9 +48,9 @@ function getTrans(){
         trans['value'] = window.parent.webs.prototype.toWeiHx($("#value")[0].value);
     else
         trans['value'] = '0x0';
-    if($("#data")[0].value.length > 0)
+    if($("#data")[0].value.length > 0){
         trans['data'] = $("#data")[0].value;
-    else
+	}else
         trans['data'] = '0x';
 
     if($("#chainId")[0].value.length == 0){
@@ -83,9 +79,9 @@ function estimate(web3){
     if(window.parent.webs.prototype.isAddress(to)){
         console.log("to=", to);
         trans['to'] = to;
-        if(trans['data'] = $("#data")[0].value.length > 0)
-            trans['data'] = $("#data")[0].value.length;
-        else
+        if(trans['data'] = $("#data")[0].value.length > 0){
+            trans['data'] = $("#data")[0].value;
+		}else
             trans['data'] = '0x';
     }
 
@@ -118,6 +114,46 @@ function on_estimate(){
 
     estimate(web3);
     return false;
+}
+
+function on_encode(){
+	try{
+		let abi = $("#abi")[0].value;
+		let params = $("#params")[0].value;
+
+		if(!(params.startsWith('[') && params.endsWith(']'))){
+			params = '[' + params + ']';
+		}
+		params = JSON.parse(params);
+		abi = JSON.parse(abi);
+		const data = window.parent.webs.prototype.encodeFunctionCall(abi, params);
+
+		$("#data")[0].value = data;
+		alter_abi_array(abi);
+		console.log("on_encode abi=", abi, ',params:', params);
+    }catch (err) {
+		set_result_text(err.stack);
+	}
+
+	return false;
+}
+
+function on_decode(){
+	try{
+		let abi = $("#abi")[0].value;
+		let data = $("#data")[0].value;
+		abi = JSON.parse(abi);
+		console.log("on_encode abi=", abi, ',abi:', abi);
+
+		const result = window.parent.webs.prototype.decodeParameters(abi.inputs, data.substr(10));
+
+		set_result_text(JSON.stringify(result, null, 4));
+		alter_abi_array(abi);
+	}catch (err) {
+		set_result_text(err.stack);
+	}
+
+	return false;
 }
 
 function on_send(obj)
@@ -158,6 +194,9 @@ function on_send(obj)
 
 function on_change(){
     var privateKey = $("#secure")[0].value;
+    if(privateKey.startsWith('0x') || privateKey.startsWith('0X')){
+		privateKey = privateKey.substr(2);
+    }
 
     if(window.parent.webs.prototype.isPrivKey(privateKey)){
         $("#from")[0].value = "0x" + window.parent.webs.prototype.toAddress(privateKey);
@@ -187,6 +226,237 @@ function on_generate(obj)
     }
 
     return false;
+}
+
+function abi_key(){
+	return "abi_array." + window.location.href;
+}
+
+function get_abi_array(){
+	var value = window.localStorage.getItem(abi_key());
+
+	var abi_array;
+	try{
+		abi_array = JSON.parse(window.localStorage.getItem(abi_key()));
+	}catch(e){
+
+	}
+
+	if(!Array.isArray(abi_array) || abi_array.length == 0){
+		abi_array = [
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "transfer",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "spender",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "approve",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "transferFrom",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "totalSupply",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					}
+				],
+				"name": "balanceOf",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "spender",
+						"type": "address"
+					}
+				],
+				"name": "allowance",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+		];
+    }
+
+	return abi_array;
+}
+
+function save_abi_array(abi_array){
+	window.localStorage.setItem(abi_key(), JSON.stringify(abi_array));
+}
+
+function set_abi_array(abi_array){
+	$("#abi_list").empty();
+
+	var select = document.getElementById("abi_list");
+	console.log('abi_array=', abi_array);
+	abi_array.forEach(function (element, index, array) {
+		select.add(new Option(element.name,""));
+	});
+
+	$('#abi_list')[0].selectedIndex = 0;
+	var id = select.options.selectedIndex;
+
+}
+
+function alter_abi_array(abi){
+	var  abi_array = get_abi_array();
+	if(abi == null || !Array.isArray(abi_array)){
+		return set_abi_array(abi_array);
+	}
+
+	console.log('abi_array=', abi_array, ',abi:', abi, ',equal:', window.parent.webs.prototype.equal(abi_array[0], abi));
+	if(window.parent.webs.prototype.equal(abi_array[0], abi)){
+		return;
+    }
+
+	abi_array = abi_array.filter(function(item,index,array){
+		return typeof(item.name) == 'string' && item.name != abi.name;
+	});
+
+	abi_array.unshift(abi);
+	save_abi_array(abi_array);
+	set_abi_array(abi_array);
+	console.log('abi_array=', abi_array);
+}
+
+function on_abi_change(event)
+{
+	try{
+		var text = $("#abi_list").find("option:selected").text();
+		var abi = get_abi_array().filter(it=>{ return it.name == text})[0];
+		console.log('on_abi_change text=', text, ',abi:', abi);
+
+		if(abi != null){
+			$("#abi")[0].value = JSON.stringify(abi, null, 4);
+			alter_abi_array(abi);
+        }
+    }catch (err) {
+		set_result_text(err.stack);
+	}
+
+	return false;
+}
+
+function onDeviceReady() {
+	console.log('list:window.parent=', window.parent, ",window.parent.url_key()=", window.parent.url_key());
+
+	var  abi_array = get_abi_array();
+	set_abi_array([{name: 'select:'}, ...abi_array]);
 }
 
 </script>
@@ -236,7 +506,7 @@ function on_generate(obj)
     <div class="w">
         <div class="left"><div align="left">
 
-            <form name="eth.getBlock"> <table class="fun">
+            <form name="eth.getBlock" style="width:100%;"> <table class="fun" style="width:100%;">
                 <tr> <td> <label>Private Key:</label> <input type="text" class="input" id="secure" size="6" value="" oninput="on_change(event)" autocomplete="off"/></td></tr>
                 <tr> <td> <label>from:</label> <input type="text" class="input" id="from" size="66" value="" readonly="true"/> </td></tr>
                 <tr> <td> <label>to:</label> <input type="text" class="input" id="to" size="66" value="" /> </td></tr>
@@ -246,7 +516,10 @@ function on_generate(obj)
                 <tr> <td> <label>gasPrice:</label> <input type="text" class="input" id="gasPrice" size="66" value="" /> </td></tr>
                 <tr> <td> <label>chainId:</label> <input type="text" class="input" id="chainId" size="66" value="" /> </td></tr>
                 <tr> <td> <input type="submit" name="estimate" value="estimate" onclick="return on_estimate()"/> <input type="submit" name="generate" value="generate" onclick="return on_generate()"/> <input type="submit" name="submit" value="send" onclick="return on_send(this)"/> </td></tr>
-                <tr> <td> <label>data:</label> <textarea id="data" class="input" rows="12" cols="60"></textarea> </td></tr>
+
+                <tr> <td > <label>abi:</label> <select id="abi_list" onChange="return on_abi_change(event)"></select> <textarea id="abi" class="input" rows="12" style="width:100%;"></textarea> </td></tr>
+                <tr> <td> <label>params:</label> <textarea id="params" class="input" rows="6" style="width:100%;"></textarea> </td></tr>
+                <tr> <td> <label>data:</label> <input type="submit" name="encode" value="encode" onclick="return on_encode()"/> <input type="submit" name="decode" value="decode" onclick="return on_decode()"/> <textarea id="data" class="input" rows="6" style="width:100%;"></textarea> </td></tr>
             </table></form>
 
             <div id="funs"></div>

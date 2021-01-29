@@ -11,9 +11,11 @@ var formatters = require('../node_modules/web3/lib/web3/formatters');
 var utils = require('../node_modules/web3/lib/utils/utils');
 //var SolidityFunction = require('../node_modules/web3/lib/web3/function');
 var Method = require('../node_modules/web3/lib/web3/method');
+var ethAbi = require('web3-eth-abi');
 var Tx = require('ethereumjs-tx');
 var ethUtils = require('ethereumjs-util');
 var async = require('async');
+var equal = require('deep-equal');
 
 var Jsonrpc = {
     messageId: 0
@@ -555,6 +557,11 @@ function call_extend() {
 			call: 'eth_chainId',
 			params: 0
 		}),
+		new Method({
+			name: 'extend.sendSignedTransaction',
+			call: 'eth_sendSignedTransaction',
+			params: 1,
+		}),
         new Method({
             name: 'extend.getLogs',
             call: 'eth_getLogs',
@@ -943,6 +950,17 @@ webs.prototype.toWeiHx = function (_d) {
     return Web3.prototype.toHex(Web3.prototype.toWei(_d, 'ether'));
 }
 
+webs.prototype.encodeFunctionCall = function (abi, data) {
+	const ret = ethAbi.encodeFunctionCall(abi, data);
+	return ret;
+}
+
+webs.prototype.decodeParameters = function (abi, data) {
+	const ret = ethAbi.decodeParameters(abi, data);
+	return ret;
+}
+
+webs.prototype.equal = equal;
 webs.prototype.toHex = Web3.prototype.toHex;
 webs.prototype.sha3 = Web3.prototype.sha3;
 webs.prototype.isAddress = Web3.prototype.isAddress;
