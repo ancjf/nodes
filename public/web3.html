@@ -110,7 +110,7 @@ function on_submit(obj)
 	<div class="left"><div align="left">
 
         <form name="eth.getBlock"  onsubmit="return on_submit(this);"> <table class="fun">
-                <tr> <td><input type="text" name="fname" size="66" value="0" /> <input type="submit" name="submit" value="getBlock"/></td></tr>
+                <tr> <td><input type="text" name="fname" size="66" value="0" /> <input type="text" name="fname" size="6" value="true" /> <input type="submit" name="submit" value="getBlock"/></td></tr>
         </table></form>
 
         <form name="eth.getBlockNumber"  onsubmit="return on_submit(this);"> <table class="fun">
@@ -154,7 +154,7 @@ function on_submit(obj)
         </table></form>
 
         <form name="extend.getLogs"  onsubmit="return on_submit(this);"> <table class="fun" style="width:100%;">
-            <tr> <td><textarea type="text" name="params" rows="4" id="input_object">{"address": "0x43C12c563cD7f9d844fec73418e8282C1B456e18","fromBlock": "0xC02F", "toBlock": "0xC02F0","topics":["0x0d3648bd0f6ba80134a33ba9275ac585d9d315f0ad8355cddefde31afa28d0e9"]}</textarea> <input type="submit" name="submit" value="getLogs"/> </td></tr>
+            <tr> <td><textarea type="text" name="params" rows="4" id="input_object">{"address": "0x43C12c563cD7f9d844fec73418e8282C1B456e18","fromBlock": "0xC02F", "toBlock": "0xC02F","topics":["0x0d3648bd0f6ba80134a33ba9275ac585d9d315f0ad8355cddefde31afa28d0e9"]}</textarea> <input type="submit" name="submit" value="getLogs"/> </td></tr>
         </table></form>
 
         <form name="eth.getGasPrice"  onsubmit="return on_submit(this);"> <table class="fun">

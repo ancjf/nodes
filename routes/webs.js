@@ -955,6 +955,11 @@ webs.prototype.encodeFunctionCall = function (abi, data) {
 	return ret;
 }
 
+webs.prototype.encodeFunctionSignature = function (abi) {
+	const ret = ethAbi.encodeFunctionSignature(abi);
+	return ret;
+}
+
 webs.prototype.decodeParameters = function (abi, data) {
 	const ret = ethAbi.decodeParameters(abi, data);
 	return ret;

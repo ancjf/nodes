@@ -138,6 +138,25 @@ function on_encode(){
 	return false;
 }
 
+function on_sign(){
+	try{
+		let abi = $("#abi")[0].value;
+		if(!(abi.length > 1)){
+			return;
+		}
+		abi = JSON.parse(abi);
+		const data = window.parent.webs.prototype.encodeFunctionSignature(abi);
+
+		$("#data")[0].value = data;
+		alter_abi_array(abi);
+		console.log("on_encode abi=", abi);
+	}catch (err) {
+		set_result_text(err.stack);
+	}
+
+	return false;
+}
+
 function on_decode(){
 	try{
 		let abi = $("#abi")[0].value;
@@ -519,7 +538,7 @@ function onDeviceReady() {
 
                 <tr> <td > <label>abi:</label> <select id="abi_list" onChange="return on_abi_change(event)"></select> <textarea id="abi" class="input" rows="12" style="width:100%;"></textarea> </td></tr>
                 <tr> <td> <label>params:</label> <textarea id="params" class="input" rows="6" style="width:100%;"></textarea> </td></tr>
-                <tr> <td> <label>data:</label> <input type="submit" name="encode" value="encode" onclick="return on_encode()"/> <input type="submit" name="decode" value="decode" onclick="return on_decode()"/> <textarea id="data" class="input" rows="6" style="width:100%;"></textarea> </td></tr>
+                <tr> <td> <label>data:</label> <input type="submit" name="encode" value="encode" onclick="return on_encode()"/> <input type="submit" name="sign" value="sign" onclick="return on_sign()"/> <input type="submit" name="decode" value="decode" onclick="return on_decode()"/> <textarea id="data" class="input" rows="6" style="width:100%;"></textarea> </td></tr>
             </table></form>
 
             <div id="funs"></div>
