@@ -86,7 +86,7 @@ function randomBoolean() {
 }
 
 function randomString() {
-    return random_string(get_random_num(0, 256));;
+    return random_string(get_random_num(0, 256));
 }
 
 function randomFixedBytes(size) {
@@ -667,6 +667,27 @@ webs.prototype.sendRawTrans = function(web3, tx, events, fun) {
         //logs.logvar(typeof(err.stack), err.stack);
         fun(true, err.stack);
     }
+};
+
+webs.prototype.ethCall = function(web3, tx, abi, fun) {
+	try{
+		web3.eth.call(tx, function(err, result) {
+			let ret = {data: result};
+			console.log('ethCall', tx, abi);
+
+			if(!err && abi){
+				try{
+					ret.parameters = ethAbi.decodeParameters(abi.outputs, result);
+				}catch (e) {
+					console.log('ethCall', e);
+				}
+			}
+			fun(err, ret);
+		});
+	}catch(err){
+		//logs.logvar(typeof(err.stack), err.stack);
+		fun(true, err.stack);
+	}
 };
 
 webs.prototype.call = function(args, callback) {

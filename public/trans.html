@@ -9,7 +9,11 @@
 <script>
 
 function set_result_text(text){
-    $("#result_text")[0].value = text;
+	if(typeof(text) == "string"){
+		$("#result_text")[0].value = text;
+    }else{
+		$("#result_text")[0].value = JSON.stringify(text, null, 4);
+    }
 }
 
 function getTrans(){
@@ -121,11 +125,15 @@ function on_encode(){
 		let abi = $("#abi")[0].value;
 		let params = $("#params")[0].value;
 
+		abi = JSON.parse(abi);
+		console.log('on_encode abi:', abi);
+
 		if(!(params.startsWith('[') && params.endsWith(']'))){
 			params = '[' + params + ']';
 		}
+
 		params = JSON.parse(params);
-		abi = JSON.parse(abi);
+		console.log('on_encode params:', params);
 		const data = window.parent.webs.prototype.encodeFunctionCall(abi, params);
 
 		$("#data")[0].value = data;
@@ -175,7 +183,7 @@ function on_decode(){
 	return false;
 }
 
-function on_send(obj)
+function on_call(obj)
 {
     try{
         var web3 = window.parent.getWeb3();
@@ -184,31 +192,90 @@ function on_send(obj)
             return false;
         }
 
-        var trans = getTrans();
-        if(trans == undefined){
-            return false;
+		var to = $("#to")[0].value;
+		if(!window.parent.webs.prototype.isAddress(to)){
+			set_result_text("From address format error");
+			return undefined;
+		}
+
+        var data = $("#data")[0].value;
+		if(data.length < 8){
+			set_result_text("Data error");
+			return undefined;
+		}
+		if(!data.startsWith('0x') && !data.startsWith('0X')){
+			data = '0x' + data;
         }
-        var privateKey = $("#secure")[0].value;
-        console.log('trans:', trans, ',privateKey:', privateKey);
-        var tx = window.parent.webs.prototype.sign(trans, privateKey);
-        tx = '0x' + tx.toString('hex');
-        console.log('privateKey=', privateKey, 'trans=', trans, ",tx=", tx);
 
-        set_result_text(JSON.stringify({rawTx:tx,transaction:trans}, null, 4));
+		let abi = $("#abi")[0].value;
+        try{
+			abi = JSON.parse(abi);
+        }catch (e) {
+			abi = null;
+		}
 
-        window.parent.webs.prototype.sendRawTrans(web3, tx, {}, function(err, receipt) {
+        const tx = {to, data};
+		var output = {data: tx}
+        set_result_text(JSON.stringify(tx, null, 4));
+        window.parent.webs.prototype.ethCall(web3, tx, abi, function(err, receipt) {
             console.log("err=", err, ",receipt=", receipt); // "0x7f9fade1c0d57a7af66ab4ead79fade1c0d57a7af66ab4ead7c2c2eb7b11a91385"
-            if(err){
-                set_result_text($("#result_text").val() + '\r\n\r\n' + err);
-            }else{
-                set_result_text($("#result_text").val() + '\r\n\r\n' + JSON.stringify(receipt, null, 4));
-            }
+			if(err){
+				output.error = err
+			}else{
+				output.result = receipt;
+			}
+
+			set_result_text(output);
         });
     }catch (err){
         set_result_text(err.stack);
     }
 
     return false;
+}
+
+function on_send(obj)
+{
+	try{
+		var web3 = window.parent.getWeb3();
+		if(typeof(web3) !== 'object'){
+			set_result_text("web3 can't connect");
+			return false;
+		}
+
+		if($("#data")[0].value.length > 0){
+			trans['data'] = $("#data")[0].value;
+		}else
+			trans['data'] = '0x';
+
+		var trans = getTrans();
+		if(trans == undefined){
+			return false;
+		}
+		var privateKey = $("#secure")[0].value;
+		console.log('trans:', trans, ',privateKey:', privateKey);
+		var tx = window.parent.webs.prototype.sign(trans, privateKey);
+		tx = '0x' + tx.toString('hex');
+		console.log('privateKey=', privateKey, 'trans=', trans, ",tx=", tx);
+
+		var output = {data: {rawTx:tx,transaction:trans}}
+		set_result_text(output);
+
+		window.parent.webs.prototype.sendRawTrans(web3, tx, {}, function(err, receipt) {
+			console.log("err=", err, ",receipt=", receipt); // "0x7f9fade1c0d57a7af66ab4ead79fade1c0d57a7af66ab4ead7c2c2eb7b11a91385"
+			if(err){
+				output.error = err
+			}else{
+				output.result = receipt;
+			}
+
+			set_result_text(output);
+		});
+	}catch (err){
+		set_result_text(err.stack);
+	}
+
+	return false;
 }
 
 function on_change(){
@@ -383,6 +450,45 @@ function get_abi_array(){
 				"type": "function"
 			},
 			{
+				"inputs": [],
+				"name": "decimals",
+				"outputs": [
+					{
+						"internalType": "uint8",
+						"name": "",
+						"type": "uint8"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "name",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "",
+						"type": "string"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "symbol",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "",
+						"type": "string"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
 				"constant": true,
 				"inputs": [
 					{
@@ -534,7 +640,7 @@ function onDeviceReady() {
                 <tr> <td> <label>gasLimit:</label> <input type="text" class="input" id="gasLimit" size="66" value="" /> </td></tr>
                 <tr> <td> <label>gasPrice:</label> <input type="text" class="input" id="gasPrice" size="66" value="" /> </td></tr>
                 <tr> <td> <label>chainId:</label> <input type="text" class="input" id="chainId" size="66" value="" /> </td></tr>
-                <tr> <td> <input type="submit" name="estimate" value="estimate" onclick="return on_estimate()"/> <input type="submit" name="generate" value="generate" onclick="return on_generate()"/> <input type="submit" name="submit" value="send" onclick="return on_send(this)"/> </td></tr>
+                <tr> <td> <input type="submit" name="estimate" value="estimate" onclick="return on_estimate()"/> <input type="submit" name="generate" value="generate" onclick="return on_generate()"/> <input type="submit" name="submit" value="send" onclick="return on_send(this)"/> <input type="submit" name="submit" value="call" onclick="return on_call(this)"/> </td></tr>
 
                 <tr> <td > <label>abi:</label> <select id="abi_list" onChange="return on_abi_change(event)"></select> <textarea id="abi" class="input" rows="12" style="width:100%;"></textarea> </td></tr>
                 <tr> <td> <label>params:</label> <textarea id="params" class="input" rows="6" style="width:100%;"></textarea> </td></tr>
