@@ -197,7 +197,7 @@ function on_call(obj)
 			set_result_text("From address format error");
 			return undefined;
 		}
-
+        
         var data = $("#data")[0].value;
 		if(data.length < 8){
 			set_result_text("Data error");
@@ -215,7 +215,7 @@ function on_call(obj)
 		}
 
         const tx = {to, data};
-		var output = {data: tx}
+		var output = {data: tx};
         set_result_text(JSON.stringify(tx, null, 4));
         window.parent.webs.prototype.ethCall(web3, tx, abi, function(err, receipt) {
             console.log("err=", err, ",receipt=", receipt); // "0x7f9fade1c0d57a7af66ab4ead79fade1c0d57a7af66ab4ead7c2c2eb7b11a91385"

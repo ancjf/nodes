@@ -119,14 +119,14 @@ function randomType(typeInput) {
         var prefix = (part[2] || part[4] || part[5]); // eslint-disable-line
         switch (prefix) {
             case 'int': case 'uint':
-            if (coder) { throw new Error(invalidTypeErrorMessage); }
-            var intSize = parseInt(part[3] || 256); // eslint-disable-line
-            if (intSize === 0 || intSize > 256 || (intSize % 8) !== 0) {
-                throw new Error(`[ethjs-abi] while getting param coder for type ${type}, invalid ${prefix}<N> width: ${type}`);
-            }
+				if (coder) { throw new Error(invalidTypeErrorMessage); }
+				var intSize = parseInt(part[3] || 256); // eslint-disable-line
+				if (intSize === 0 || intSize > 256 || (intSize % 8) !== 0) {
+					throw new Error(`[ethjs-abi] while getting param coder for type ${type}, invalid ${prefix}<N> width: ${type}`);
+				}
 
-            coder = randomNumber(intSize / 8, (prefix === 'int'));
-            break;
+				coder = randomNumber(intSize / 8, (prefix === 'int'));
+				break;
 
             case 'bool':
                 if (coder) { throw new Error(invalidTypeErrorMessage); }
@@ -199,7 +199,7 @@ function validateArgs(inputTypes, args) {
     if (inputArgs.length !== inputTypes.length) {
         throw errors.InvalidNumberOfSolidityArgs();
     }
-};
+}
 
 
 function toPayload(tran, params) {
@@ -208,7 +208,7 @@ function toPayload(tran, params) {
     options.data = webs.prototype.random_data(tran.abi, params);
     options.to = tran.to;
     return options;
-};
+}
 
 function getReceipt(eth, txHash, callback){
     var timeout = 240000;
@@ -245,7 +245,7 @@ var webs = function (rpc) {
     this.web3 = new Web3(new Web3.providers.HttpProvider(rpc));
     //logs.logvar(rpc);
     this.logs = {};
-};
+}
 
 webs.prototype.logs = new Map();
 
@@ -271,7 +271,7 @@ webs.prototype.unpackOutput = function (outputs, output) {
     }
 
     return result.length === 1 ? result[0] : result;
-};
+}
 
 function JsonToStr(json) {
     if(utils.isBigNumber(json)){
@@ -348,7 +348,7 @@ webs.prototype.unpack_logs = function(event, output) {
 
     var ret = event.name + "(" + JsonToStr(result).slice(1, -1) + ")";
     return ret;
-};
+}
 
 webs.prototype.unpack_logs({
     "anonymous": false,
@@ -381,7 +381,7 @@ webs.prototype.decode_logs = function(events, receipt) {
     }
 
     return ret;
-};
+}
 
 webs.prototype.trans_params = function(eth, tran, params, i, fun){
     var payload = toPayload(tran, params);
@@ -649,7 +649,7 @@ webs.prototype.fillTrans = function(web3, trans, fun) {
     ], function(error, result) {
         fun(error, trans);
     });
-};
+}
 
 webs.prototype.sendRawTrans = function(web3, tx, events, fun) {
     try{
@@ -667,7 +667,7 @@ webs.prototype.sendRawTrans = function(web3, tx, events, fun) {
         //logs.logvar(typeof(err.stack), err.stack);
         fun(true, err.stack);
     }
-};
+}
 
 webs.prototype.ethCall = function(web3, tx, abi, fun) {
 	try{
@@ -682,13 +682,13 @@ webs.prototype.ethCall = function(web3, tx, abi, fun) {
 					console.log('ethCall', e);
 				}
 			}
-			fun(err, ret);
+			fun(err ? err.message : null, ret);
 		});
 	}catch(err){
 		//logs.logvar(typeof(err.stack), err.stack);
 		fun(true, err.stack);
 	}
-};
+}
 
 webs.prototype.call = function(args, callback) {
     var fun = args.fun;
@@ -707,7 +707,7 @@ webs.prototype.call = function(args, callback) {
     var line = "web3." + fun + params;
     //logs.logvar(line);
     eval(line);
-};
+}
 
 webs.prototype.stat_init = function (req_count) {
     return {"id": new Date().getTime(),
