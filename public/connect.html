@@ -2,43 +2,35 @@
 
 <head>
     <meta charset="utf-8"/>
-    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <mcharSetp-equiv
+    ="Access-Control-Allow-Origin" content="*">
     <meta http-equiv="Access-Control-Allow-Methods" content="POST,GET">
+
     <style type="text/css">
-        html
-        {
-            height:100%;
-            margin:0;
-        }
-        body
-        {
-            top: 10px;
-            height:100%;
-            margin:0;
+        html {
+            height: 100%;
+            margin: 0;
         }
 
-        hr{ border-top:1px solid #987cb9;}
+        body {
+            top: 10px;
+            height: 100%;
+            margin: 0;
+        }
+
+        hr {
+            border-top: 1px solid #987cb9;
+        }
 
         .div {
             padding: 20px;
         }
 
         .btn {
-            background-color: yellow;
-            color: black;
-            width: 120px;
-            text-align: center;
-            font-size: 15px;
-            padding: 20px;
-            border-radius: 15px;
-            border: 3px dashed blue;
-        }
-
-        .primary-btn {
             font-size: 14px;
             color: #000;
             height: 44px;
-            width: 120px;
+            width: 240px;
             padding: 0 15px;
             background-color: yellow;
             border: 1px solid yellow;
@@ -52,7 +44,7 @@
 
         }
 
-        .primary-btn::before {
+        .btn::before {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -67,71 +59,213 @@
             content: ' ';
         }
 
-        .primary-btn:active::before {
+        .btn:active::before {
             opacity: 0.1;
         }
     </style>
 
-<script type="module">
-//https://docs.ethers.io/v5/getting-started/
-//import { ethers } from "./javascripts/ethers-5.2.esm.min.js";
-import { ethers } from "https://cdn.ethers.io/lib/ethers-5.2.esm.min.js";
-let squareBtn = document.querySelector('.primary-btn');
+    <script type="module">
 
-squareBtn.addEventListener('click', () => {
-    window.ethereum.enable().then(function (result){
-        console.log("result:", result);
+        import {ethers} from "./javascripts/ethers-5.2.esm.min.js";
 
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-        console.log("signer:", signer);
+        //import { WalletConnectConnector } from './javascripts/walletconnect-connector.esm.js';
+        //import { ethers } from "https://cdn.ethers.io/lib/ethers-5.2.esm.min.js";
+        //https://docs.metamask.io/guide/ethereum-provider.html#methods
+        //https://docs.ethers.io/v5/getting-started/
+        document.querySelector('#connect').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
 
-        const daiAddress = "0x84b9b910527ad5c03a9ca831909e21e236ea7b06";
-        const daiAbi = [
-            // Some details about the token
-            "function name() view returns (string)",
-            "function symbol() view returns (string)",
+                try {
+                    await ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{chainId: '0x61'}],
+                    });
+                } catch (error) {
+                    // This error code indicates that the chain has not been added to MetaMask.
+                    if (error.code === 4902) {
+                        try {
+                            await ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{chainId: '0x61', rpcUrl: 'https://...' /* ... */}],
+                            });
+                        } catch (error) {
+                            // handle "add" error
+                            throw error;
+                        }
+                    }
+                    // handle other "switch" errors
+                }
 
-            // Get the account balance
-            "function balanceOf(address) view returns (uint)",
-
-            // Send some of your tokens to someone else
-            "function transfer(address to, uint amount)",
-
-            // An event triggered whenever anyone transfers to someone else
-            "event Transfer(address indexed from, address indexed to, uint amount)"
-        ];
-        const linkContract = new ethers.Contract(daiAddress, daiAbi, provider);
-
-        const tx =  signer.sendTransaction({
-            to: "0xa2847B58f13020f3bbcd116A1f7319D6d6aeb180",
-            value: ethers.utils.parseEther("0.001")
-        }).then((tx)=>{
-            console.log("tx:", tx);
-            const dai = ethers.utils.parseUnits("0.001", 18);
-            const daiWithSigner = linkContract.connect(signer);
-            return daiWithSigner.transfer("0xa2847B58f13020f3bbcd116A1f7319D6d6aeb180", dai);
-        }).then((erc20tx)=>{
-            console.log("erc20tx:", erc20tx);
-        }).catch( (error)=>{
-            console.log("error:", error);
+            } catch (e) {
+                console.log('e:', e);
+            }
         });
-    }).catch( (error)=>{
-        console.log("error:", error);
-    })
-});
 
-</script>
+        document.querySelector('#requestAccounts').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                console.log("window.ethereum:", window.ethereum);
+                let account = await window.ethereum.send('eth_requestAccounts');
+                console.log("account:", account, ',account.result.length:', account.result.length);
+                if(account.error != null || !(account.result.length > 0)){
+                    throw Error('eth_requestAccounts');
+                }
+
+                account = account.result[0];
+                console.log("account:", account);
+                document.getElementById('result').textContent = JSON.stringify(account);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#sendTransaction').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                console.log("signer:", signer);
+
+                const tx = await signer.sendTransaction({
+                    to: "0xa2847B58f13020f3bbcd116A1f7319D6d6aeb180",
+                    value: ethers.utils.parseEther("0.001")
+                })
+                console.log("tx:", tx);
+                document.getElementById('result').textContent = JSON.stringify(tx, null, 4);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#balance').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const tx = await provider.getBalance("0xa2847B58f13020f3bbcd116A1f7319D6d6aeb180")
+                console.log("tx:", tx);
+
+                document.getElementById('result').textContent = JSON.stringify(tx, null, 4);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#contract').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                const address = "0x84b9b910527ad5c03a9ca831909e21e236ea7b06";
+                const erc20Abi = [
+                    // Some details about the token
+                    "function name() view returns (string)",
+                    "function symbol() view returns (string)",
+
+                    // Get the account balance
+                    "function balanceOf(address) view returns (uint)",
+
+                    // Send some of your tokens to someone else
+                    "function transfer(address to, uint amount)",
+
+                    // An event triggered whenever anyone transfers to someone else
+                    "event Transfer(address indexed from, address indexed to, uint amount)"
+                ];
+                const linkContract = new ethers.Contract(address, erc20Abi, provider);
+                const value = ethers.utils.parseUnits("0.001", 18);
+                const contractSigner = linkContract.connect(signer);
+                const erc20tx = await contractSigner.transfer("0xa2847B58f13020f3bbcd116A1f7319D6d6aeb180", value);
+
+                console.log("erc20tx:", erc20tx);
+                document.getElementById('result').textContent = JSON.stringify(erc20tx, null, 4);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#call').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const address = "0x84b9b910527ad5c03a9ca831909e21e236ea7b06";
+                const erc20Abi = [
+                    // Some details about the token
+                    "function name() view returns (string)",
+                    "function symbol() view returns (string)",
+
+                    // Get the account balance
+                    "function balanceOf(address) view returns (uint)",
+
+                    // Send some of your tokens to someone else
+                    "function transfer(address to, uint amount)",
+
+                    // An event triggered whenever anyone transfers to someone else
+                    "event Transfer(address indexed from, address indexed to, uint amount)"
+                ];
+                const linkContract = new ethers.Contract(address, erc20Abi, provider);
+                const erc20tx = await linkContract.balanceOf("0xa2847B58f13020f3bbcd116A1f7319D6d6aeb180");
+
+                console.log("erc20tx:", erc20tx);
+                document.getElementById('result').textContent = JSON.stringify(erc20tx, null, 4);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+    </script>
 </head>
 
 <body>
-<div align="center" class ="div">
+<div align="center" class="div">
     <p>
-        <button class="primary-btn">test injected</button>
+        <button class="btn" id="connect">test connect</button>
     </p>
 
     <p>
-        <button class="primary-btn">主要按钮</button>
+        <button class="btn" id="requestAccounts">test requestAccounts</button>
+    </p>
+
+    <p>
+        <button class="btn" id="sendTransaction">test sendTransaction</button>
+    </p>
+
+    <p>
+        <button class="btn" id="balance">test balance</button>
+    </p>
+
+    <p>
+        <button class="btn" id="contract">test contract</button>
+    </p>
+
+    <p>
+        <button class="btn" id="call">test contract call</button>
+    </p>
+
+    <p>
+        <text id="result"></text>
     </p>
 </div>
 </body>
