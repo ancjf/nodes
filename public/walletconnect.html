@@ -4,6 +4,8 @@
     <meta charset="utf-8"/>
     <meta http-equiv="Access-Control-Allow-Origin" content="*">
     <meta http-equiv="Access-Control-Allow-Methods" content="POST,GET">
+    <script src="./javascripts/web3-provider.min.js"></script>
+    <script src="./javascripts/ethers-5.2.umd.min.js"></script>
 
     <style type="text/css">
         html {
@@ -65,78 +67,38 @@
 
     <script type="module">
 
-        import {ethers} from "./javascripts/ethers-5.2.esm.min.js";
-
         //import { WalletConnectConnector } from './javascripts/walletconnect-connector.esm.js';
         //import { ethers } from "https://cdn.ethers.io/lib/ethers-5.2.esm.min.js";
         //https://docs.metamask.io/guide/ethereum-provider.html#methods
         //https://docs.ethers.io/v5/getting-started/
-        //https://docs.metamask.io/guide/ethereum-provider.html#errors
         document.querySelector('#connect').addEventListener('click', async () => {
             try {
-                if (typeof window.ethereum === "undefined") {
-                    //没安装MetaMask钱包进行弹框提示
-                    return alert("请安装MetaMask");
-                }
-
-                try {
-                    await ethereum.request({
-                        method: 'wallet_switchEthereumChain',
-                        params: [{chainId: '0x61'}],
-                    });
-
-
-
-                } catch (error) {
-                    // This error code indicates that the chain has not been added to MetaMask.
-                    if (error.code === 4902) {
-                        try {
-                            await ethereum.request({
-                                method: 'wallet_addEthereumChain',
-                                params: [{chainId: '0x61', rpcUrl: 'https://...' /* ... */}],
-                            });
-                        } catch (error) {
-                            // handle "add" error
-                            throw error;
-                        }
-                    }
-                    // handle other "switch" errors
-                }
-
-            } catch (e) {
-                console.log('e:', e);
-            }
-        });
-
-        document.querySelector('#requestAccounts').addEventListener('click', async () => {
-            try {
-                if (typeof window.ethereum === "undefined") {
-                    //没安装MetaMask钱包进行弹框提示
-                    return alert("请安装MetaMask");
-                }
-
-                console.log("window.ethereum:", window.ethereum);
-                let account = await await ethereum.request({
-                    method: 'eth_requestAccounts',
-                    params: [{chainId: '0x61'}],
+                const WalletConnectProvider = window.WalletConnectProvider.default;
+                console.log('window.WalletConnectProvider:', window.WalletConnectProvider);
+                const WalletConnect = new WalletConnectProvider({
+                    chainId: 56,
+                    rpc: { //1: "https://api.mycryptoapi.com/eth",
+                        56: "https://bsc-dataseed1.ninicoin.io",
+                        //97: "https://data-seed-prebsc-2-s2.binance.org:8545/",
+                    },
+                    qrcode: true,
+                    pollingInterval: 12000,
                 });
-                //let account = await window.ethereum.send('eth_requestAccounts');
-                console.log("account:", account);
-                account = account[0];
-                ethereum.on('disconnect', (result)=>{
-                    console.log('disconnect result:', result);
+
+                const accounts = await WalletConnect.enable();
+                //events: connect, disconnect, session_request, session_update, call_request, wc_sessionRequest, wc_sessionUpdate
+                WalletConnect.on('disconnect', (error, result)=>{
+                    console.log('error:', error, ',result:', result);
                 })
 
-                ethereum.on('chainChanged', (result)=>{
-                    console.log('chainChanged result:', result);
-                })
+                const provider = new ethers.providers.Web3Provider(WalletConnect);
+                console.log('provider:', provider, ',provider.getBalance:', provider.getBalance, ',accounts:', accounts, ',WalletConnect:', WalletConnect);
 
-                ethereum.on('accountsChanged', (result)=>{
-                    console.log('accountsChanged result:', result);
-                })
+                window.provider = provider;
+                window.WalletConnect = WalletConnect;
 
-                console.log("account:", account);
-                document.getElementById('result').textContent = JSON.stringify(account);
+                const balance = await provider.getBalance(accounts[0]);
+                console.log("balance:", balance);
             } catch (e) {
                 console.log('e:', e);
             }
@@ -144,12 +106,12 @@
 
         document.querySelector('#sendTransaction').addEventListener('click', async () => {
             try {
-                if (typeof window.ethereum === "undefined") {
+                if (window.WalletConnect == null) {
                     //没安装MetaMask钱包进行弹框提示
-                    return alert("请安装MetaMask");
+                    return alert("请先连接");
                 }
 
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const provider = window.provider;
                 const signer = provider.getSigner();
                 console.log("signer:", signer, ',ethers.utils.parseUnits(2, 0):', ethers.utils.parseUnits('2', 0));
 
@@ -167,17 +129,16 @@
 
         document.querySelector('#balance').addEventListener('click', async () => {
             try {
-                if (typeof window.ethereum === "undefined") {
+                if (window.WalletConnect == null) {
                     //没安装MetaMask钱包进行弹框提示
-                    return alert("请安装MetaMask");
+                    return alert("请先连接");
                 }
 
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                let balance = await provider.getBalance("0xa2847B58f13020f3bbcd116A1f7319D6d6aeb180");
-                balance = ethers.utils.formatUnits(balance, 18);
-                console.log("balance:", balance);
+                const provider = window.provider;
+                const tx = await provider.getBalance("0xa2847B58f13020f3bbcd116A1f7319D6d6aeb180")
+                console.log("tx:", tx);
 
-                document.getElementById('result').textContent = JSON.stringify(balance, null, 4);
+                document.getElementById('result').textContent = JSON.stringify(tx, null, 4);
             } catch (e) {
                 console.log('e:', e);
             }
@@ -185,12 +146,12 @@
 
         document.querySelector('#contract').addEventListener('click', async () => {
             try {
-                if (typeof window.ethereum === "undefined") {
+                if (window.WalletConnect == null) {
                     //没安装MetaMask钱包进行弹框提示
-                    return alert("请安装MetaMask");
+                    return alert("请先连接");
                 }
 
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const provider = window.provider;
                 const signer = provider.getSigner();
                 const address = "0x4cc2223682617038AD93bE86866dA5CA01436B61";
                 const erc20Abi = [
@@ -223,12 +184,12 @@
 
         document.querySelector('#call').addEventListener('click', async () => {
             try {
-                if (typeof window.ethereum === "undefined") {
+                if (window.provider == null) {
                     //没安装MetaMask钱包进行弹框提示
-                    return alert("请安装MetaMask");
+                    return alert("请先连接");
                 }
 
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const provider = window.provider;
                 const address = "0x4cc2223682617038AD93bE86866dA5CA01436B61";
                 const erc20Abi = [
                     // Some details about the token
@@ -245,11 +206,25 @@
                     "event Transfer(address indexed from, address indexed to, uint amount)"
                 ];
                 const linkContract = new ethers.Contract(address, erc20Abi, provider);
-                let balance = await linkContract.balanceOf("0xa2847B58f13020f3bbcd116A1f7319D6d6aeb180", 100);
-                balance = ethers.utils.formatUnits(balance, 18);
+                const erc20tx = await linkContract.balanceOf("0xa2847B58f13020f3bbcd116A1f7319D6d6aeb180", 100);
 
-                console.log("balance:", balance);
-                document.getElementById('result').textContent = JSON.stringify(balance, null, 4);
+                console.log("erc20tx:", erc20tx);
+                document.getElementById('result').textContent = JSON.stringify(erc20tx, null, 4);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#disconnect').addEventListener('click', async () => {
+            try {
+                if (window.WalletConnect == null) {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请先连接");
+                }
+
+                await window.WalletConnect.disconnect();
+                window.disconnect = null;
+                window.WalletConnect = null;
             } catch (e) {
                 console.log('e:', e);
             }
@@ -262,10 +237,6 @@
 <div align="center" class="div">
     <p>
         <button class="btn" id="connect">test connect</button>
-    </p>
-
-    <p>
-        <button class="btn" id="requestAccounts">test requestAccounts</button>
     </p>
 
     <p>
@@ -282,6 +253,10 @@
 
     <p>
         <button class="btn" id="call">test contract call</button>
+    </p>
+
+    <p>
+        <button class="btn" id="disconnect">test disconnect</button>
     </p>
 
     <p>

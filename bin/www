@@ -7,6 +7,12 @@
 var app = require('../app');
 var debug = require('debug')('dapp:server');
 var http = require('http');
+var https = require('https');
+const fs = require("fs");
+var privateKey  = fs.readFileSync('certificates/6292993_test.ancjf.com.key', 'utf8');
+var certificate = fs.readFileSync('certificates/6292993_test.ancjf.com.pem', 'utf8');
+
+var credentials = {key: privateKey, cert: certificate};
 
 /**
  * Get port from environment and store in Express.
@@ -20,6 +26,7 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+var httpsServer = https.createServer(credentials, app);
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -28,6 +35,10 @@ var server = http.createServer(app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+
+httpsServer.listen(3101);
+httpsServer.on('error', onError);
+httpsServer.on('listening', onListening);
 
 /**
  * Normalize a port into a number, string, or false.

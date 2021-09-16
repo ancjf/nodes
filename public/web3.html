@@ -117,6 +117,10 @@ function on_submit(obj)
             <tr> <td><input type="submit" name="submit" value="blockNumber"/> </td></tr>
         </table></form>
 
+        <form name="eth.getSyncing"  onsubmit="return on_submit(this);"> <table class="fun">
+            <tr> <td><input type="submit" name="submit" value="syncing"/> </td></tr>
+        </table></form>
+
         <form name="eth.getTransaction"  onsubmit="return on_submit(this);"> <table class="fun" style="width:100%;">
             <tr> <td><input type="text" name="fname" size="66"/> <input type="submit" name="submit" value="getTransaction"/> </td></tr>
         </table></form>
