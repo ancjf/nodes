@@ -4,7 +4,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var logs = require('./routes/logs.js');
+const logs = require('@ancjf/logs');
 var fs = require('fs');
 var upload = require('./routes/upload');
 var web3 = require('./routes/web3');
@@ -17,8 +17,6 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-
-
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
@@ -28,19 +26,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.all('*', users.requireAuth);
-/*
+
 //设置跨域访问
 app.all('*', function(req, res, next) {
-    logs.logvar("app.all*******************************************************************************");
     res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    res.header("Access-Control-Allow-Headers", "*");
     res.header("Access-Control-Allow-Methods","PUT,POST,GET,DELETE,OPTIONS");
     //res.header("X-Powered-By",' 3.2.1')
     //res.header("Content-Type", "application/json;charset=utf-8");
     //app.all('*', users.requireAuthentication(req, res, next));
-    //next();
+    next();
 });
-*/
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -67,14 +63,13 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-
 var srcfile = './routes/webs.js';
 var destfile = './public/javascripts/webs.min.js';
 if(!fs.existsSync(destfile) || fs.statSync(srcfile).mtime > fs.statSync(destfile).mtime)
 {
     const webpack = require('webpack');
 
-    logs.logvar("begin");
+    logs.log("begin");
     webpack({
         entry:  __dirname + "/routes/webs.js",//已多次提及的唯一入口文件
         output: {
@@ -93,10 +88,10 @@ if(!fs.existsSync(destfile) || fs.statSync(srcfile).mtime > fs.statSync(destfile
         }
     }, function(err, stats){
         if (err || stats.hasErrors()) {
-            logs.logvar("error");
+            logs.log("error");
         }else{
-            logs.logvar("succeed");
-            //logs.logvar(stats);
+            logs.log("succeed");
+            //logs.log(stats);
         }
     });
 }

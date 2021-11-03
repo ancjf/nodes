@@ -3,7 +3,7 @@
  */
 
 var Web3 = require('web3');
-//var logs = require('./logs.js');
+//const logs = require('@ancjf/logs');
 var coder = require('../node_modules/web3/lib/solidity/coder');
 var formatters = require('../node_modules/web3/lib/web3/formatters');
 //var Eth = require('../node_modules/web3/lib/web3/methods/eth');
@@ -216,9 +216,9 @@ function getReceipt(eth, txHash, callback){
 
     var getTransactionReceipt_UntilNotNull = function(txHash) {
         eth.getTransactionReceipt(txHash, function (err, receipt) {
-            //logs.logvar(txHash, err, receipt);
+            //logs.log(txHash, err, receipt);
             if (err) {
-                //logs.logvar(typeof(err.message), err.message, err);
+                //logs.log(typeof(err.message), err.message, err);
                 callback(true, err.stack);
                 return;
             }
@@ -243,7 +243,7 @@ function getReceipt(eth, txHash, callback){
 
 var webs = function (rpc) {
     this.web3 = new Web3(new Web3.providers.HttpProvider(rpc));
-    //logs.logvar(rpc);
+    //logs.log(rpc);
     this.logs = {};
 }
 
@@ -266,7 +266,7 @@ webs.prototype.unpackOutput = function (outputs, output) {
         output = output.length >= 2 ? output.slice(2) : output;
         var result = coder.decodeParams(outputTypes, output);
     }catch(err) {
-        //logs.logvar(err);
+        //logs.log(err);
         return [err.stack];
     }
 
@@ -319,17 +319,17 @@ webs.prototype.unpack_logs = function(event, output) {
     try{
         var outputTypes = [];
         for(var i = 0; i < outputs.length; i++){
-            //logs.logvar(typeof(outputs[i].type), outputs[i]['[type]']);
+            //logs.log(typeof(outputs[i].type), outputs[i]['[type]']);
             outputTypes[i] = outputs[i].type;
             if(outputTypes[i] == undefined)
                 outputTypes[i] = outputs[i]['[type]'];
         }
 
-        //logs.logvar(outputs, outputTypes);
+        //logs.log(outputs, outputTypes);
         output = output.length >= 2 ? output.slice(2) : output;
         var result = coder.decodeParams(outputTypes, output);
     }catch(err) {
-        //logs.logvar(err);
+        //logs.log(err);
         return [err.stack];
     }
 
@@ -367,7 +367,7 @@ webs.prototype.unpack_logs({
 
 webs.prototype.decode_logs = function(events, receipt) {
     if (events === undefined) {
-        //logs.logvar(events, receipt);
+        //logs.log(events, receipt);
         return receipt.logs;
     }
 
@@ -405,7 +405,7 @@ webs.prototype.trans_params = function(eth, tran, params, i, fun){
             }
 
             getReceipt(eth, result, function(err, receipt){
-                //logs.logvar(indes, trans.length, err, receipt);
+                //logs.log(indes, trans.length, err, receipt);
                 if(err){
                     fun(i, {"err":true,"result":receipt});
                 }else{
@@ -419,11 +419,11 @@ webs.prototype.trans_params = function(eth, tran, params, i, fun){
 }
 
 webs.prototype.trans_one = function(eth, tran, i, fun){
-    //logs.logvar(tran);
+    //logs.log(tran);
     if(tran.params == undefined){
-        //logs.logvar(tran);
+        //logs.log(tran);
         return webs.prototype.trans_params(eth, tran, undefined, 0,  function callback(index, result){
-            //logs.logvar(index, result);
+            //logs.log(index, result);
             fun(i, [result]);
         });
     }
@@ -434,7 +434,7 @@ webs.prototype.trans_one = function(eth, tran, i, fun){
         webs.prototype.trans_params(eth, tran, tran.params[f], f,  function callback(index, result){
             ret[index] = result;
             count++;
-            //logs.logvar(count, tran.params.length);
+            //logs.log(count, tran.params.length);
             if(count == tran.params.length)
                 fun(i, ret);
         });
@@ -496,7 +496,7 @@ webs.prototype.trans = function(trans, fun) {
     //var personal = new Personal(web);
     var eth = web3.eth;
     var accounts = web3.personal.listAccounts;
-    //logs.logvar(accounts);
+    //logs.log(accounts);
 
     var ret = [];
     var count = 0;
@@ -516,9 +516,9 @@ webs.prototype.trans = function(trans, fun) {
         webs.prototype.trans_one(eth, trans[i], i, function (index, result) {
             ret[index] = result;
             count++;
-            //logs.logvar(count, index, trans.length);
+            //logs.log(count, index, trans.length);
             if(count >= trans.length){
-                //logs.logvar(ret);
+                //logs.log(ret);
                 fun(false, ret);
             }
 
@@ -664,7 +664,7 @@ webs.prototype.sendRawTrans = function(web3, tx, events, fun) {
             }
         });
     }catch(err){
-        //logs.logvar(typeof(err.stack), err.stack);
+        //logs.log(typeof(err.stack), err.stack);
         fun(true, err.stack);
     }
 }
@@ -685,7 +685,7 @@ webs.prototype.ethCall = function(web3, tx, abi, fun) {
 			fun(err ? err.message : null, ret);
 		});
 	}catch(err){
-		//logs.logvar(typeof(err.stack), err.stack);
+		//logs.log(typeof(err.stack), err.stack);
 		fun(true, err.stack);
 	}
 }
@@ -705,7 +705,7 @@ webs.prototype.call = function(args, callback) {
     var web3 = new Web3(new Web3.providers.HttpProvider(rpc));
     web3._extend(call_extend());
     var line = "web3." + fun + params;
-    //logs.logvar(line);
+    //logs.log(line);
     eval(line);
 }
 
@@ -774,7 +774,7 @@ webs.prototype.stat_one = function (stat, conname, fun, result) {
 }
 
 webs.prototype.stat = function (stat, trans, result) {
-    //logs.logvar(trans, result);
+    //logs.log(trans, result);
     for(var i = 0; i < trans.length; i++){
         if(trans[i].params == undefined){
             var val = undefined;
@@ -798,7 +798,7 @@ webs.prototype.test_fun_trans = function (stat, count, trans) {
             result = [];
         stat = me.stat(stat, trans, result);
         webs.prototype.set_log(stat);
-        //logs.logvar(count, stat);
+        //logs.log(count, stat);
         if(count > 1)
             me.test_fun_trans(stat, count-1, trans);
     });
@@ -821,7 +821,7 @@ webs.prototype.test_con_trans = function (perCount, con) {
     for(var i = 0; i < perCount; i++){
         var abi = this.random_item(con.abi);
 
-        //logs.logvar(this.web3.net.version, con.networks);
+        //logs.log(this.web3.net.version, con.networks);
         var tran = {"abi":abi,"conname":con.contract_name,"to":con.address};
         trans[i] = tran;
     }
@@ -843,7 +843,7 @@ webs.prototype.test_con = function (count, perCount, con, stat) {
             result = [];
         stat = me.stat(stat, trans, result);
         webs.prototype.set_log(stat);
-        //logs.logvar(count, stat);
+        //logs.log(count, stat);
         if(count > 1)
             me.test_con(count-1, perCount, con, stat);
     });
@@ -855,12 +855,12 @@ webs.prototype.test_trans = function (perCount, cons) {
     var trans = [];
 
     for(var i = 0; i < perCount; i++){
-        //logs.logvar(cons);
+        //logs.log(cons);
         var con = this.random_item(cons);
-        //logs.logvar(con);
+        //logs.log(con);
         var abi = this.random_item(con.abi);
 
-        //logs.logvar(con.networks[this.web3.version.network].address, con.address);
+        //logs.log(con.networks[this.web3.version.network].address, con.address);
         var tran = {"abi":abi,"conname":con.contract_name,"to":con.address};
 
         trans[i] = tran;
@@ -878,14 +878,14 @@ webs.prototype.test = function (count, perCount, cons, stat) {
     var trans = this.test_trans(perCount, cons);
 
     var me = this;
-    //logs.logvar(count, perCount);
+    //logs.log(count, perCount);
     me.trans(trans, function (err, result) {
-        //logs.logvar(err, result);
+        //logs.log(err, result);
         if(err)
             result = [];
         stat = webs.prototype.stat(stat, trans, result);
-        //logs.logvar(count, stat.id, stat);
-        //logs.logvar("1111111111111111111111111111111111111111111111111111111111111111");
+        //logs.log(count, stat.id, stat);
+        //logs.log("1111111111111111111111111111111111111111111111111111111111111111");
         webs.prototype.set_log(stat);
         if(count > 1)
             me.test(count-1, perCount, cons, stat);

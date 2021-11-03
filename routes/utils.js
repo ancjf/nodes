@@ -1,7 +1,7 @@
 /**
  * Created by cjf on 2017/8/30.
  */
-var logs = require('./logs.js');
+const logs = require('@ancjf/logs');
 var Web3 = require('web3');
 var Webs = require('./webs.js');
 var fs = require('fs');
@@ -11,7 +11,7 @@ const json_path = './jsons/';
 var utils = {};
 utils.jsons = new Map();
 
-logs.logvar('name', /*files, */typeof(files), typeof('name'));
+logs.log('name', /*files, */typeof(files), typeof('name'));
 
 //logs.log("utils.jsons=", utils.jsons);
 function cname(str) {
@@ -32,7 +32,7 @@ utils.filepath = function(account, name){
 utils.files = function(account){
     var path = json_path + (account ? account + '/' : '');
     return fs.readdirSync(path).filter(function (key) {
-        logs.logvar(path + key);
+        logs.log(path + key);
         var stat = fs.lstatSync(path + key);
         return !stat.isDirectory();
     });
@@ -58,7 +58,7 @@ utils.load = function(account){
             var json = JSON.parse(fs.readFileSync(file, "utf-8"));
             jsons[name] = json;
             //logs.log("name=", name);
-            logs.logvar(name);
+            logs.log(name);
             /*
              var network = json.networks[web3.version.network];
 
@@ -79,7 +79,7 @@ utils.load = function(account){
         //utils.jsons[account] = jsons;
         return jsons;
     }catch(err){
-        logs.logvar(err.message);
+        logs.log(err.message);
         return {};
     }
 }
@@ -92,7 +92,7 @@ utils.add = function(file, account, name){
     name = json_path + utils.filepath(account, name);
 
     if(fs.existsSync(name)){
-        logs.logvar("exists:", file);
+        logs.log("exists:", file);
         fs.unlinkSync(file);
         return false;
     }
@@ -106,16 +106,16 @@ utils.add = function(file, account, name){
 }
 
 utils.network = function(rpc, callback){
-    //logs.logvar(rpc);
+    //logs.log(rpc);
     if(rpc.substring(0, 7) != 'http://' && rpc.substring(0, 8) != 'https://'){
         callback(false, rpc);
         return;
     }
 
     var web3 = new Web3(new Web3.providers.HttpProvider(rpc));
-    logs.logvar('');
+    logs.log('');
     web3.version.getNetwork(function(error, result){
-        //logs.logvar(error, result);
+        //logs.log(error, result);
         callback(error, result);
     });
 }
@@ -164,12 +164,12 @@ utils.cons = function(rpc, account, callback){
         var jsons = utils.load(account);
         for (var f in jsons){
 
-            //logs.logvar(f);
+            //logs.log(f);
             var net = jsons[f].networks[network];
 
-            //logs.logvar(network);
+            //logs.log(network);
             if(net == undefined){
-                logs.logvar(net);
+                logs.log(net);
                 continue;
             }
 
@@ -178,14 +178,14 @@ utils.cons = function(rpc, account, callback){
             ret[f].address = jsons[f].networks[network].address;
             //ret[f].events = jsons[f].networks[network].events;
             ret[f].events = utils.events(jsons[f], network);
-            //logs.logvar(ret[f].events);
+            //logs.log(ret[f].events);
             ret[f].contract_name = jsons[f].contract_name || jsons[f].contractName;
             ret[f].abi = jsons[f].abi.filter(function(item){
                 return item.type=='function';
             });
         }
 
-        //logs.logvar(ret);
+        //logs.log(ret);
         callback(ret);
     });
 }

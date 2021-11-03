@@ -5,7 +5,7 @@
 var express = require('express');
 var router = express.Router();
 var utils = require('./utils.js');
-var logs = require('./logs.js');
+const logs = require('@ancjf/logs');
 var Webs = require('./webs.js');
 var assert = require('assert');
 var Web3 = require('web3');
@@ -16,15 +16,15 @@ function trans_trans(args, res) {
         var trans = args.trans;
         var rpc = args[".rpc"];
         var webs = new Webs(rpc);
-        //logs.logvar(args);
-        //logs.logvar(JSON.stringify(trans));
+        //logs.log(args);
+        //logs.log(JSON.stringify(trans));
         webs.trans(trans, function (error, result) {
             var out = JSON.stringify(result);
-            logs.logvar(error, out);
+            logs.log(error, out);
             res.send({"err":false, "result":result});
         });
     }catch(err){
-        //logs.logvar(typeof(err.stack), err.stack);
+        //logs.log(typeof(err.stack), err.stack);
         res.send({"err":true, "result":err.stack});
     }
 };
@@ -39,7 +39,7 @@ function test(args, res) {
         var rpc = args[".rpc"];
 
         var web3 = new Web3(new Web3.providers.HttpProvider(rpc));
-        logs.logvar(conname);
+        logs.log(conname);
 
         if(conname === undefined){
             var cons = utils.cons(rpc);
@@ -51,10 +51,10 @@ function test(args, res) {
             id = webs.test_fun(count, perCount, fun, conname, address);
         }
 
-        logs.logvar(id);
+        logs.log(id);
         res.send({"err":false, "result":id});
     }catch(err){
-        //logs.logvar(err);
+        //logs.log(err);
         res.send({"err":true, "result":err.stack});
     }
 };
@@ -69,9 +69,9 @@ function query_log(args, res) {
 }
 
 function query_cons(args, res, account) {
-    //logs.logvar('start', cons);
+    //logs.log('start', cons);
     var cons = utils.cons(args[".rpc"], account, function (cons) {
-        logs.logvar(cons);
+        logs.log(cons);
         res.send(cons);
     });
 }
@@ -88,7 +88,7 @@ function query_blocks(args, res) {
           //res.send({error:null,result:arr});
         var end = start + count;
       web3.eth.getBlockNumber(function (err, ret) {
-        logs.logvar(ret, typeof(ret), end);
+        logs.log(ret, typeof(ret), end);
         if(err){
           res.send({error:err.stack,result:null});
           return;
@@ -100,7 +100,7 @@ function query_blocks(args, res) {
           return;
         }
 
-        logs.logvar(start, end);
+        logs.log(start, end);
         for(i = start; i < end; i++){
           web3.eth.getBlock(i, function (err, result) {
             if(!err)
@@ -144,7 +144,7 @@ function query_trans(args, res) {
 
 function query(args, res, account) {
     try{
-        logs.logvar(account);
+        logs.log(account);
         var type = args["type"];
         if(type == 'log'){
             return query_log(args, res);
@@ -156,20 +156,20 @@ function query(args, res, account) {
           return query_trans(args, res, account);
         }
     }catch(err){
-        //logs.logvar(err);
+        //logs.log(err);
         res.send({"err":true, "result":err.stack});
     }
 };
 
 function trans_call(args, res) {
     try{
-        logs.logvar(args);
+        logs.log(args);
         Webs.prototype.call(args, function (error, result) {
-            logs.logvar(args);
+            logs.log(args);
             res.send({"err":false, "result":result});
         });
     }catch(err){
-        logs.logvar(err);
+        logs.log(err);
         res.send({"err":true, "result":err.stack});
     }
 };
@@ -208,7 +208,7 @@ router.get('/query', function(req, res, next) {
 
 function test_1(args) {
     try{
-        logs.logvar('*******************************************************************************');
+        logs.log('*******************************************************************************');
         var count = Number(args["count"]);
         var perCount = Number(args["perCount"]);
         var conname = args[".contract"];
@@ -217,7 +217,7 @@ function test_1(args) {
         var rpc = args[".rpc"];
 
         var webs = new Webs(rpc);
-        logs.logvar(conname);
+        logs.log(conname);
 
         if(conname === undefined){
             var cons = utils.cons(webs.web3.version.network);
@@ -229,9 +229,9 @@ function test_1(args) {
             id = webs.test_con(count, perCount, fun, conname, address);
         }
 
-        logs.logvar(id);
+        logs.log(id);
     }catch(err){
-        logs.logvar(err.message);
+        logs.log(err.message);
         res.send({"err":true, "result":err});
     }
 }
@@ -315,10 +315,10 @@ var utils = require('../node_modules/web3/lib/utils/utils');
 
 function JsonToStr(json) {
     if(utils.isBigNumber(json)){
-        logs.logvar(json);
+        logs.log(json);
         return utils.toHex(json);
     }else if(utils.isObject(json)){
-        logs.logvar(json);
+        logs.log(json);
         var tmp = '';
 
         Object.keys(json).forEach(function(item,index){
@@ -340,7 +340,7 @@ function JsonToStr(json) {
 
         return '[' + tmp + ']';
     }else{
-        logs.logvar(json);
+        logs.log(json);
         var itstr = JSON.stringify(json);
         if(itstr.indexOf('"') == 0)
             itstr = itstr.slice(1, -1);
@@ -350,8 +350,8 @@ function JsonToStr(json) {
 }
 
 
-logs.logvar(JsonToStr(arr));
-logs.logvar(str.slice(0, -1));
+logs.log(JsonToStr(arr));
+logs.log(str.slice(0, -1));
 console.log('JSON.stringify(arr).slice(1, -1)=', JSON.stringify(arr).slice(1, -1));
  */
 

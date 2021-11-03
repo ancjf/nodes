@@ -72,7 +72,36 @@
         //https://docs.metamask.io/guide/ethereum-provider.html#methods
         //https://docs.ethers.io/v5/getting-started/
         //https://docs.metamask.io/guide/ethereum-provider.html#errors
-        document.querySelector('#connect').addEventListener('click', async () => {
+        document.querySelector('#addEthereumChain').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const value = await ethereum.request({
+                    method: 'wallet_addEthereumChain',
+                    params: [{
+                        chainId: '0x38',
+                        chainName: 'Binance Smart Chain Mainnet',
+                        blockExplorerUrls: ['https://bscscan.com/'],
+                        rpcUrls: ['https://bsc-dataseed1.binance.org/'],
+                        nativeCurrency: {
+                            name: 'bnb',
+                            symbol: 'BNB',
+                            decimals: 18,
+                        }}
+                    ],
+                });
+
+                console.log('value:', value);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+
+        document.querySelector('#switchEthereumChain').addEventListener('click', async () => {
             try {
                 if (typeof window.ethereum === "undefined") {
                     //没安装MetaMask钱包进行弹框提示
@@ -80,20 +109,30 @@
                 }
 
                 try {
-                    await ethereum.request({
+                    const req = await ethereum.request({
                         method: 'wallet_switchEthereumChain',
-                        params: [{chainId: '0x61'}],
+                        params: [{chainId: '0x38'}],
                     });
 
-
-
+                    console.log('req:', req);
                 } catch (error) {
+                    console.log('error:', error);
                     // This error code indicates that the chain has not been added to MetaMask.
                     if (error.code === 4902) {
                         try {
                             await ethereum.request({
                                 method: 'wallet_addEthereumChain',
-                                params: [{chainId: '0x61', rpcUrl: 'https://...' /* ... */}],
+                                params: [{
+                                    chainId: '0x38',
+                                    chainName: 'Binance Smart Chain Mainnet',
+                                    blockExplorerUrls: ['https://bscscan.com/'],
+                                    rpcUrls: ['https://bsc-dataseed1.binance.org/'],
+                                    nativeCurrency: {
+                                        name: 'bnb',
+                                        symbol: 'BNB',
+                                        decimals: 18,
+                                    }}
+                                ],
                             });
                         } catch (error) {
                             // handle "add" error
@@ -101,8 +140,42 @@
                         }
                     }
                     // handle other "switch" errors
+
+
                 }
 
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#isUnlocked').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                //const isUnlocked = window.ethereum._state.isUnlocked;
+                const isUnlocked = await window.ethereum._metamask.isUnlocked()
+                console.log("window.ethereum:", window.ethereum, ',isUnlocked:', isUnlocked);
+                document.getElementById('result').textContent = JSON.stringify(isUnlocked);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#connected').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const connected = await window.ethereum.isConnected();
+                const address = await window.ethereum.selectedAddress;
+                console.log("window.ethereum:", window.ethereum, ',connected:', connected, ',address:', address);
+                document.getElementById('result').textContent = JSON.stringify(connected);
             } catch (e) {
                 console.log('e:', e);
             }
@@ -115,14 +188,24 @@
                     return alert("请安装MetaMask");
                 }
 
-                console.log("window.ethereum:", window.ethereum);
                 let account = await await ethereum.request({
                     method: 'eth_requestAccounts',
-                    params: [{chainId: '0x61'}],
+                    params: [{chainId: '0x38'}],
                 });
+
+                const chainId = await ethereum.request({ method: 'eth_chainId' })
                 //let account = await window.ethereum.send('eth_requestAccounts');
-                console.log("account:", account);
+                console.log("account:", account, ',chainId:', parseInt(chainId));
                 account = account[0];
+
+                ethereum.on('message', (result)=>{
+                    console.log('message result:', result);
+                })
+
+                ethereum.on('connect', (result)=>{
+                    console.log('connect result:', result);
+                })
+
                 ethereum.on('disconnect', (result)=>{
                     console.log('disconnect result:', result);
                 })
@@ -159,7 +242,93 @@
                     value: ethers.utils.parseUnits('2', 0)
                 })
                 console.log("tx:", tx);
+
                 document.getElementById('result').textContent = JSON.stringify(tx, null, 4);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#sign').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                console.log("signer:", signer, ',signer.provider.provider:', signer.provider.provider);
+
+                let blockNumber = await signer.provider.provider.request({
+                    method: 'eth_blockNumber',
+                    params: [],
+                });
+                let account = await signer.getAddress();
+                let chainId = await signer.getChainId();
+                const msg =  `${blockNumber}:${chainId}:${Date.now()}:safeTransferFrom`;
+
+                /*
+                let sig = await ethereum.request({
+                        method: 'personal_sign',
+                        params: [account[0], msg],
+                    });*/
+                let sig = await signer.signMessage(msg);
+                console.log("signer:", signer, ',sig:', sig);
+
+                const msgHash = ethers.utils.hashMessage(msg);
+                const msgHashBytes = ethers.utils.arrayify(msgHash);
+                //const recoveredPubKey = ethers.utils.recoverPublicKey(msgHashBytes, sig);
+                const recoveredAddress = ethers.utils.recoverAddress(msgHashBytes, sig);
+                console.log("account:,", account, ",sig:", sig, ',msgHash:', msgHash, ',msgHashBytes:', msgHashBytes, ',recoveredAddress:', recoveredAddress);
+
+                document.getElementById('result').textContent = JSON.stringify({sig, msg, account, recoveredAddress}, null, 4);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#signTypedData').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                console.log("signer:", signer, ',signer.provider.provider:', signer.provider.provider);
+
+                let blockNumber = await signer.provider.provider.request({
+                    method: 'eth_blockNumber',
+                    params: [],
+                });
+                let account = await signer.getAddress();
+                let chainId = await signer.getChainId();
+
+                const domain = {
+                    name: 'minefi',
+                    version: '1',
+                    chainId: chainId,
+                    verifyingContract: '0x2255444362b73087b82bb2c95239be4e708c130d'
+                };
+
+                const types = {
+                    Message: [
+                        { name: 'content', type: 'string' }
+                    ]
+                };
+
+                const msg =  `${blockNumber}:${chainId}:${Date.now()}:safeTransferFrom`;
+                const message = {
+                    content: msg
+                };
+
+                const sig = await signer._signTypedData(domain, types, message);
+                let verifiedAddress = ethers.utils.verifyTypedData(domain, types, message, sig)
+
+                console.log("account:,", account, ",sig:", sig, ',verifiedAddress:', verifiedAddress);
+                document.getElementById('result').textContent = JSON.stringify({chainId, sig, msg, account, verifiedAddress}, null, 4);
             } catch (e) {
                 console.log('e:', e);
             }
@@ -177,6 +346,7 @@
                 balance = ethers.utils.formatUnits(balance, 18);
                 console.log("balance:", balance);
 
+                window.provider = provider;
                 document.getElementById('result').textContent = JSON.stringify(balance, null, 4);
             } catch (e) {
                 console.log('e:', e);
@@ -192,7 +362,7 @@
 
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const signer = provider.getSigner();
-                const address = "0x4cc2223682617038AD93bE86866dA5CA01436B61";
+                const address = "0x35D260757541c783e9A672608bf71764C8e32BF8";
                 const erc20Abi = [
                     // Some details about the token
                     "function name() view returns (string)",
@@ -201,6 +371,8 @@
                     // Get the account balance
                     "function balanceOf(address) view returns (uint)",
                     "function buy(uint256 ticket, uint256 period, bool direct) payable",
+
+                    "function safeTransferFrom(address from,address to, uint256 id, uint256 amount, bytes calldata data) external payable",
 
                     // Send some of your tokens to someone else
                     "function transfer(address to, uint amount)",
@@ -212,7 +384,50 @@
                 const value = ethers.utils.parseUnits("0.001", 18);
                 const contractSigner = linkContract.connect(signer);
                 //const erc20tx = await contractSigner.transfer("0xa2847B58f13020f3bbcd116A1f7319D6d6aeb180", value);
-                const erc20tx = await contractSigner.buy('3452345', 1, true, {value: ethers.utils.parseEther('0.0001')});
+                const erc20tx = await contractSigner.buy('3452345', 100, true, {value: ethers.utils.parseEther('0.0001'), gasLimit: 1000000});
+
+                console.log("erc20tx:", erc20tx);
+                document.getElementById('result').textContent = JSON.stringify(erc20tx, null, 4);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#safeTransferFrom').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                const address = "0x2255444362b73087b82bB2C95239Be4e708c130d";
+                const erc20Abi = [
+                    // Some details about the token
+                    "function name() view returns (string)",
+                    "function symbol() view returns (string)",
+
+                    // Get the account balance
+                    "function balanceOf(address) view returns (uint)",
+                    "function owner() public view virtual returns (address)",
+                    "function buy(uint256 ticket, uint256 period, bool direct) payable",
+
+                    "function safeTransferFrom(address from,address to, uint256 id, uint256 amount, bytes calldata data) external payable",
+
+                    // Send some of your tokens to someone else
+                    "function transfer(address to, uint amount)",
+
+                    // An event triggered whenever anyone transfers to someone else
+                    "event Transfer(address indexed from, address indexed to, uint amount)"
+                ];
+                const linkContract = new ethers.Contract(address, erc20Abi, provider);
+                const value = ethers.utils.parseUnits("0.001", 18);
+                const contractSigner = linkContract.connect(signer);
+                //const erc20tx = await contractSigner.transfer("0xa2847B58f13020f3bbcd116A1f7319D6d6aeb180", value);
+                const owner = await contractSigner.owner();
+                console.log("owner:", owner);
+                const erc20tx = await contractSigner.safeTransferFrom('0xF11804c522753E2afd2a4a8d9c1BF7AB0ABAf60f', owner, 100000, 1, '0x', {value: ethers.utils.parseEther('0.0001'), gasLimit: 1000000});
 
                 console.log("erc20tx:", erc20tx);
                 document.getElementById('result').textContent = JSON.stringify(erc20tx, null, 4);
@@ -237,6 +452,7 @@
 
                     // Get the account balance
                     "function balanceOf(address, uint256 id) view returns (uint)",
+                    "function owner() public view virtual returns (address)",
 
                     // Send some of your tokens to someone else
                     "function transfer(address to, uint amount)",
@@ -247,8 +463,9 @@
                 const linkContract = new ethers.Contract(address, erc20Abi, provider);
                 let balance = await linkContract.balanceOf("0xa2847B58f13020f3bbcd116A1f7319D6d6aeb180", 100);
                 balance = ethers.utils.formatUnits(balance, 18);
+                const owner = await linkContract.owner();
 
-                console.log("balance:", balance);
+                console.log("balance:", balance, ",owner:", owner);
                 document.getElementById('result').textContent = JSON.stringify(balance, null, 4);
             } catch (e) {
                 console.log('e:', e);
@@ -260,12 +477,33 @@
 
 <body>
 <div align="center" class="div">
+
     <p>
-        <button class="btn" id="connect">test connect</button>
+        <button class="btn" id="addEthereumChain">test addEthereumChain</button>
+    </p>
+
+    <p>
+        <button class="btn" id="isUnlocked">test isUnlocked</button>
+    </p>
+
+    <p>
+        <button class="btn" id="connected">test connected</button>
+    </p>
+
+    <p>
+        <button class="btn" id="switchEthereumChain">test switchEthereumChain</button>
     </p>
 
     <p>
         <button class="btn" id="requestAccounts">test requestAccounts</button>
+    </p>
+
+    <p>
+        <button class="btn" id="sign">test sign</button>
+    </p>
+
+    <p>
+        <button class="btn" id="signTypedData">test signTypedData</button>
     </p>
 
     <p>
@@ -281,6 +519,10 @@
     </p>
 
     <p>
+        <button class="btn" id="safeTransferFrom">test safeTransferFrom</button>
+    </p>
+
+    <p>
         <button class="btn" id="call">test contract call</button>
     </p>
 
@@ -288,6 +530,13 @@
         <text id="result"></text>
     </p>
 </div>
+
+<script type="text/javascript">
+    window.onload = function() {
+        console.log('window.provider:', window.provider);
+    };
+
+</script>
 </body>
 
 </html>

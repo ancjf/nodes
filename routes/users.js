@@ -5,7 +5,7 @@
 var express = require('express');
 var router = express.Router();
 var crypto = require('crypto');
-var logs = require('./logs.js');
+const logs = require('@ancjf/logs');
 var Web3 = require('web3');
 var SQLite3 = require('sqlite3').verbose();
 
@@ -88,7 +88,7 @@ class HandleDB {
         return new Promise((resolve, reject) => {
             _self.db[mode](sql, param,
                 function (err, data) {    // data: Array, Object
-                    //logs.logvar(sql, param, err, data);
+                    //logs.log(sql, param, err, data);
                     if (err) {
                         reject(new Error(err.code));
                     } else {
@@ -122,10 +122,10 @@ db.connectDataBase().then((result)=>{
         );`;
     return db.createTable(sentence);
 }).then((result)=>{
-    //logs.logvar(result);
+    //logs.log(result);
     doLogic();
 }).catch((err)=>{
-    //logs.logvar(err);
+    //logs.log(err);
 });
 
 let doLogic = function() {
@@ -133,9 +133,9 @@ let doLogic = function() {
     // 增
     db.sql(`insert into ${db.tableName} (account, password, last_time) values(?, ?, ?)`,
         ['admin', Web3.prototype.sha3('123456'), Date().toString()]).then((res)=>{
-        logs.logvar(res);
+        logs.log(res);
     }).catch((err)=>{
-        logs.logvar(err);
+        logs.log(err);
     });
 /*
     // 一次性插入多个数据
@@ -161,42 +161,42 @@ let doLogic = function() {
             [obj.account, obj.password, obj.last_time]);
     });
     Promise.all(promises).then(function (posts) {
-        logs.logvar('全部插入完毕', posts)
+        logs.log('全部插入完毕', posts)
     }).catch(function(reason){
-        logs.logvar(reason);
+        logs.log(reason);
     });
 
     // 删
     db.sql(`delete from ${db.tableName} where account = ?`, 'user1').then((res)=>{
-        logs.logvar(res);
+        logs.log(res);
     }).catch((err)=>{
-        logs.logvar(err);
+        logs.log(err);
     });
 
     // 改
     db.sql(`update ${db.tableName} set last_time = ? where account = ?`, ['user2', Date().toString()]).then((res)=>{
-        logs.logvar(res);
+        logs.log(res);
     }).catch((err)=>{
-        logs.logvar(err);
+        logs.log(err);
     });
 
     // 查
     db.sql(`select * from ${db.tableName} where account = ?`, 'admin', 'get').then((res)=>{
-        logs.logvar(res);
+        logs.log(res);
     }).catch((err)=>{
-        logs.logvar(err);
+        logs.log(err);
     });
     */
 };
 
 function create_account(account, password, ballback) {
-    logs.logvar(account, password);
+    logs.log(account, password);
     db.sql(`insert into ${db.tableName} (account, password, last_time) values(?, ?, ?)`,
         [account, password, Date().toString()]).then((res)=>{
-        //logs.logvar(res);
+        //logs.log(res);
         ballback(false, res);
     }).catch((err)=>{
-        //logs.logvar(err.name, typeof(err.message), err.message, err);
+        //logs.log(err.name, typeof(err.message), err.message, err);
         var msg = err.message;
         if(msg == 'SQLITE_CONSTRAINT')
             msg = '账号已经存在!';
@@ -206,7 +206,7 @@ function create_account(account, password, ballback) {
 
 function updateLastLoginTime(account){
     db.sql(`update ${db.tableName} set last_time = ? where account = ?`, [Date().toString(), account]).then((res)=>{
-        logs.logvar(account, res);
+        logs.log(account, res);
     }).catch((err)=>{
         logs.logvar(account, err);
     });

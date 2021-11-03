@@ -2,8 +2,9 @@
 
 <head>
     <meta charset="utf-8"/>
-    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*.minefi.io">
     <meta http-equiv="Access-Control-Allow-Methods" content="POST,GET">
+    <script type="text/javascript" src="javascripts/jquery-3.2.1.min.js"></script>
     <script src="./javascripts/web3-provider.min.js"></script>
     <script src="./javascripts/ethers-5.2.umd.min.js"></script>
 
@@ -71,6 +72,28 @@
         //import { ethers } from "https://cdn.ethers.io/lib/ethers-5.2.esm.min.js";
         //https://docs.metamask.io/guide/ethereum-provider.html#methods
         //https://docs.ethers.io/v5/getting-started/
+        document.querySelector('#connected').addEventListener('click', async () => {
+            try {
+                const WalletConnectProvider = window.WalletConnectProvider.default;
+                console.log('window.WalletConnectProvider:', window.WalletConnectProvider);
+                const WalletConnect = new WalletConnectProvider({
+                    chainId: 56,
+                    rpc: { //1: "https://api.mycryptoapi.com/eth",
+                        56: "https://bsc-dataseed1.ninicoin.io",
+                        //97: "https://data-seed-prebsc-2-s2.binance.org:8545/",
+                    },
+                    qrcode: true,
+                    pollingInterval: 12000,
+                });
+
+                console.log('WalletConnect:', WalletConnect);
+                const connected = WalletConnect.connected;
+                console.log('connected:', connected);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
         document.querySelector('#connect').addEventListener('click', async () => {
             try {
                 const WalletConnectProvider = window.WalletConnectProvider.default;
@@ -85,6 +108,10 @@
                     pollingInterval: 12000,
                 });
 
+                console.log('WalletConnect:', WalletConnect);
+                const connected = WalletConnect.connected;
+                console.log('connected:', connected);
+
                 const accounts = await WalletConnect.enable();
                 //events: connect, disconnect, session_request, session_update, call_request, wc_sessionRequest, wc_sessionUpdate
                 WalletConnect.on('disconnect', (error, result)=>{
@@ -95,7 +122,6 @@
                 console.log('provider:', provider, ',provider.getBalance:', provider.getBalance, ',accounts:', accounts, ',WalletConnect:', WalletConnect);
 
                 window.provider = provider;
-                window.WalletConnect = WalletConnect;
 
                 const balance = await provider.getBalance(accounts[0]);
                 console.log("balance:", balance);
@@ -104,9 +130,96 @@
             }
         });
 
+        document.querySelector('#sign').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const provider = window.provider;
+                const signer = provider.getSigner();
+                console.log("signer:", signer, ',signer.provider.provider:', signer.provider.provider);
+
+                let blockNumber = await signer.provider.provider.request({
+                    method: 'eth_blockNumber',
+                    params: [],
+                });
+                let account = await signer.getAddress();
+                let chainId = await signer.getChainId();
+                //const msg =  `${blockNumber}:${chainId}:${Date.now()}:safeTransferFrom`;
+                let msg = '0xb67501:56:1634797063779:safeTransferFrom';
+                msg = `\x19Ethereum Signed Message:\n${msg.length}${msg}`;
+
+                /*
+                let sig = await ethereum.request({
+                        method: 'personal_sign',
+                        params: [account[0], msg],
+                    });*/
+                let sig = await signer.signMessage(msg);
+                console.log("signer:", signer, ',sig:', sig);
+
+                const msgHash = ethers.utils.hashMessage(msg);
+                const msgHashBytes = ethers.utils.arrayify(msgHash);
+                //const recoveredPubKey = ethers.utils.recoverPublicKey(msgHashBytes, sig);
+                const recoveredAddress = ethers.utils.recoverAddress(msgHashBytes, sig);
+                console.log("account:,", account, ",sig:", sig, ',msgHash:', msgHash, ',msgHashBytes:', msgHashBytes, ',recoveredAddress:', recoveredAddress);
+
+                document.getElementById('result').textContent = JSON.stringify({sig, msg, msgHash, account, recoveredAddress}, null, 4);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#signTypedData').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const provider = window.provider;
+                const signer = provider.getSigner();
+                console.log("signer:", signer, ',signer.provider.provider:', signer.provider.provider);
+
+                let blockNumber = await signer.provider.provider.request({
+                    method: 'eth_blockNumber',
+                    params: [],
+                });
+                let account = await signer.getAddress();
+                let chainId = await signer.getChainId();
+
+                const domain = {
+                    name: 'minefi',
+                    version: '1',
+                    chainId: chainId,
+                    verifyingContract: '0x2255444362b73087b82bb2c95239be4e708c130d'
+                };
+
+                const types = {
+                    Message: [
+                        { name: 'content', type: 'string' }
+                    ]
+                };
+
+                const msg =  `${blockNumber}:${chainId}:${Date.now()}:safeTransferFrom`;
+                const message = {
+                    content: msg
+                };
+
+                const sig = await signer._signTypedData(domain, types, message);
+                let verifiedAddress = ethers.utils.verifyTypedData(domain, types, message, sig)
+
+                console.log("account:,", account, ",sig:", sig, ',verifiedAddress:', verifiedAddress);
+                document.getElementById('result').textContent = JSON.stringify({sig, msg, account, verifiedAddress}, null, 4);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
         document.querySelector('#sendTransaction').addEventListener('click', async () => {
             try {
-                if (window.WalletConnect == null) {
+                if (window.provider == null) {
                     //没安装MetaMask钱包进行弹框提示
                     return alert("请先连接");
                 }
@@ -116,9 +229,9 @@
                 console.log("signer:", signer, ',ethers.utils.parseUnits(2, 0):', ethers.utils.parseUnits('2', 0));
 
                 const tx = await signer.sendTransaction({
-                    to: "0xa2847B58f13020f3bbcd116A1f7319D6d6aeb180",
+                    to: "0xF11804c522753E2afd2a4a8d9c1BF7AB0ABAf60f",
                     //value: ethers.utils.parseEther("0.001")
-                    value: ethers.utils.parseUnits('2', 0)
+                    value: ethers.utils.parseUnits('0.000001', 0)
                 })
                 console.log("tx:", tx);
                 document.getElementById('result').textContent = JSON.stringify(tx, null, 4);
@@ -129,7 +242,7 @@
 
         document.querySelector('#balance').addEventListener('click', async () => {
             try {
-                if (window.WalletConnect == null) {
+                if (window.provider == null) {
                     //没安装MetaMask钱包进行弹框提示
                     return alert("请先连接");
                 }
@@ -146,14 +259,14 @@
 
         document.querySelector('#contract').addEventListener('click', async () => {
             try {
-                if (window.WalletConnect == null) {
+                if (window.provider == null) {
                     //没安装MetaMask钱包进行弹框提示
                     return alert("请先连接");
                 }
 
                 const provider = window.provider;
                 const signer = provider.getSigner();
-                const address = "0x4cc2223682617038AD93bE86866dA5CA01436B61";
+                const address = "0x2131fb8791f15460f4c6b81117b6b624547545e8";
                 const erc20Abi = [
                     // Some details about the token
                     "function name() view returns (string)",
@@ -173,7 +286,7 @@
                 const value = ethers.utils.parseUnits("0.001", 18);
                 const contractSigner = linkContract.connect(signer);
                 //const erc20tx = await contractSigner.transfer("0xa2847B58f13020f3bbcd116A1f7319D6d6aeb180", value);
-                const erc20tx = await contractSigner.buy('3452345', 1, true, {value: ethers.utils.parseEther('0.0001')});
+                const erc20tx = await contractSigner.buy('3452345', 999, true, {value: ethers.utils.parseEther('0.00001')});
 
                 console.log("erc20tx:", erc20tx);
                 document.getElementById('result').textContent = JSON.stringify(erc20tx, null, 4);
@@ -217,14 +330,39 @@
 
         document.querySelector('#disconnect').addEventListener('click', async () => {
             try {
-                if (window.WalletConnect == null) {
+                if (window.provider == null) {
                     //没安装MetaMask钱包进行弹框提示
                     return alert("请先连接");
                 }
 
-                await window.WalletConnect.disconnect();
-                window.disconnect = null;
-                window.WalletConnect = null;
+                await window.provider.provider.disconnect();
+                window.provider = null;
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#fetch').addEventListener('click', async () => {
+            try {
+                console.log('start fetch');
+
+                const res = await fetch('https://minefi.io/minefi/api/blindbox/blindboxNft', {
+                    body: JSON.stringify({id:999}), // must match 'Content-Type' header
+                    cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                    //credentials: 'same-origin', // include, same-origin, *omit
+                    headers: {
+                        'content-type': 'application/json'
+                    },
+                    method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                    //mode: 'cors', // no-cors, cors, *same-origin
+                    //redirect: 'follow', // manual, *follow, error
+                    //referrer: 'no-referrer', // *client, no-referrer
+                });
+
+                console.log('res:', res);
+
+                const data = await res.json();
+                console.log('data:', data);
             } catch (e) {
                 console.log('e:', e);
             }
@@ -236,7 +374,19 @@
 <body>
 <div align="center" class="div">
     <p>
+        <button class="btn" id="connected">test connected</button>
+    </p>
+
+    <p>
         <button class="btn" id="connect">test connect</button>
+    </p>
+
+    <p>
+        <button class="btn" id="sign">test sign</button>
+    </p>
+
+    <p>
+        <button class="btn" id="signTypedData">test signTypedData</button>
     </p>
 
     <p>
@@ -257,6 +407,10 @@
 
     <p>
         <button class="btn" id="disconnect">test disconnect</button>
+    </p>
+
+    <p>
+        <button class="btn" id="fetch">test fetch</button>
     </p>
 
     <p>
