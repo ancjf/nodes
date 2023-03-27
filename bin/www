@@ -24,6 +24,7 @@ app.set('port', port);
 
 var server = http.createServer(app);
 
+/*
 var privateKey  = fs.readFileSync('certificates/6292993_test.ancjf.com.key', 'utf8');
 var certificate = fs.readFileSync('certificates/6292993_test.ancjf.com.pem', 'utf8');
 
@@ -32,6 +33,7 @@ var httpsServer = https.createServer(credentials, app);
 httpsServer.listen(3101);
 httpsServer.on('error', onError);
 httpsServer.on('listening', onListening);
+*/
 
 /**
  * Listen on provided port, on all network interfaces.

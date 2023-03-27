@@ -37,6 +37,7 @@ router.post('/upload', mutipartMiddeware, function(req, res, next) {
         //logs.log(dest);
         
         utils.add(req.files[value].path, account, dest);
+
     }
 
     var files = utils.files(account);

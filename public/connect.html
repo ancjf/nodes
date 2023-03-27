@@ -158,7 +158,8 @@
 
                 //const isUnlocked = window.ethereum._state.isUnlocked;
                 const isUnlocked = await window.ethereum._metamask.isUnlocked()
-                console.log("window.ethereum:", window.ethereum, ',isUnlocked:', isUnlocked);
+                const value = ethers.utils.formatEther('100000000000000000');
+                console.log("window.ethereum:", window.ethereum, ',isUnlocked:', isUnlocked, ',value:', value);
                 document.getElementById('result').textContent = JSON.stringify(isUnlocked);
             } catch (e) {
                 console.log('e:', e);
@@ -472,6 +473,204 @@
             }
         });
 
+        // 切换网络，网络不存在时则添加s
+        document.querySelector('#switchEthereumChainIbc').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                try {
+                    const req = await ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{chainId: '0x2328'}],
+                    });
+
+                    console.log('req:', req);
+                } catch (error) {
+                    console.log('error:', error);
+                    // This error code indicates that the chain has not been added to MetaMask.
+                    if (error.code === 4902) {
+                        try {
+                            await ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: '0x2328',
+                                    chainName: 'Indiev blockchain',
+                                    blockExplorerUrls: ['https://ibc.ancjf.com:3001'],
+                                    rpcUrls: ['https://ibc.ancjf.com:3031/users/rpc'],
+                                    nativeCurrency: {
+                                        name: 'ibc',
+                                        symbol: 'IBC',
+                                        decimals: 18,
+                                    }}
+                                ],
+                            });
+                        } catch (error) {
+                            // handle "add" error
+                            throw error;
+                        }
+                    }
+                    // handle other "switch" errors
+
+
+                }
+
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        //铸造
+        document.querySelector('#safeMint').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                console.log("safeMint:");
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const address = "0x2131fb8791f15460f4c6b81117b6b624547545e8";
+                const erc721Abi = [
+                    // Some details about the token
+                    "function safeMint(address to, uint256 tokenId) public",
+                ];
+                const linkContract = new ethers.Contract(address, erc721Abi, provider);
+                const signer = provider.getSigner();
+                const contractSigner = linkContract.connect(signer);
+                const tx = await contractSigner.safeMint("0xF11804c522753E2afd2a4a8d9c1BF7AB0ABAf60f", 11110);
+
+                console.log("tx:", tx);
+                document.getElementById('result').textContent = JSON.stringify(tx, null, 4);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#tokenURI').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const address = "0x2131fb8791f15460f4c6b81117b6b624547545e8";
+                const erc721Abi = [
+                    // Some details about the token
+                    "function safeMint(address to, uint256 tokenId) public",
+                    "function tokenURI(uint256 tokenId) external view returns (string memory)",
+                ];
+                const linkContract = new ethers.Contract(address, erc721Abi, provider);
+                const tx = await linkContract.tokenURI('5656');
+
+                console.log("tx:", tx);
+                document.getElementById('result').textContent = JSON.stringify(tx, null, 4);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#exists').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const address = "0x2131fb8791f15460f4c6b81117b6b624547545e8";
+                const erc721Abi = [
+                    // Some details about the token
+                    "function safeMint(address to, uint256 tokenId) public",
+                    "function tokenURI(uint256 tokenId) external view returns (string memory)",
+                    "function exists(uint256 tokenId) public view returns (bool)",
+                ];
+                const linkContract = new ethers.Contract(address, erc721Abi, provider);
+                const tx = await linkContract.exists(0);
+
+                console.log("tx:", tx);
+                document.getElementById('result').textContent = JSON.stringify(tx, null, 4);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        //挂单
+        document.querySelector('#approve').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const address = "0x2131fb8791f15460f4c6b81117b6b624547545e8";
+                const admin_address = "0xF190a927C43eC6885Dc8533EA937429f75b8a73b";
+                const erc721Abi = [
+                    "function setApprovalForAll(address operator, bool _approved) external",
+                    "function isApprovedForAll(address owner, address operator) external view returns (bool)",
+                ];
+                const linkContract = new ethers.Contract(address, erc721Abi, provider);
+                const owner = await window.ethereum.selectedAddress;
+                const isApprovedForAll = await linkContract.isApprovedForAll(owner, admin_address);
+                console.log("isApprovedForAll:", isApprovedForAll);
+
+                if(isApprovedForAll !== true){
+                    const signer = provider.getSigner();
+                    const contractSigner = linkContract.connect(signer);
+                    const tx = await contractSigner.setApprovalForAll(admin_address, true);
+                    console.log("tx:", tx);
+                }
+
+                const adminAbi = [
+                    "function setPrice(address addr , uint256 id, uint256 price) public",
+                ];
+                const adminLinkContract = new ethers.Contract(admin_address, adminAbi, provider);
+                const adminSigner = provider.getSigner();
+                const adminContractSigner = adminLinkContract.connect(adminSigner);
+                const tx = await adminContractSigner.setPrice(address, '10001', ethers.utils.parseEther('0.0001'));
+                console.log("admin tx:", tx);
+
+                document.getElementById('result').textContent = JSON.stringify(tx, null, 4);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        //购买nft
+        document.querySelector('#adminbuy').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const address = "0x2131fb8791f15460f4c6b81117b6b624547545e8";
+                const admin_address = "0xF190a927C43eC6885Dc8533EA937429f75b8a73b";
+                const adminAbi = [
+                    "function setPrice(address addr , uint256 id, uint256 price) public",
+                    "function buy(address addr, uint256 id) payable public",
+                    "function getPrice(address addr , uint256 id) view public returns (uint256)",
+                ];
+                const adminLinkContract = new ethers.Contract(admin_address, adminAbi, provider);
+                const adminSigner = provider.getSigner();
+                const adminContractSigner = adminLinkContract.connect(adminSigner);
+                const price = await adminLinkContract.getPrice(address, '10001');
+                console.log("price:", price);
+                const tx = await adminContractSigner.buy(address, '10001', {value: price.toString()});
+                console.log("tx:", tx);
+
+                document.getElementById('result').textContent = JSON.stringify(tx, null, 4);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
     </script>
 </head>
 
@@ -527,11 +726,36 @@
     </p>
 
     <p>
+        <button class="btn" id="switchEthereumChainIbc">IBC 切换添加网络测试</button>
+    </p>
+
+    <p>
+        <button class="btn" id="safeMint">test contract safeMint</button>
+    </p>
+
+    <p>
+        <button class="btn" id="tokenURI">test contract tokenURI</button>
+    </p>
+
+    <p>
+        <button class="btn" id="exists">test contract exists</button>
+    </p>
+
+    <p>
+        <button class="btn" id="approve">测试挂单</button>
+    </p>
+
+    <p>
+        <button class="btn" id="adminbuy">测试购买</button>
+    </p>
+
+    <p>
         <text id="result"></text>
     </p>
 </div>
 
 <script type="text/javascript">
+
     window.onload = function() {
         console.log('window.provider:', window.provider);
     };
