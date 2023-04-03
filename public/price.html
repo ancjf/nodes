@@ -1,0 +1,513 @@
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <meta http-equiv="Access-Control-Allow-Methods" content="POST,GET">
+
+    <style type="text/css">
+        html {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            top: 10px;
+            height: 100%;
+            margin: 0;
+        }
+
+        hr {
+            border-top: 1px solid #987cb9;
+        }
+
+        .div {
+            padding: 20px;
+        }
+
+        .btn {
+            font-size: 14px;
+            color: #000;
+            height: 44px;
+            width: 240px;
+            padding: 0 15px;
+            background-color: yellow;
+            border: 1px solid yellow;
+            line-height: 1.2;
+            text-align: center;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            outline: none;
+            position: relative;
+
+        }
+
+        .btn::before {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            border: inherit;
+            border-color: #000;
+            border-radius: inherit;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            content: ' ';
+        }
+
+        .btn:active::before {
+            opacity: 0.1;
+        }
+    </style>
+
+    <script type="module">
+
+        import {ethers} from "./javascripts/ethers-5.2.esm.min.js";
+
+        //import { WalletConnectConnector } from './javascripts/walletconnect-connector.esm.js';
+        //import { ethers } from "https://cdn.ethers.io/lib/ethers-5.2.esm.min.js";
+        //https://docs.metamask.io/guide/ethereum-provider.html#methods
+        //https://docs.ethers.io/v5/getting-started/
+        //https://docs.metamask.io/guide/ethereum-provider.html#errors
+        document.querySelector('#addEthereumChain').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const value = await ethereum.request({
+                    method: 'wallet_addEthereumChain',
+                    params: [{
+                        chainId: '0x38',
+                        chainName: 'Binance Smart Chain Mainnet',
+                        blockExplorerUrls: ['https://bscscan.com/'],
+                        rpcUrls: ['https://bsc-dataseed1.binance.org/'],
+                        nativeCurrency: {
+                            name: 'bnb',
+                            symbol: 'BNB',
+                            decimals: 18,
+                        }}
+                    ],
+                });
+
+                console.log('value:', value);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+
+        document.querySelector('#switchEthereumChain').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                try {
+                    const req = await ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{chainId: '0x38'}],
+                    });
+
+                    console.log('req:', req);
+                } catch (error) {
+                    console.log('error:', error);
+                    // This error code indicates that the chain has not been added to MetaMask.
+                    if (error.code === 4902) {
+                        try {
+                            await ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: '0x38',
+                                    chainName: 'Binance Smart Chain Mainnet',
+                                    blockExplorerUrls: ['https://bscscan.com/'],
+                                    rpcUrls: ['https://bsc-dataseed1.binance.org/'],
+                                    nativeCurrency: {
+                                        name: 'bnb',
+                                        symbol: 'BNB',
+                                        decimals: 18,
+                                    }}
+                                ],
+                            });
+                        } catch (error) {
+                            // handle "add" error
+                            throw error;
+                        }
+                    }
+                    // handle other "switch" errors
+
+
+                }
+
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#isUnlocked').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                //const isUnlocked = window.ethereum._state.isUnlocked;
+                const isUnlocked = await window.ethereum._metamask.isUnlocked()
+                console.log("window.ethereum:", window.ethereum, ',isUnlocked:', isUnlocked);
+                document.getElementById('result').textContent = JSON.stringify(isUnlocked);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#connected').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const connected = await window.ethereum.isConnected();
+                const address = await window.ethereum.selectedAddress;
+                console.log("window.ethereum:", window.ethereum, ',connected:', connected, ',address:', address);
+                document.getElementById('result').textContent = JSON.stringify(connected);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#requestAccounts').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                let account = await await ethereum.request({
+                    method: 'eth_requestAccounts',
+                    params: [{chainId: '0x38'}],
+                });
+
+                const chainId = await ethereum.request({ method: 'eth_chainId' })
+                //let account = await window.ethereum.send('eth_requestAccounts');
+                console.log("account:", account, ',chainId:', parseInt(chainId));
+                account = account[0];
+
+                ethereum.on('message', (result)=>{
+                    console.log('message result:', result);
+                })
+
+                ethereum.on('connect', (result)=>{
+                    console.log('connect result:', result);
+                })
+
+                ethereum.on('disconnect', (result)=>{
+                    console.log('disconnect result:', result);
+                })
+
+                ethereum.on('chainChanged', (result)=>{
+                    console.log('chainChanged result:', result);
+                })
+
+                ethereum.on('accountsChanged', (result)=>{
+                    console.log('accountsChanged result:', result);
+                })
+
+                console.log("account:", account);
+                document.getElementById('result').textContent = JSON.stringify(account);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#setPrice').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                const address = "0x9F645Ab6e26BC8642BE83613Ca78E8093cd7fCc3";
+                const erc20Abi = [
+                    "constructor(int256)",
+                    "event ControllerChanged(address indexed,bool)",
+                    "event OwnershipTransferred(address indexed,address indexed)",
+                    "function controllers(address) view returns (bool)",
+                    "function latestAnswer() view returns (int256)",
+                    "function owner() view returns (address)",
+                    "function renounceOwnership()",
+                    "function set(int256)",
+                    "function setController(address,bool)",
+                    "function supportsInterface(bytes4) pure returns (bool)",
+                    "function transferOwnership(address)"
+                ];
+                const linkContract = new ethers.Contract(address, erc20Abi, provider);
+                const contractSigner = linkContract.connect(signer);
+                //const erc20tx = await contractSigner.transfer("0xa2847B58f13020f3bbcd116A1f7319D6d6aeb180", value);
+                const owner = await contractSigner.owner();
+                console.log("owner:", owner);
+                const tx = await contractSigner.set(50000000000);
+
+                console.log("tx:", tx);
+                document.getElementById('result').textContent = JSON.stringify(tx, null, 4);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#getPrice').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                const address = "0x9F645Ab6e26BC8642BE83613Ca78E8093cd7fCc3";
+                const erc20Abi = [
+                    "constructor(int256)",
+                    "event ControllerChanged(address indexed,bool)",
+                    "event OwnershipTransferred(address indexed,address indexed)",
+                    "function controllers(address) view returns (bool)",
+                    "function latestAnswer() view returns (int256)",
+                    "function owner() view returns (address)",
+                    "function renounceOwnership()",
+                    "function set(int256)",
+                    "function setController(address,bool)",
+                    "function supportsInterface(bytes4) pure returns (bool)",
+                    "function transferOwnership(address)"
+                ];
+                const linkContract = new ethers.Contract(address, erc20Abi, provider);
+                const tx = await linkContract.latestAnswer();
+
+                console.log("tx:", tx);
+                document.getElementById('result').textContent = JSON.stringify(parseInt(tx.toString())/100000000, null, 4);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#setController').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                const address = "0x9F645Ab6e26BC8642BE83613Ca78E8093cd7fCc3";
+                const erc20Abi = [
+                    "constructor(int256)",
+                    "event ControllerChanged(address indexed,bool)",
+                    "event OwnershipTransferred(address indexed,address indexed)",
+                    "function controllers(address) view returns (bool)",
+                    "function latestAnswer() view returns (int256)",
+                    "function owner() view returns (address)",
+                    "function renounceOwnership()",
+                    "function set(int256)",
+                    "function setController(address,bool)",
+                    "function supportsInterface(bytes4) pure returns (bool)",
+                    "function transferOwnership(address)"
+                ];
+                const linkContract = new ethers.Contract(address, erc20Abi, provider);
+                const contractSigner = linkContract.connect(signer);
+                //const erc20tx = await contractSigner.transfer("0xa2847B58f13020f3bbcd116A1f7319D6d6aeb180", value);
+                const owner = await contractSigner.owner();
+                console.log("owner:", owner);
+                const tx = await contractSigner.setController('0x75089fA30172389388050618478897Aa1dddAd0f', true);
+
+                console.log("tx:", tx);
+                document.getElementById('result').textContent = JSON.stringify(tx, null, 4);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#getController').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                const address = "0x9F645Ab6e26BC8642BE83613Ca78E8093cd7fCc3";
+                const erc20Abi = [
+                    "constructor(int256)",
+                    "event ControllerChanged(address indexed,bool)",
+                    "event OwnershipTransferred(address indexed,address indexed)",
+                    "function controllers(address) view returns (bool)",
+                    "function latestAnswer() view returns (int256)",
+                    "function owner() view returns (address)",
+                    "function renounceOwnership()",
+                    "function set(int256)",
+                    "function setController(address,bool)",
+                    "function supportsInterface(bytes4) pure returns (bool)",
+                    "function transferOwnership(address)"
+                ];
+                const linkContract = new ethers.Contract(address, erc20Abi, provider);
+                const contractSigner = linkContract.connect(signer);
+                //const erc20tx = await contractSigner.transfer("0xa2847B58f13020f3bbcd116A1f7319D6d6aeb180", value);
+                const owner = await contractSigner.owner();
+                const tx = await linkContract.controllers(owner);
+
+                console.log("tx:", tx, ",owner:", owner);
+                document.getElementById('result').textContent = JSON.stringify({owner, controllers: tx}, null, 4);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#getOwner').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                const address = "0x9F645Ab6e26BC8642BE83613Ca78E8093cd7fCc3";
+                const erc20Abi = [
+                    "constructor(int256)",
+                    "event ControllerChanged(address indexed,bool)",
+                    "event OwnershipTransferred(address indexed,address indexed)",
+                    "function controllers(address) view returns (bool)",
+                    "function latestAnswer() view returns (int256)",
+                    "function owner() view returns (address)",
+                    "function renounceOwnership()",
+                    "function set(int256)",
+                    "function setController(address,bool)",
+                    "function supportsInterface(bytes4) pure returns (bool)",
+                    "function transferOwnership(address)"
+                ];
+                const linkContract = new ethers.Contract(address, erc20Abi, provider);
+                const tx = await linkContract.owner();
+
+                console.log("tx:", tx);
+                document.getElementById('result').textContent = JSON.stringify(tx, null, 4);
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        // 切换网络，网络不存在时则添加s
+        document.querySelector('#switchEthereumChainIbc').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === "undefined") {
+                    //没安装MetaMask钱包进行弹框提示
+                    return alert("请安装MetaMask");
+                }
+
+                try {
+                    const req = await ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{chainId: '0x2328'}],
+                    });
+
+                    console.log('req:', req);
+                } catch (error) {
+                    console.log('error:', error);
+                    // This error code indicates that the chain has not been added to MetaMask.
+                    if (error.code === 4902) {
+                        try {
+                            await ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: '0x2328',
+                                    chainName: 'Indiev blockchain',
+                                    blockExplorerUrls: ['https://ibc.ancjf.com:3001'],
+                                    rpcUrls: ['https://ibc.ancjf.com:3031/users/rpc'],
+                                    nativeCurrency: {
+                                        name: 'ibc',
+                                        symbol: 'IBC',
+                                        decimals: 18,
+                                    }}
+                                ],
+                            });
+                        } catch (error) {
+                            // handle "add" error
+                            throw error;
+                        }
+                    }
+                    // handle other "switch" errors
+
+
+                }
+
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+    </script>
+</head>
+
+<body>
+<div align="center" class="div">
+
+    <p>
+        <button class="btn" id="addEthereumChain">test addEthereumChain</button>
+    </p>
+
+    <p>
+        <button class="btn" id="isUnlocked">test isUnlocked</button>
+    </p>
+
+    <p>
+        <button class="btn" id="connected">test connected</button>
+    </p>
+
+    <p>
+        <button class="btn" id="switchEthereumChain">test switchEthereumChain</button>
+    </p>
+
+    <p>
+        <button class="btn" id="requestAccounts">test requestAccounts</button>
+    </p>
+
+    <p>
+        <button class="btn" id="setPrice">set price</button>
+    </p>
+
+    <p>
+        <button class="btn" id="getPrice">get price</button>
+    </p>
+
+    <p>
+        <button class="btn" id="setController">set controller</button>
+    </p>
+
+    <p>
+        <button class="btn" id="getController">get controller</button>
+    </p>
+
+    <p>
+        <button class="btn" id="getOwner">get owner</button>
+    </p>
+
+    <p>
+        <text id="result"></text>
+    </p>
+</div>
+
+<script type="text/javascript">
+
+    window.onload = function() {
+        console.log('window.provider:', window.provider);
+    };
+
+</script>
+</body>
+
+</html>
