@@ -1,0 +1,198 @@
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="Access-Control-Allow-Origin" content="*.minefi.io">
+    <meta http-equiv="Access-Control-Allow-Methods" content="POST,GET">
+    <script type="text/javascript" src="javascripts/jquery-3.2.1.min.js"></script>
+    <script src="./javascripts/eos.min.js"></script>
+
+    <style type="text/css">
+        html {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            top: 10px;
+            height: 100%;
+            margin: 0;
+        }
+
+        hr {
+            border-top: 1px solid #987cb9;
+        }
+
+        .div {
+            height: 100%;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .input {
+            font-size: 14px;
+            color: #000;
+            height: 44px;
+            width: 80%;
+            padding: 0 15px;
+            line-height: 1.2;
+            text-align: center;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            outline: none;
+            position: relative;
+        }
+
+        .btn {
+            font-size: 14px;
+            color: #000;
+            height: 44px;
+            width: 240px;
+            padding: 0 15px;
+            line-height: 1.2;
+            text-align: center;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            outline: none;
+            position: relative;
+
+        }
+
+        .btn::before {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            border: inherit;
+            border-color: #000;
+            border-radius: inherit;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            content: ' ';
+        }
+
+        .btn:active::before {
+            opacity: 0.1;
+        }
+    </style>
+
+    <script type="module">
+        const updateauth = async function (wif, acc, newpub, newownerpub, httpEndpoint){
+            const eos = window.Eos({
+                chainId: 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906', // 32 byte (64 char) hex string
+                keyProvider: [wif],
+                httpEndpoint: httpEndpoint || 'https://eos-mainnet.token.im' || 'https://mainnet.genereos.io',
+                expireInSeconds: 60,
+                broadcast: true,
+                verbose: false, // API activity
+                sign: true
+            });
+
+            return await eos.transaction(function(tr){
+                tr.updateauth({
+                    "account": acc,
+                    "permission": "active",
+                    "parent": "owner",
+                    "auth": {"keys":[{"key":newpub,"weight":1}],"waits":[],"accounts":[],"threshold":1}
+                }, {
+                    authorization: acc + '@owner',
+                    broadcast: true,
+                    sign: true,
+                });
+
+                tr.updateauth({
+                    "account": acc,
+                    "permission": "owner",
+                    "parent": "",
+                    "auth": {"keys":[{"key":newownerpub,"weight":1}],"waits":[],"accounts":[],"threshold":1}
+                }, {
+                    authorization: acc + '@owner',
+                    broadcast: true,
+                    sign: true,
+                });
+            });
+        }
+
+        const transfer = async function (wif, acc, httpEndpoint){
+            const eos = window.Eos({
+                chainId: 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906', // 32 byte (64 char) hex string
+                keyProvider: [wif], // WIF string or array of keys..
+            //    httpEndpoint: 'http://192.168.0.120:8888',
+                httpEndpoint: httpEndpoint || 'http://mainnet.genereos.io',
+                expireInSeconds: 60,
+                broadcast: true,
+                verbose: false, // API activity
+                sign: true
+            });
+
+            return eos.transaction({
+                actions: [
+                {
+                    account: 'eosio.token',
+                    name: 'transfer',
+                    authorization: [{
+                        actor: acc,
+                        permission: 'owner'
+                    }],
+                    data: {
+                        from: acc,
+                        to: 'initb',
+                        quantity: '0.0100 eos',
+                        memo: ''
+                    }
+                }
+                ]
+            })
+        }
+
+        document.querySelector('#submit').addEventListener('click', async () => {
+            try {
+                const account = $("#acccout").text();
+                const wif = $("#wif").val();
+                const new_pub = $("#new_pub").val();
+
+                if(account === '') {
+                    return alert('请先输入新账号')
+                }
+
+                if(wif === '') {
+                    return alert('请先输入私钥')
+                }
+
+                if(new_pub === '') {
+                    return alert('请先输入新的公钥')
+                }
+
+                console.log(account, new_pub);
+                const action = await updateauth(wif, account, new_pub, new_pub);
+
+                console.log(action);
+                $("#acccout").text( JSON.stringify(action, null, 4));
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+    </script>
+</head>
+
+<body>
+<div align="center" class="div">
+    <p>
+        <p class="input_pub">账号: <br><input class="input" type="text" id="wif" value=""><br></p>
+        <p class="input_pub">私钥: <br><input class="input" type="text" id="old_pub" value=""><br></p>
+        <p class="input_pub">新公钥: <br><input class="input" type="text" id="new_pub" value=""><br></p>
+        <button class="btn" id="submit">更新公钥</button>
+    </p>
+
+    <p>
+        <text id="result"></text>
+    </p>
+</div>
+</body>
+
+</html>

@@ -1,0 +1,214 @@
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="Access-Control-Allow-Origin" content="*.minefi.io">
+    <meta http-equiv="Access-Control-Allow-Methods" content="POST,GET">
+    <script type="text/javascript" src="javascripts/jquery-3.2.1.min.js"></script>
+    <script src="./javascripts/tp.js"></script>
+
+    <style type="text/css">
+        html {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            top: 10px;
+            height: 100%;
+            margin: 0;
+        }
+
+        hr {
+            border-top: 1px solid #987cb9;
+        }
+
+        .div {
+            height: 100%;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .input {
+            font-size: 14px;
+            color: #000;
+            height: 44px;
+            width: 80%;
+            padding: 0 15px;
+            line-height: 1.2;
+            text-align: center;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            outline: none;
+            position: relative;
+        }
+
+        .btn {
+            font-size: 14px;
+            color: #000;
+            height: 44px;
+            width: 240px;
+            padding: 0 15px;
+            line-height: 1.2;
+            text-align: center;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            outline: none;
+            position: relative;
+
+        }
+
+        .btn::before {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            border: inherit;
+            border-color: #000;
+            border-radius: inherit;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            content: ' ';
+        }
+
+        .btn:active::before {
+            opacity: 0.1;
+        }
+    </style>
+
+    <script type="module">
+
+        //import { WalletConnectConnector } from './javascripts/walletconnect-connector.esm.js';
+        //import { ethers } from "https://cdn.ethers.io/lib/ethers-5.2.esm.min.js";
+        //https://docs.metamask.io/guide/ethereum-provider.html#methods
+        //https://docs.ethers.io/v5/getting-started/
+        document.querySelector('#connect').addEventListener('click', async () => {
+            try {
+                console.log(tp.isConnected());
+                $("#acccout").text("Hello world!");
+                $("#old_pub").val("Hello world!");
+                console.log($("#acccout"));
+                console.log(tp);
+
+
+                //const info = await tp.getWallet(['eos']);
+                const info = await tp.getCurrentWallet();
+
+                if(info.msg === 'Success') {
+                    $("#acccout").text(info.data.name);
+                    $("#old_pub").val(info.data.address);
+                }
+
+                console.log(info);
+
+
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+        document.querySelector('#submit').addEventListener('click', async () => {
+            try {
+                console.log(tp.isConnected());
+                const old_pub = $("#old_pub").val();
+                const account = $("#acccout").text();
+                const new_pub = $("#new_pub").val();
+
+                if(old_pub === '') {
+                    return alert('请先连接钱包')
+                }
+
+                if(new_pub === '') {
+                    //return alert('请先输入新的公钥')
+                }
+
+                console.log(account, old_pub, new_pub);
+                /*
+                const action = await tp.pushEosAction({
+                    actions: [
+                        {
+                            account: 'eosio',
+                            name: 'updateauth',
+                            authorization: [{
+                                actor: account,
+                                permission: 'owner'
+                            }],
+                            data: {
+                                "account": account,
+                                "permission": "owner",
+                                "parent": "",
+                                "auth": {"keys":[{"key":new_pub,"weight":1}],"waits":[],"accounts":[],"threshold":1}
+                            }
+                        },
+                        {
+                            account: "eosio",
+                            name: "updateauth",
+                            authorization: [
+                                {
+                                actor: account,
+                                permission: "owner"
+                                }
+                            ],
+                            data: {
+                                "account": account,
+                                "permission": "active",
+                                "parent": "",
+                                "auth": {"keys":[{"key":new_pub,"weight":1}],"waits":[],"accounts":[],"threshold":1}
+                            }
+                        }
+                    ],
+                    address: old_pub,
+                    account: account
+                });*/
+
+                const action = await tp.eosTokenTransfer({
+                    from: account,
+                    to: 'meinvqianbao',
+                    amount: '0.0100',
+                    tokenName: 'EOS',
+                    precision: 4,
+                    contract: 'eosio.token',
+                    memo: 'test',
+                    address: old_pub
+                })
+
+                console.log(action);
+
+                if(action.result === true) {
+                    $("#acccout").text(action.data.transactionId);
+                } else {
+                    $("#acccout").text( JSON.stringify(action, null, 4));
+                }
+            } catch (e) {
+                console.log('e:', e);
+            }
+        });
+
+    </script>
+</head>
+
+<body>
+<div align="center" class="div">
+    <p>
+        <button class="btn" id="connect">连接钱包</button>
+    </p>
+
+    <p>
+        <p id="acccout"></p>
+
+        <p class="input_pub">旧公钥: <br><input class="input" type="text" id="old_pub" value="" readonly><br></p>
+        <p class="input_pub">新公钥: <br><input class="input" type="text" id="new_pub" value=""><br></p>
+        <button class="btn" id="submit">更新公钥</button>
+    </p>
+
+    <p>
+        <text id="result"></text>
+    </p>
+</div>
+</body>
+
+</html>

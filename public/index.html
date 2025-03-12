@@ -524,7 +524,7 @@ function jump_url(obj){
     var type = $(obj).attr("class");
     var log = logined();
     console.log("obj.name=", obj.name, "type=", type, "log=", log);
-    if(type == 'login' && !logined()){
+    if(type === 'login' && !logined()){
         //window.location.href='/login.html';
         //return;
     }
@@ -565,7 +565,8 @@ function jump_url(obj){
 
         <button name="web3.html" onClick="jump_url(this)">web3</button>
         <button name="trans.html" onClick="jump_url(this)">trans</button>
-        <button name="ethscan.html" onClick="jump_url(this)">ethscan</button>
+        <button name="tp.html" onClick="jump_url(this)">tp</button>
+        <button name="walletconnect.html" onClick="jump_url(this)">walletconnect</button>
         <button name="secure/contract.html" class="login" onClick="jump_url(this)">contract</button>
         <button name="secure/contract_list.html" class="login" onClick="jump_url(this)">contract_test</button>
         <button name="secure/test_stress.html" class="login" onClick="jump_url(this)">test stress</button>
